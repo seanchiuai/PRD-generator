@@ -148,3 +148,135 @@ export const updateStage = mutation({
     });
   },
 });
+
+export const saveResearchResults = mutation({
+  args: {
+    conversationId: v.id("conversations"),
+    researchResults: v.any(), // Use the detailed schema object
+  },
+  handler: async (ctx, args): Promise<void> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation || conversation.userId !== identity.subject) {
+      throw new Error("Unauthorized");
+    }
+
+    await ctx.db.patch(args.conversationId, {
+      researchResults: args.researchResults,
+      researchMetadata: {
+        startedAt: conversation.researchMetadata?.startedAt || Date.now(),
+        completedAt: Date.now(),
+        categoriesCompleted: Object.keys(args.researchResults),
+        status: "completed",
+      },
+      currentStage: "selecting",
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const updateResearchProgress = mutation({
+  args: {
+    conversationId: v.id("conversations"),
+    category: v.string(),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("in_progress"),
+      v.literal("completed"),
+      v.literal("failed")
+    ),
+  },
+  handler: async (ctx, args): Promise<void> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation || conversation.userId !== identity.subject) {
+      throw new Error("Unauthorized");
+    }
+
+    const currentCompleted = conversation.researchMetadata?.categoriesCompleted || [];
+    const newCompleted =
+      args.status === "completed" && !currentCompleted.includes(args.category)
+        ? [...currentCompleted, args.category]
+        : currentCompleted;
+
+    await ctx.db.patch(args.conversationId, {
+      researchMetadata: {
+        startedAt: conversation.researchMetadata?.startedAt || Date.now(),
+        categoriesCompleted: newCompleted,
+        status: "in_progress",
+      },
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const saveSelection = mutation({
+  args: {
+    conversationId: v.id("conversations"),
+    category: v.string(),
+    selection: v.object({
+      name: v.string(),
+      reasoning: v.string(),
+      selectedFrom: v.array(v.string()),
+    }),
+  },
+  handler: async (ctx, args): Promise<void> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation || conversation.userId !== identity.subject) {
+      throw new Error("Unauthorized");
+    }
+
+    const currentSelections = conversation.selectedTechStack || {};
+
+    await ctx.db.patch(args.conversationId, {
+      selectedTechStack: {
+        ...currentSelections,
+        [args.category]: args.selection,
+      },
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const saveValidationWarnings = mutation({
+  args: {
+    conversationId: v.id("conversations"),
+    warnings: v.array(
+      v.object({
+        level: v.union(v.literal("warning"), v.literal("error")),
+        message: v.string(),
+        affectedTechnologies: v.array(v.string()),
+        suggestion: v.optional(v.string()),
+      })
+    ),
+  },
+  handler: async (ctx, args): Promise<void> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation || conversation.userId !== identity.subject) {
+      throw new Error("Unauthorized");
+    }
+
+    await ctx.db.patch(args.conversationId, {
+      validationWarnings: args.warnings,
+      updatedAt: Date.now(),
+    });
+  },
+});
