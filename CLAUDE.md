@@ -67,7 +67,22 @@ This is a full-stack TypeScript application using:
 - `/public` - Static assets including custom fonts
 - `/agents` - Custom Claude Code agent definitions for specialized tasks
 - `/plans` - Implementation plans and guides for specific features
+- `/docs` - Project documentation and implementation notes
+  - `scratchpad.md` - Critical implementation details and decisions for future development
+  - Additional documentation files as needed
 - `middleware.ts` - Route protection configuration
+
+## Documentation Guidelines
+**IMPORTANT**: When creating markdown documentation files:
+- **Never create markdown files in the project root** unless they are standard files like README.md
+- Files under `/.claude/` follow their own organization (commands, agents, plans, skills)
+- **All other markdown documentation must go in `/docs`**
+- `/docs/scratchpad.md` is specifically for logging:
+  - Critical implementation details
+  - Technical decisions and rationale
+  - Important patterns and approaches
+  - Information crucial for future development and maintenance
+- Other documentation files (guides, specs, notes) should also be placed in `/docs`
 
 ## Key Architecture Patterns
 - Uses TypeScript with strict mode enabled
