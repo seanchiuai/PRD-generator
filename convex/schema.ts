@@ -42,6 +42,20 @@ export default defineSchema({
         coreFeatures: v.optional(v.array(v.string())),
       })
     ),
+    clarifyingQuestions: v.optional(
+      v.array(
+        v.object({
+          id: v.string(),
+          category: v.string(),
+          question: v.string(),
+          placeholder: v.optional(v.string()),
+          answer: v.optional(v.string()),
+          required: v.boolean(),
+          type: v.union(v.literal("text"), v.literal("textarea"), v.literal("select")),
+        })
+      )
+    ),
+    answersCompleteness: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })

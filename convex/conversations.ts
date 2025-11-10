@@ -88,3 +88,63 @@ export const list = query({
       .take(50);
   },
 });
+
+export const saveQuestions = mutation({
+  args: {
+    conversationId: v.id("conversations"),
+    questions: v.array(
+      v.object({
+        id: v.string(),
+        category: v.string(),
+        question: v.string(),
+        placeholder: v.optional(v.string()),
+        answer: v.optional(v.string()),
+        required: v.boolean(),
+        type: v.union(v.literal("text"), v.literal("textarea"), v.literal("select")),
+      })
+    ),
+  },
+  handler: async (ctx, args): Promise<void> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation || conversation.userId !== identity.subject) {
+      throw new Error("Unauthorized");
+    }
+
+    await ctx.db.patch(args.conversationId, {
+      clarifyingQuestions: args.questions,
+      currentStage: "clarifying",
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const updateStage = mutation({
+  args: {
+    conversationId: v.id("conversations"),
+    stage: v.union(
+      v.literal("discovery"),
+      v.literal("clarifying"),
+      v.literal("researching"),
+      v.literal("selecting"),
+      v.literal("generating"),
+      v.literal("completed")
+    ),
+  },
+  handler: async (ctx, args): Promise<void> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation || conversation.userId !== identity.subject) {
+      throw new Error("Unauthorized");
+    }
+
+    await ctx.db.patch(args.conversationId, {
+      currentStage: args.stage,
+      updatedAt: Date.now(),
+    });
+  },
+});
