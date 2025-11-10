@@ -1,6 +1,6 @@
 ---
 name: "Researching Features"
-description: "Use this whenever a user wants to add a new feature or explitly states to research a feature/API or building a plan for a new feature. It iterviews the user for feature details (if not provided), research the best API/service for their needs, confirm choice, then gather all implementation notes for their request and save them as a .claude/plans file. "
+description: "Use this whenever a user wants to add a new feature or explitly states to research a feature/API or building a plan for a new feature. It itnerviews the user for feature details (if not provided), research the best API/service for their needs, confirm choice, then gather all implementation notes for their request and save them as a .claude/plans file. "
 version: "1.0.0"
 dependencies: ["context7", "mcp-api", "python>=3.8"]
 allowed-tools: ["context7", "mcp", "file_write"]
@@ -19,7 +19,8 @@ When requested to research a feature:
 1. **Service & API Discovery**  
    - Take the user's answers and consider them in your search
    - You MUST use `context7` to identify the APIs/services/libraries that best match the user's requirements.
-   - DO NOT use `web_search` if `context7` is being used
+   - DO NOT use `web_search` - tell teh user to get `context7`
+   - Only use `web_search` if the the user doesnt want to use `context7`
    - Go with the top 3 options that the tools return/suggest
 
 3. **User Confirmation**  
@@ -28,7 +29,8 @@ When requested to research a feature:
    - Ask the user to confirm before proceeding with implementation research.
 
 4. **Implementation Notes Gathering**  
-   - Once confirmed, use context7 to retrieve official docs, key endpoints, authentication steps, usage patterns, and constraints for the selected API/service.
+   - VERY IMPORTANT: Before you start, look at the `spec-sheet.md` for the specs for this projects and `claude.md` to understand the context - this way you know the tech stack to a build a plan for.
+   - Once confirmed, use `Context7` to retrieve official docs, key endpoints, authentication steps, usage patterns, and constraints for the selected API/service.
    - Structure your notes clearly around:
       - Have page and UI elements to be built first before backend functions etc
      - Authentication  

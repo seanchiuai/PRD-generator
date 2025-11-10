@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Claude Code Instructions
 
-### Subagents, Plans and Skills
+### Subagents, Plans and Skills under `.claude/`
 - **`/skills`** - contains the custom skills you can use to do specific things
   - Before proceeding please check if there is a skill for the requested action
 - **`/agents`** - Contains custom agent personas
