@@ -780,4 +780,64 @@ export async function POST(request: NextRequest) {
 
 ---
 
+## Testing Session - November 10, 2025
+
+**Testing Method:** Playwright MCP browser automation
+
+### Errors Found and Fixed
+
+#### 1. Missing @clerk/themes Package ✅ FIXED
+**Error:**
+```
+Module not found: Can't resolve '@clerk/themes'
+```
+
+**Location:** `app/layout.tsx:6`
+
+**Fix:** Installed missing package:
+```bash
+npm install @clerk/themes
+```
+
+**Status:** ✅ Resolved
+
+#### 2. Missing Convex Environment Variable ⚠️ REQUIRES SETUP
+**Error:**
+```
+Error: No address provided to ConvexReactClient.
+If trying to deploy to production, make sure to follow all the instructions found at https://docs.convex.dev/production/hosting/
+If running locally, make sure to run `convex dev` and ensure the .env.local file is populated.
+```
+
+**Location:** `components/ConvexClientProvider.tsx:7`
+
+**Root Cause:**
+- No `.env.local` file exists
+- Missing `NEXT_PUBLIC_CONVEX_URL` environment variable
+
+**Required Setup:**
+1. Run `npx convex dev` to initialize Convex and generate the deployment URL
+2. Create `.env.local` file with:
+   ```
+   NEXT_PUBLIC_CONVEX_URL=<convex-deployment-url>
+   ```
+3. Optionally configure Clerk JWT issuer domain:
+   ```
+   CLERK_JWT_ISSUER_DOMAIN=<your-clerk-domain>
+   ```
+
+**Status:** ⚠️ Requires user authentication/setup
+
+**Note:** Clerk is currently running in "keyless mode" which allows development but requires proper keys for production. A claim URL was provided in the console for setting up Clerk keys.
+
+### Summary
+
+**Fixed:** 1 error (missing dependency)
+**Requires Setup:** 1 critical error (Convex configuration)
+**Warnings:** 1 (Clerk keyless mode - non-blocking for development)
+
+The application cannot load until Convex is properly configured with environment variables. Once the user runs `npx convex dev` and populates `.env.local`, the application should be functional.
+
+---
+
 *Last Updated: November 10, 2025*

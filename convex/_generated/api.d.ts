@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as conversations from "../conversations.js";
 import type * as myFunctions from "../myFunctions.js";
 import type * as todos from "../todos.js";
 
@@ -26,6 +27,7 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  conversations: typeof conversations;
   myFunctions: typeof myFunctions;
   todos: typeof todos;
 }>;
