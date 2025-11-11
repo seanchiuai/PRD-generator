@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     const { productContext } = await request.json();
 
     const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-5-20250929",
+      model: "claude-haiku-4-5",
       max_tokens: 4096,
       messages: [
         {

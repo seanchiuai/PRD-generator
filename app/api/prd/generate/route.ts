@@ -178,7 +178,7 @@ Generate a complete PRD for this product.
 
     // Call Claude API
     const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-5-20250929",
+      model: "claude-haiku-4-5",
       max_tokens: 8192,
       system: PRD_SYSTEM_PROMPT,
       messages: [
