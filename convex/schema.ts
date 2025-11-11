@@ -1,10 +1,14 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
-// The schema is entirely optional.
-// You can delete this file (schema.ts) and the
-// app will continue to work.
-// The schema provides more precise TypeScript types.
+/**
+ * PRD Generator Database Schema
+ *
+ * Defines the structure for:
+ * - users: User authentication and profile data
+ * - conversations: Multi-stage PRD creation conversations
+ * - prds: Generated Product Requirements Documents
+ */
 export default defineSchema({
   users: defineTable({
     clerkId: v.string(),
@@ -14,17 +18,6 @@ export default defineSchema({
     createdAt: v.number(),
     lastSeenAt: v.number(),
   }).index("by_clerk_id", ["clerkId"]),
-  numbers: defineTable({
-    value: v.number(),
-  }),
-  todos: defineTable({
-    title: v.string(),
-    description: v.optional(v.string()),
-    status: v.union(v.literal("pending"), v.literal("completed")),
-    userId: v.string(),
-    createdAt: v.number(),
-    completedAt: v.optional(v.number()),
-  }).index("by_user", ["userId"]),
   conversations: defineTable({
     userId: v.string(),
     messages: v.array(
