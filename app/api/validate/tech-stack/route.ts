@@ -36,6 +36,14 @@ Format your response as JSON:
 
 Only include actual issues. If the stack is compatible, return empty arrays.`;
 
+/**
+ * Validate a submitted tech-stack selection using Anthropic Claude and return consolidated warnings and errors.
+ *
+ * @param request - NextRequest whose JSON body must include `selections: Record<string, string>` mapping categories to chosen technologies.
+ * @returns A JSON response containing either:
+ *  - `warnings`: an array of entries `{ level: "error" | "warning", message, affectedTechnologies, suggestion }` when validation completes, or
+ *  - `error`: an error message when the request is unauthorized (401) or an internal validation failure occurs (500).
+ */
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();
