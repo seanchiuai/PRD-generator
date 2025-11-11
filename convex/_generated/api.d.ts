@@ -10,7 +10,9 @@
 
 import type * as conversations from "../conversations.js";
 import type * as myFunctions from "../myFunctions.js";
+import type * as prds from "../prds.js";
 import type * as todos from "../todos.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -29,7 +31,9 @@ import type {
 declare const fullApi: ApiFromModules<{
   conversations: typeof conversations;
   myFunctions: typeof myFunctions;
+  prds: typeof prds;
   todos: typeof todos;
+  users: typeof users;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 

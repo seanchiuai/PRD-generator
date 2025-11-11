@@ -1,147 +1,161 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+**Purpose**: This file provides persistent, project-level instructions for Claude Code when working in this repository. All guidelines here are version-controlled and shared across the team.
 
-## Claude Code Instructions
+---
 
-### Subagents, Plans and Skills under `.claude/`
-- **`/skills`** - contains the custom skills you can use to do specific things
-  - Before proceeding please check if there is a skill for the requested action
-- **`/agents`** - Contains custom agent personas
-  - Before implementing features, check if a relevant agent exists in this directory that can be invoked
-  - Invoke custom agents using the Task tool when their expertise matches the request
-  - If no matching agent exists, proceed with the task normally
-- **`/plans`** - Contains plans for implementing new features
-  - Usually called out to be used by an agent or user
-  - Before implementing features, check if a relevant plan exists in this directory
-  - If a user requests a feature with a plan, always reference and follow that plan
-  - If no matching plan exists, proceed with the implementation with your own plan
+## Critical Workflow - Check Before Starting
 
-**IMPORTANT**: Always check these directories when starting a new feature or task. subagents, skills and plans provide project-specific expertise and tested approaches when available.
+**ALWAYS** check these directories before implementing any feature or task:
 
-## Commands
+1. **`.claude/skills/`** - Reusable skills for specific actions (e.g., deployment, setup)
+2. **`.claude/agents/`** - Specialized agent personas for different domains
+3. **`.claude/plans/`** - Pre-built implementation plans for features
 
-### Development
-- `npm run dev` - Runs both Next.js frontend and Convex backend in parallel
-  - http://localhost:3000
-  - Convex dashboard opens automatically
+**Pattern**: Skills → Agents → Plans → Custom Implementation
 
-### Convex
-- `npx convex dev` - Start Convex development server (auto-started with `npm run dev`)
-- `npx convex deploy` - Deploy Convex functions to production
+If a relevant skill, agent, or plan exists, use it. Otherwise, proceed with standard implementation.
 
-## Architecture
+## Common Commands
 
-This is a full-stack TypeScript application using:
+### Development & Testing
+```bash
+npm run dev          # Start Next.js + Convex dev servers (http://localhost:3000)
+npm test             # Run test suite (maintain >80% coverage)
+npm run build        # Production build
+npm run lint         # Run ESLint checks
+```
 
-### Frontend
-- **Next.js 15** with App Router - React framework with file-based routing in `/app`
-- **Tailwind CSS 4** - Utility-first styling with custom dark theme variables
-- **shadcn/ui** - Pre-configured component library
-- **Clerk** - Authentication provider integrated via `ClerkProvider` in app/layout.tsx
+### Convex Backend
+```bash
+npx convex dev       # Start Convex dev server (auto-runs with npm run dev)
+npx convex deploy    # Deploy to production
+```
 
-### Backend
-- **Convex** - Real-time backend with:
-  - Database schema defined in `convex/schema.ts`
-  - Server functions in `convex/` directory (myFunctions.ts, todos.ts)
-  - Auth config in `convex/auth.config.ts` (requires Clerk JWT configuration)
+**Before committing**: Always run tests and ensure build succeeds.
+
+## Tech Stack & Architecture
+
+**Full-stack TypeScript application** with real-time capabilities:
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| Frontend | Next.js 15 (App Router) | React framework, file-based routing in `/app` |
+| Styling | Tailwind CSS 4 + shadcn/ui | Dark theme, component library |
+| Auth | Clerk | User authentication via `ClerkProvider` |
+| Backend | Convex | Real-time database, type-safe queries/mutations |
+| Language | TypeScript (strict mode) | Type safety across stack |
 
 ### Key Integration Points
-- **ConvexClientProvider** (components/ConvexClientProvider.tsx) wraps the app with `ConvexProviderWithClerk` to integrate Convex with Clerk auth
-- **Middleware** (middleware.ts) protects `/server` routes using Clerk
-- Path aliases configured: `@/*` maps to root directory
+- **Auth Flow**: Clerk → JWT → Convex (via `ConvexProviderWithClerk`)
+- **Database**: Schema in `convex/schema.ts`, functions in `convex/`
+- **Route Protection**: `middleware.ts` protects routes using Clerk
+- **Path Aliases**: `@/*` maps to project root
 
-### Clerk JWT Configuration
-1. Create a JWT template named "convex" in Clerk dashboard
-2. Set issuer domain in the template
-3. Add `CLERK_JWT_ISSUER_DOMAIN` environment variable in Convex dashboard
+### Clerk + Convex Setup
+1. Create JWT template named "convex" in Clerk dashboard
+2. Set `CLERK_JWT_ISSUER_DOMAIN` in Convex dashboard
+3. Configure in `convex/auth.config.ts`
 
 ## Project Structure
-- `/app` - Next.js pages and layouts (App Router)
-  - `/app/(auth)` - Authentication pages if needed
-  - `/app/(protected)` - Protected routes requiring authentication
-- `/components` - React components including sidebar and UI components
-- `/convex` - Backend functions, schema, and auth configuration
-  - `schema.ts` - Database schema definition
-  - `auth.config.ts` - Clerk authentication configuration
-- `/public` - Static assets including custom fonts
-- `/agents` - Custom Claude Code agent definitions for specialized tasks
-- `/plans` - Implementation plans and guides for specific features
-- `/docs` - Project documentation and implementation notes
-  - `scratchpad.md` - Critical implementation details and decisions for future development
-  - Additional documentation files as needed
-- `middleware.ts` - Route protection configuration
 
-## Documentation Guidelines
-**IMPORTANT**: When creating markdown documentation files:
-- **Never create markdown files in the project root** unless they are standard files like README.md
-- Files under `/.claude/` follow their own organization (commands, agents, plans, skills)
-- **All other markdown documentation must go in `/docs`**
-- `/docs/scratchpad.md` is specifically for logging:
-  - Critical implementation details
-  - Technical decisions and rationale
-  - Important patterns and approaches
-  - Information crucial for future development and maintenance
-- Other documentation files (guides, specs, notes) should also be placed in `/docs`
+```
+/app                    # Next.js App Router pages
+  /(auth)               # Public authentication pages
+  /(protected)          # Protected routes (require auth)
+/components             # React components, UI elements
+/convex                 # Backend (schema.ts, mutations, queries, actions)
+/public                 # Static assets
+/.claude                # Claude Code configuration
+  /agents               # Specialized agent personas
+  /commands             # Custom slash commands
+  /plans                # Feature implementation plans
+  /skills               # Reusable automation skills
+/docs                   # **ALL project documentation goes here**
+  scratchpad.md         # Critical decisions & implementation notes
+middleware.ts           # Route protection (Clerk)
+```
 
-## Key Architecture Patterns
-- Uses TypeScript with strict mode enabled
-- Path aliases configured with `@/*` mapping to root directory
-- Components follow React patterns with Tailwind CSS for styling
-- Real-time data synchronization with Convex
-- JWT-based authentication with Clerk
-- Custom hooks for framework integration
-- ESLint configuration for code quality
+### Documentation Rules
+- **Never create `.md` files in project root** (except README.md)
+- **All documentation → `/docs`** (guides, specs, notes)
+- **`/docs/scratchpad.md`** → Critical decisions, patterns, future context
+- **`.claude/` files** → Follow their own structure (agents, plans, skills, commands)
 
-## Authentication & Security
-- Protected routes using Clerk's authentication in middleware.ts
-- User-specific data filtering at the database level in Convex
-- JWT tokens with Convex integration
-- ClerkProvider wraps the app in app/layout.tsx
-- ConvexClientProvider integrates Convex with Clerk auth
+## Code Style & Standards
 
-## Backend Integration
-- Convex provides real-time database with TypeScript support
-- All mutations and queries are type-safe
-- Automatic optimistic updates and real-time sync
-- Row-level security ensures users only see their own data
-- Use `useQuery`, `useMutation`, and `useAction` hooks in Next.js components
+### TypeScript
+- ✅ **Strict mode enabled** - All code must pass TypeScript strict checks
+- ✅ **Type safety** - No `any` types; use proper interfaces/types
+- ✅ **Path aliases** - Use `@/*` for imports (e.g., `@/components/Button`)
 
-## Styling Approach
-- Tailwind CSS 4 with custom dark theme variables
-- shadcn/ui component library for pre-built components
-- Responsive design with mobile-first approach
-- Consistent design system across the application
+### React & Next.js
+- ✅ **Functional components** - Prefer function components over class components
+- ✅ **Server/Client separation** - Mark client components with `"use client"`
+- ✅ **Hooks** - Use `useQuery`, `useMutation`, `useAction` for Convex integration
+- ✅ **Modular code** - Break large pages into smaller components (<200 lines per file)
 
-## API Key Management
-When implementing features that require API keys:
-1. Ask the user to provide the API key
-2. Add the key to `.env.local` file yourself (create the file if it doesn't exist)
-4. Never ask the user to manually edit environment files - handle it for them
+### Styling
+- ✅ **Tailwind CSS 4** - Use utility classes, custom dark theme variables
+- ✅ **shadcn/ui** - Prefer pre-built components for consistency
+- ✅ **Mobile-first** - Responsive design with mobile breakpoints
 
-## Convex Backend Development
-**IMPORTANT**: When implementing any features or changes that involve Convex:
-- ALWAYS refer to and follow the guidelines in `convexGuidelines.md`
-- This file contains critical best practices for:
-  - Function syntax (queries, mutations, actions, internal functions)
-  - Validators and type safety
-  - Schema definitions and index usage
-  - File storage patterns
-  - Scheduling and cron jobs
-  - Database queries and performance optimization
-- Following these guidelines ensures type safety, proper security, and optimal performance
-- Never deviate from these patterns without explicit user approval
+### Security
+- ✅ **No vulnerabilities** - Prevent XSS, SQL injection, command injection (OWASP Top 10)
+- ✅ **Row-level security** - Filter user data at database level in Convex
+- ✅ **Protected routes** - Use `middleware.ts` for authentication checks
+- ✅ **No secrets in code** - API keys go in `.env.local`, never committed
 
-## Modular Code Best Practice
-**IMPORTANT**: Write modular, reusable code to optimize token usage and maintainability:
-- Break down large pages into smaller, focused components
-- Extract reusable UI elements into separate component files
-- Keep pages concise by delegating logic to components and hooks
-- Avoid pages that are thousands of lines long - this saves tokens and improves code quality
+### Testing & Quality
+- ✅ **>80% coverage** - Maintain test coverage above 80%
+- ✅ **ESLint clean** - No linting errors before commit
+- ✅ **Build succeeds** - `npm run build` must pass before deploying
 
-## UI-First Implementation Approach
-**IMPORTANT**: When implementing new features or screens:
-1. **Build the UI first** - Create the complete visual interface with all elements, styling, and layout
-2. **Match existing design** - New designs should closely match the existing UI screens, pages, and components, unless otherwise stated by the user
-3. **Then add functionality** - After the UI is in place, implement the business logic, state management, and backend integration
-4. This approach ensures a clear separation of concerns and makes it easier to iterate on both design and functionality independently
+## Development Conventions
+
+### Convex Backend
+**CRITICAL**: Always follow `convexGuidelines.md` for Convex development:
+- Function syntax (queries, mutations, actions, internal)
+- Validators and type safety
+- Schema definitions and indexes
+- File storage, scheduling, cron jobs
+- Performance optimization
+
+**Never deviate** from these patterns without explicit approval.
+
+### API Keys & Environment Variables
+1. Ask user for API key
+2. Add to `.env.local` yourself (create file if needed)
+3. Never ask user to manually edit environment files
+
+### Implementation Workflow
+
+**UI-First Approach**:
+1. Build complete UI (layout, styling, all elements)
+2. Match existing design patterns unless stated otherwise
+3. Add functionality (business logic, state, backend)
+
+**Modular Code**:
+- Break large files into focused components (<200 lines)
+- Extract reusable UI elements
+- Delegate logic to components and hooks
+- Saves tokens and improves maintainability
+
+---
+
+## Quick Reference
+
+| Need | Check First | Action |
+|------|-------------|--------|
+| New feature | `.claude/plans/` | Use existing plan if available |
+| Specific task | `.claude/skills/` | Invoke skill for automation |
+| Domain expertise | `.claude/agents/` | Use specialized agent |
+| Convex code | `convexGuidelines.md` | Follow all patterns |
+| Documentation | `/docs` | Create/update markdown there |
+| API integration | User request | Get API key, add to `.env.local` |
+
+**Testing checklist before commit**:
+- [ ] `npm run build` succeeds
+- [ ] `npm test` passes (>80% coverage)
+- [ ] `npm run lint` clean
+- [ ] No security vulnerabilities introduced
