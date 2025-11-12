@@ -53,6 +53,7 @@ export default defineSchema({
           answer: v.optional(v.string()),
           required: v.boolean(),
           type: v.union(v.literal("text"), v.literal("textarea"), v.literal("select")),
+          suggestedOptions: v.optional(v.array(v.string())),
         })
       )
     ),

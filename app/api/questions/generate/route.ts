@@ -24,6 +24,12 @@ Requirements:
 - Mix of open-ended and specific questions
 - Answers should inform tech stack decisions
 - Keep questions concise and clear
+- For each question, provide 2 intelligent suggested answer options based on the product context
+- Suggested options should be:
+  * Product-specific (not generic)
+  * Concise (3-10 words each)
+  * Mutually exclusive
+  * Helpful starting points for the user
 
 Output format (JSON only, no markdown):
 {
@@ -34,7 +40,8 @@ Output format (JSON only, no markdown):
       "question": "What specific actions should users be able to perform?",
       "placeholder": "e.g., Create projects, invite team members...",
       "required": true,
-      "type": "textarea"
+      "type": "textarea",
+      "suggestedOptions": ["Create and share content", "Search and discover items"]
     }
   ]
 }`;
