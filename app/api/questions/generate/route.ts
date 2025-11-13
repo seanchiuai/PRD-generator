@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
+import { handleAPIError, handleUnauthorizedError } from "@/lib/api-error-handler";
+import { parseAIResponse } from "@/lib/parse-ai-json";
+import { QuestionGenerationResponse } from "@/types";
 
 const QUESTION_GENERATION_PROMPT = `Generate 12-15 clarifying questions for creating a Product Requirements Document.
 
@@ -50,14 +49,14 @@ export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return handleUnauthorizedError();
     }
 
     const { productContext } = await request.json();
 
     const response = await anthropic.messages.create({
-      model: "claude-haiku-4-5",
-      max_tokens: 4096,
+      model: AI_MODELS.CLAUDE_HAIKU,
+      max_tokens: TOKEN_LIMITS.QUESTION_GENERATION,
       messages: [
         {
           role: "user",
@@ -74,22 +73,11 @@ export async function POST(request: NextRequest) {
       throw new Error("Unexpected response type");
     }
 
-    // Extract JSON from response (handle both plain JSON and markdown-wrapped JSON)
-    let jsonText = content.text.trim();
-    if (jsonText.startsWith("```json")) {
-      jsonText = jsonText.replace(/```json\n?/, "").replace(/\n?```$/, "");
-    } else if (jsonText.startsWith("```")) {
-      jsonText = jsonText.replace(/```\n?/, "").replace(/\n?```$/, "");
-    }
-
-    const questions = JSON.parse(jsonText);
+    // Parse AI response using centralized utility
+    const questions = parseAIResponse<QuestionGenerationResponse>(content.text);
 
     return NextResponse.json(questions);
   } catch (error) {
-    console.error("Question generation error:", error);
-    return NextResponse.json(
-      { error: "Failed to generate questions" },
-      { status: 500 }
-    );
+    return handleAPIError(error, "generate questions");
   }
 }

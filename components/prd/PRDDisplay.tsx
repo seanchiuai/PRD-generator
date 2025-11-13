@@ -3,9 +3,10 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PRDData } from "@/types";
 
 interface PRDDisplayProps {
-  prd: any;
+  prd: PRDData;
 }
 
 export function PRDDisplay({ prd }: PRDDisplayProps) {
@@ -59,7 +60,7 @@ export function PRDDisplay({ prd }: PRDDisplayProps) {
             <div>
               <h4 className="font-semibold mb-2">Key Objectives</h4>
               <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                {prd.purposeAndGoals.keyObjectives.map((obj: string, i: number) => (
+                {prd.purposeAndGoals.keyObjectives.map((obj, i) => (
                   <li key={i}>{obj}</li>
                 ))}
               </ul>
@@ -69,42 +70,44 @@ export function PRDDisplay({ prd }: PRDDisplayProps) {
       </TabsContent>
 
       <TabsContent value="techstack" className="space-y-4">
-        {Object.entries(prd.techStack).map(([key, value]: [string, any]) => {
-          if (key === "reasoning" || key === "additionalTools") return null;
-          return (
-            <Card key={key}>
-              <CardHeader>
-                <CardTitle className="capitalize">{key}</CardTitle>
-                <CardDescription>{value.name}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-sm">{value.purpose}</p>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h5 className="font-medium text-sm mb-2 text-green-700 dark:text-green-400">
-                      Pros
-                    </h5>
-                    <ul className="list-disc list-inside space-y-1 text-sm">
-                      {value.pros.map((pro: string, i: number) => (
-                        <li key={i}>{pro}</li>
-                      ))}
-                    </ul>
+        {Object.entries(prd.techStack)
+          .filter(([key]) => key !== "reasoning")
+          .map(([key, value]) => {
+            if (typeof value === "string") return null;
+            return (
+              <Card key={key}>
+                <CardHeader>
+                  <CardTitle className="capitalize">{key}</CardTitle>
+                  <CardDescription>{value.name}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm">{value.purpose}</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h5 className="font-medium text-sm mb-2 text-green-700 dark:text-green-400">
+                        Pros
+                      </h5>
+                      <ul className="list-disc list-inside space-y-1 text-sm">
+                        {value.pros.map((pro, i) => (
+                          <li key={i}>{pro}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h5 className="font-medium text-sm mb-2 text-red-700 dark:text-red-400">
+                        Cons
+                      </h5>
+                      <ul className="list-disc list-inside space-y-1 text-sm">
+                        {value.cons.map((con, i) => (
+                          <li key={i}>{con}</li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-                  <div>
-                    <h5 className="font-medium text-sm mb-2 text-red-700 dark:text-red-400">
-                      Cons
-                    </h5>
-                    <ul className="list-disc list-inside space-y-1 text-sm">
-                      {value.cons.map((con: string, i: number) => (
-                        <li key={i}>{con}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+                </CardContent>
+              </Card>
+            );
+          })}
       </TabsContent>
 
       <TabsContent value="features" className="space-y-4">
@@ -114,7 +117,7 @@ export function PRDDisplay({ prd }: PRDDisplayProps) {
             <CardDescription>Critical features for initial launch</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {prd.features.mvpFeatures.map((feature: any, i: number) => (
+            {prd.features.mvpFeatures.map((feature, i) => (
               <div key={i} className="border-l-4 border-primary pl-4">
                 <div className="flex items-center gap-2 mb-2">
                   <h4 className="font-semibold">{feature.name}</h4>
@@ -129,7 +132,7 @@ export function PRDDisplay({ prd }: PRDDisplayProps) {
                 <div>
                   <strong className="text-sm">Acceptance Criteria:</strong>
                   <ul className="list-disc list-inside text-sm mt-1">
-                    {feature.acceptanceCriteria.map((criteria: string, j: number) => (
+                    {feature.acceptanceCriteria.map((criteria, j) => (
                       <li key={j}>{criteria}</li>
                     ))}
                   </ul>
@@ -157,12 +160,12 @@ export function PRDDisplay({ prd }: PRDDisplayProps) {
             <CardTitle>Data Models</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {prd.technicalArchitecture.dataModels.map((model: any, i: number) => (
+            {prd.technicalArchitecture.dataModels.map((model, i) => (
               <div key={i} className="border rounded-lg p-4">
                 <h4 className="font-semibold mb-2">{model.entityName}</h4>
                 <p className="text-sm text-muted-foreground mb-3">{model.description}</p>
                 <div className="text-sm font-mono">
-                  {model.fields.map((field: any, j: number) => (
+                  {model.fields.map((field, j) => (
                     <div key={j} className="flex justify-between py-1">
                       <span>{field.name}</span>
                       <span className="text-muted-foreground">
@@ -187,14 +190,14 @@ export function PRDDisplay({ prd }: PRDDisplayProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {prd.timeline.phases.map((phase: any, i: number) => (
+              {prd.timeline.phases.map((phase, i) => (
                 <div key={i} className="border-l-4 border-primary pl-4">
                   <div className="flex justify-between items-center mb-2">
                     <h4 className="font-semibold">{phase.name}</h4>
                     <Badge variant="outline">{phase.duration}</Badge>
                   </div>
                   <ul className="list-disc list-inside text-sm">
-                    {phase.deliverables.map((deliverable: string, j: number) => (
+                    {phase.deliverables.map((deliverable, j) => (
                       <li key={j}>{deliverable}</li>
                     ))}
                   </ul>
@@ -209,7 +212,7 @@ export function PRDDisplay({ prd }: PRDDisplayProps) {
             <CardTitle>Risks & Mitigation</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {prd.risks.map((risk: any, i: number) => (
+            {prd.risks.map((risk, i) => (
               <div key={i} className="border rounded-lg p-4">
                 <div className="flex items-start gap-2 mb-2">
                   <Badge variant="destructive">{risk.category}</Badge>
