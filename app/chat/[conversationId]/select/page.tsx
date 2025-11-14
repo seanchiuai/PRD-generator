@@ -6,11 +6,14 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CategorySection } from "@/components/selection/CategorySection";
 import { ValidationWarnings } from "@/components/selection/ValidationWarnings";
 import { SelectionProgress } from "@/components/selection/SelectionProgress";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { WorkflowLayout } from "@/components/workflow/WorkflowLayout";
+import { AutoAdvance } from "@/components/workflow/AutoAdvance";
+import { Sparkles } from "lucide-react";
 
 interface ValidationWarning {
   level: "warning" | "error";
@@ -33,6 +36,12 @@ export default function SelectionPage() {
   const [selections, setSelections] = useState<Record<string, string>>({});
   const [validationWarnings, setValidationWarnings] = useState<ValidationWarning[]>([]);
   const [isValidating, setIsValidating] = useState(false);
+  const [isSkipping, setIsSkipping] = useState(false);
+  const [countdown, setCountdown] = useState(5);
+  const [showCountdown, setShowCountdown] = useState(false);
+
+  // Detect if the stack was auto-selected
+  const isAutoSelected = conversation?.selection?.autoSelected || false;
 
   const categories = [
     { name: "Frontend Framework", key: "frontend" },
@@ -58,6 +67,24 @@ export default function SelectionPage() {
       setValidationWarnings(conversation.validationWarnings as ValidationWarning[]);
     }
   }, [conversation]);
+
+  // Auto-advance countdown for auto-selected stacks
+  useEffect(() => {
+    if (isAutoSelected && conversation?.selection && !showCountdown) {
+      setShowCountdown(true);
+    }
+  }, [isAutoSelected, conversation?.selection, showCountdown]);
+
+  useEffect(() => {
+    if (showCountdown && countdown > 0) {
+      const timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (showCountdown && countdown === 0) {
+      router.push(`/chat/${conversationId}/generate`);
+    }
+  }, [showCountdown, countdown, conversationId, router]);
 
   const validateSelections = useCallback(async (currentSelections: Record<string, string>) => {
     if (Object.keys(currentSelections).length < 2) return;
@@ -140,6 +167,26 @@ export default function SelectionPage() {
     router.push(`/chat/${conversationId}/generate`);
   };
 
+  const handleSkip = async () => {
+    setIsSkipping(true);
+    try {
+      await updateStage({
+        conversationId,
+        stage: "generating",
+      });
+      router.push(`/chat/${conversationId}/generate`);
+    } catch (error) {
+      console.error("Error skipping:", error);
+      toast({
+        title: "Skip failed",
+        description: "Failed to skip to generation. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSkipping(false);
+    }
+  };
+
   if (!conversation) {
     return (
       <div className="container mx-auto py-8 flex items-center justify-center min-h-screen">
@@ -170,59 +217,78 @@ export default function SelectionPage() {
   const hasErrors = validationWarnings.some((w) => w.level === "error");
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Select Your Tech Stack</h1>
-        <p className="text-muted-foreground mt-2">
-          Choose one technology from each category based on your requirements
-        </p>
+    <WorkflowLayout
+      currentStep="selection"
+      completedSteps={["discovery", "questions", "research"]}
+      conversationId={conversationId}
+      showSkipButton={true}
+      onSkip={handleSkip}
+      skipButtonText="Skip to Generate"
+      skipButtonLoading={isSkipping}
+      skipConfirmMessage="Skipping selection will use default technology choices. This may not be optimal for your needs. Continue?"
+      skipConfirmTitle="Skip Selection?"
+      showFooter={true}
+      onBack={() => router.push(`/chat/${conversationId}/research`)}
+      onNext={handleContinue}
+      nextButtonText={isValidating ? "Validating..." : "Generate PRD"}
+      nextButtonDisabled={isValidating || hasErrors || selectedCount < categories.length}
+    >
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold">Select Your Tech Stack</h1>
+          <p className="text-muted-foreground mt-2">
+            Choose one technology from each category based on your requirements
+          </p>
+        </div>
+
+        {/* Auto-Selection Indicator */}
+        {isAutoSelected && (
+          <Alert className="border-green-200 bg-green-50">
+            <Sparkles className="h-4 w-4 text-green-600" />
+            <AlertTitle className="text-green-900">Recommended Stack Selected</AlertTitle>
+            <AlertDescription className="text-green-800">
+              We've selected a tech stack based on your product requirements.
+              You can review and change any selections below.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Progress */}
+        <SelectionProgress total={categories.length} selected={selectedCount} />
+
+        {/* Validation Warnings */}
+        {validationWarnings.length > 0 && (
+          <ValidationWarnings warnings={validationWarnings} />
+        )}
+
+        {/* Category Sections */}
+        <div className="space-y-12">
+          {categories.map((cat) => {
+            const options = (conversation.researchResults as any)?.[cat.key];
+            if (!options || options.length === 0) return null;
+
+            return (
+              <CategorySection
+                key={cat.key}
+                category={cat.name}
+                options={options}
+                selectedOption={selections[cat.key]}
+                onSelect={(optionName) => handleSelection(cat.key, optionName)}
+              />
+            );
+          })}
+        </div>
+
+        {/* Auto-advance Countdown */}
+        <AutoAdvance
+          enabled={showCountdown && isAutoSelected}
+          delaySeconds={5}
+          nextStepName="PRD Generation"
+          onAdvance={() => router.push(`/chat/${conversationId}/generate`)}
+          onCancel={() => setShowCountdown(false)}
+        />
       </div>
-
-      {/* Progress */}
-      <SelectionProgress total={categories.length} selected={selectedCount} />
-
-      {/* Validation Warnings */}
-      {validationWarnings.length > 0 && (
-        <ValidationWarnings warnings={validationWarnings} />
-      )}
-
-      {/* Category Sections */}
-      <div className="space-y-12">
-        {categories.map((cat) => {
-          const options = (conversation.researchResults as any)?.[cat.key];
-          if (!options || options.length === 0) return null;
-
-          return (
-            <CategorySection
-              key={cat.key}
-              category={cat.name}
-              options={options}
-              selectedOption={selections[cat.key]}
-              onSelect={(optionName) => handleSelection(cat.key, optionName)}
-            />
-          );
-        })}
-      </div>
-
-      {/* Navigation */}
-      <div className="flex justify-between pt-6 border-t sticky bottom-0 bg-background py-4">
-        <Button
-          variant="outline"
-          onClick={() => router.push(`/chat/${conversationId}/research`)}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Research
-        </Button>
-
-        <Button
-          onClick={handleContinue}
-          disabled={isValidating || hasErrors || selectedCount < categories.length}
-        >
-          {isValidating ? "Validating..." : "Generate PRD"}
-          <ArrowRight className="h-4 w-4 ml-2" />
-        </Button>
-      </div>
-    </div>
+    </WorkflowLayout>
   );
 }

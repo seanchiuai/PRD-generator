@@ -8,8 +8,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { ChatContainer } from "@/components/chat/ChatContainer";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { WorkflowLayout } from "@/components/workflow/WorkflowLayout";
 
 export default function ChatPage() {
   const params = useParams();
@@ -19,7 +18,6 @@ export default function ChatPage() {
 
   const conversation = useQuery(api.conversations.get, { conversationId });
   const addMessage = useMutation(api.conversations.addMessage);
-  const updateStage = useMutation(api.conversations.updateStage);
 
   const [isTyping, setIsTyping] = useState(false);
   const [isSkipping, setIsSkipping] = useState(false);
@@ -28,14 +26,10 @@ export default function ChatPage() {
   const canSkip = useMemo(() => {
     if (!conversation?.messages) return false;
 
-    const messageCount = conversation.messages.length;
     const userMessages = conversation.messages.filter((m) => m.role === "user");
-    const totalUserChars = userMessages.reduce(
-      (sum, m) => sum + m.content.length,
-      0
-    );
 
-    return messageCount >= 3 && totalUserChars >= 100;
+    // Show skip button after first user message
+    return userMessages.length >= 1;
   }, [conversation?.messages]);
 
   const handleSendMessage = async (content: string) => {
@@ -89,30 +83,30 @@ export default function ChatPage() {
     try {
       setIsSkipping(true);
 
-      // Validate sufficient context
-      if (!canSkip) {
-        toast({
-          title: "Need more context",
-          description:
-            "Please share a bit more about your product idea before skipping.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Update conversation stage to clarifying
-      await updateStage({
-        conversationId,
-        stage: "clarifying",
+      // Call context extraction API
+      const response = await fetch("/api/conversation/extract-context", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversationId }),
       });
 
-      // Navigate to questions page
-      router.push(`/chat/${conversationId}/questions`);
+      if (!response.ok) {
+        throw new Error("Failed to extract context");
+      }
+
+      const { success } = await response.json();
+
+      if (success) {
+        // Navigate to questions page
+        router.push(`/chat/${conversationId}/questions`);
+      } else {
+        throw new Error("Context extraction was not successful");
+      }
     } catch (error) {
-      console.error("Error skipping to questions:", error);
+      console.error("Skip failed:", error);
       toast({
         title: "Skip failed",
-        description: "Unable to skip to questions. Please try again.",
+        description: "Failed to skip. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -129,44 +123,33 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen max-w-4xl mx-auto">
-      <div className="border-b p-4">
-        <h1 className="text-xl font-semibold">Product Discovery</h1>
-        <p className="text-sm text-muted-foreground">
-          Tell me about your product idea
-        </p>
-      </div>
+    <WorkflowLayout
+      currentStep="discovery"
+      completedSteps={[]}
+      conversationId={conversationId}
+      showSkipButton={canSkip}
+      onSkip={handleSkip}
+      skipButtonText="Skip to Questions"
+      skipButtonLoading={isSkipping}
+      skipConfirmMessage="Are you sure you want to skip? We recommend having a conversation to better understand your product."
+      skipConfirmTitle="Skip Discovery Phase?"
+    >
+      <div className="flex flex-col h-[calc(100vh-200px)] max-w-4xl mx-auto">
+        <div className="border-b p-4">
+          <h1 className="text-xl font-semibold">Product Discovery</h1>
+          <p className="text-sm text-muted-foreground">
+            Tell me about your product idea
+          </p>
+        </div>
 
-      <ChatContainer messages={conversation.messages} isTyping={isTyping} />
+        <ChatContainer messages={conversation.messages} isTyping={isTyping} />
 
-      <div className="border-t bg-background">
-        <div className="p-4 space-y-3">
-          <ChatInput onSendMessage={handleSendMessage} disabled={isTyping} />
-
-          {canSkip && (
-            <div className="flex justify-end">
-              <Button
-                variant="outline"
-                onClick={handleSkip}
-                disabled={isSkipping || isTyping}
-                className="gap-2"
-              >
-                {isSkipping ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Skipping...
-                  </>
-                ) : (
-                  <>
-                    Skip to Questions
-                    <ArrowRight className="h-4 w-4" />
-                  </>
-                )}
-              </Button>
-            </div>
-          )}
+        <div className="border-t bg-background">
+          <div className="p-4">
+            <ChatInput onSendMessage={handleSendMessage} disabled={isTyping} />
+          </div>
         </div>
       </div>
-    </div>
+    </WorkflowLayout>
   );
 }

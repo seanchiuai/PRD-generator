@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { GenerationProgress } from "@/components/prd/GenerationProgress";
 import { PRDDisplay } from "@/components/prd/PRDDisplay";
 import { useToast } from "@/hooks/use-toast";
-import { Download, ArrowLeft } from "lucide-react";
+import { WorkflowLayout } from "@/components/workflow/WorkflowLayout";
+import { Download } from "lucide-react";
 
 export default function GeneratePage() {
   const params = useParams();
@@ -130,46 +131,41 @@ export default function GeneratePage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Product Requirements Document</h1>
-          <p className="text-muted-foreground mt-2">
-            {prd ? "Your PRD is ready!" : "Generating your comprehensive PRD..."}
-          </p>
+    <WorkflowLayout
+      currentStep="generate"
+      completedSteps={["discovery", "questions", "research", "selection"]}
+      conversationId={conversationId}
+      showSkipButton={false}
+      showFooter={true}
+      onBack={() => router.push(`/chat/${conversationId}/select`)}
+      onNext={prd ? () => router.push("/dashboard") : undefined}
+      nextButtonText="View All PRDs"
+      nextButtonDisabled={isGenerating || !prd}
+      backButtonText="Back to Selection"
+    >
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">Product Requirements Document</h1>
+            <p className="text-muted-foreground mt-2">
+              {prd ? "Your PRD is ready!" : "Generating your comprehensive PRD..."}
+            </p>
+          </div>
+          {prd && existingPRD && (
+            <Button onClick={() => router.push(`/prd/${existingPRD._id}`)}>
+              <Download className="h-4 w-4 mr-2" />
+              Export PRD
+            </Button>
+          )}
         </div>
-        {prd && existingPRD && (
-          <Button onClick={() => router.push(`/prd/${existingPRD._id}`)}>
-            <Download className="h-4 w-4 mr-2" />
-            Export PRD
-          </Button>
-        )}
+
+        {/* Generation Progress */}
+        {isGenerating && <GenerationProgress steps={generationSteps} />}
+
+        {/* PRD Display */}
+        {prd && !isGenerating && <PRDDisplay prd={prd} />}
       </div>
-
-      {/* Generation Progress */}
-      {isGenerating && <GenerationProgress steps={generationSteps} />}
-
-      {/* PRD Display */}
-      {prd && !isGenerating && <PRDDisplay prd={prd} />}
-
-      {/* Navigation */}
-      <div className="flex justify-between pt-6 border-t">
-        <Button
-          variant="outline"
-          onClick={() => router.push(`/chat/${conversationId}/select`)}
-          disabled={isGenerating}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Selection
-        </Button>
-
-        {prd && (
-          <Button onClick={() => router.push("/dashboard")}>
-            View All PRDs
-          </Button>
-        )}
-      </div>
-    </div>
+    </WorkflowLayout>
   );
 }

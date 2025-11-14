@@ -7,6 +7,7 @@ import { dark } from "@clerk/themes";
 import ClientBody from "@/components/ClientBody";
 import { Toaster } from "@/components/ui/toaster";
 import { StoreUserProvider } from "@/components/StoreUserProvider";
+import { WorkflowProvider } from "@/contexts/WorkflowContext";
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -60,8 +61,10 @@ export default function RootLayout({
           >
             <ConvexClientProvider>
               <StoreUserProvider>
-                {children}
-                <Toaster />
+                <WorkflowProvider>
+                  {children}
+                  <Toaster />
+                </WorkflowProvider>
               </StoreUserProvider>
             </ConvexClientProvider>
           </ClerkProvider>

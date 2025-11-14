@@ -52,7 +52,25 @@ export async function POST(request: NextRequest) {
       return handleUnauthorizedError();
     }
 
-    const { productContext } = await request.json();
+    const { productContext, extractedContext } = await request.json();
+
+    // Build context-aware prompt
+    let contextSection = "";
+    if (extractedContext) {
+      contextSection = `
+PRODUCT CONTEXT (extracted from discovery):
+- Product: ${extractedContext.productName}
+- Description: ${extractedContext.description}
+- Target Audience: ${extractedContext.targetAudience}
+- Key Features: ${extractedContext.keyFeatures.join(", ")}
+- Problem: ${extractedContext.problemStatement}
+- Technical Preferences: ${extractedContext.technicalPreferences.join(", ")}
+
+Use this context to generate highly relevant questions.
+`;
+    } else if (productContext) {
+      contextSection = JSON.stringify(productContext, null, 2);
+    }
 
     const response = await anthropic.messages.create({
       model: AI_MODELS.CLAUDE_HAIKU,
@@ -62,7 +80,7 @@ export async function POST(request: NextRequest) {
           role: "user",
           content: QUESTION_GENERATION_PROMPT.replace(
             "{productContext}",
-            JSON.stringify(productContext, null, 2)
+            contextSection
           ),
         },
       ],

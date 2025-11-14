@@ -1,0 +1,209 @@
+'use client'
+
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { useQuery, useMutation } from 'convex/react'
+import { api } from '@/convex/_generated/api'
+import { Id } from '@/convex/_generated/dataModel'
+import { saveWorkflowSnapshot, loadWorkflowSnapshot } from '@/lib/workflow/persistence'
+
+export type WorkflowStep = 'discovery' | 'questions' | 'research' | 'selection' | 'generate'
+
+interface WorkflowState {
+  currentStep: WorkflowStep
+  completedSteps: WorkflowStep[]
+  skippedSteps: WorkflowStep[]
+  isTransitioning: boolean
+  autoAdvanceEnabled: boolean
+}
+
+interface WorkflowContextType {
+  state: WorkflowState
+  conversationId: Id<'conversations'> | null
+  setConversationId: (id: Id<'conversations'>) => void
+  advanceToNextStep: () => Promise<void>
+  goToStep: (step: WorkflowStep) => void
+  markStepComplete: (step: WorkflowStep, skipped?: boolean) => Promise<void>
+  canNavigateToStep: (step: WorkflowStep) => boolean
+  setAutoAdvance: (enabled: boolean) => void
+}
+
+const WorkflowContext = createContext<WorkflowContextType | undefined>(undefined)
+
+export function WorkflowProvider({ children }: { children: ReactNode }) {
+  const [conversationId, setConversationId] = useState<Id<'conversations'> | null>(null)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [autoAdvanceEnabled, setAutoAdvanceEnabled] = useState(true)
+
+  // Fetch workflow progress from Convex
+  const progress = useQuery(
+    api.workflow.getProgress,
+    conversationId ? { conversationId } : 'skip'
+  )
+
+  // Update progress mutation
+  const updateProgress = useMutation(api.workflow.updateProgress)
+
+  const [state, setState] = useState<WorkflowState>({
+    currentStep: 'discovery',
+    completedSteps: [],
+    skippedSteps: [],
+    isTransitioning: false,
+    autoAdvanceEnabled: true,
+  })
+
+  // Sync state with Convex
+  useEffect(() => {
+    if (progress) {
+      setState(prev => ({
+        ...prev,
+        currentStep: progress.currentStep as WorkflowStep,
+        completedSteps: progress.completedSteps as WorkflowStep[],
+        skippedSteps: progress.skippedSteps as WorkflowStep[],
+      }))
+    }
+  }, [progress])
+
+  // Load snapshot on mount
+  useEffect(() => {
+    if (conversationId) {
+      const snapshot = loadWorkflowSnapshot(conversationId)
+      if (snapshot && !progress) {
+        // Only use snapshot if Convex hasn't loaded yet
+        setState(prev => ({
+          ...prev,
+          currentStep: snapshot.currentStep,
+          completedSteps: snapshot.completedSteps,
+          skippedSteps: snapshot.skippedSteps,
+        }))
+      }
+    }
+  }, [conversationId, progress])
+
+  // Save snapshot whenever state changes
+  useEffect(() => {
+    if (conversationId) {
+      saveWorkflowSnapshot({
+        conversationId,
+        currentStep: state.currentStep,
+        completedSteps: state.completedSteps,
+        skippedSteps: state.skippedSteps,
+        timestamp: Date.now(),
+      })
+    }
+  }, [conversationId, state.currentStep, state.completedSteps, state.skippedSteps])
+
+  const markStepComplete = async (step: WorkflowStep, skipped = false) => {
+    if (!conversationId) return
+
+    const newCompletedSteps = state.completedSteps.includes(step)
+      ? state.completedSteps
+      : [...state.completedSteps, step]
+    const newSkippedSteps = skipped
+      ? state.skippedSteps.includes(step)
+        ? state.skippedSteps
+        : [...state.skippedSteps, step]
+      : state.skippedSteps
+
+    setState(prev => ({
+      ...prev,
+      completedSteps: newCompletedSteps,
+      skippedSteps: newSkippedSteps,
+    }))
+
+    // Update Convex
+    await updateProgress({
+      conversationId,
+      currentStep: state.currentStep,
+      completedSteps: newCompletedSteps,
+      skippedSteps: newSkippedSteps,
+    })
+  }
+
+  const advanceToNextStep = async () => {
+    const steps: WorkflowStep[] = ['discovery', 'questions', 'research', 'selection', 'generate']
+    const currentIndex = steps.indexOf(state.currentStep)
+
+    if (currentIndex < steps.length - 1) {
+      const nextStep = steps[currentIndex + 1]
+
+      setIsTransitioning(true)
+
+      // Mark current step as complete
+      await markStepComplete(state.currentStep)
+
+      // Advance to next step
+      setState(prev => ({
+        ...prev,
+        currentStep: nextStep,
+      }))
+
+      if (conversationId) {
+        await updateProgress({
+          conversationId,
+          currentStep: nextStep,
+          completedSteps: [...state.completedSteps, state.currentStep],
+          skippedSteps: state.skippedSteps,
+        })
+      }
+
+      setIsTransitioning(false)
+    }
+  }
+
+  const goToStep = (step: WorkflowStep) => {
+    if (canNavigateToStep(step)) {
+      setState(prev => ({ ...prev, currentStep: step }))
+
+      if (conversationId) {
+        updateProgress({
+          conversationId,
+          currentStep: step,
+          completedSteps: state.completedSteps,
+          skippedSteps: state.skippedSteps,
+        })
+      }
+    }
+  }
+
+  const canNavigateToStep = (targetStep: WorkflowStep): boolean => {
+    // Can always navigate to completed steps
+    if (state.completedSteps.includes(targetStep)) return true
+
+    // Can only navigate to next step after current
+    const steps: WorkflowStep[] = ['discovery', 'questions', 'research', 'selection', 'generate']
+    const currentIndex = steps.indexOf(state.currentStep)
+    const targetIndex = steps.indexOf(targetStep)
+
+    return targetIndex <= currentIndex + 1
+  }
+
+  const setAutoAdvance = (enabled: boolean) => {
+    setAutoAdvanceEnabled(enabled)
+    setState(prev => ({ ...prev, autoAdvanceEnabled: enabled }))
+  }
+
+  return (
+    <WorkflowContext.Provider
+      value={{
+        state: { ...state, isTransitioning, autoAdvanceEnabled },
+        conversationId,
+        setConversationId,
+        advanceToNextStep,
+        goToStep,
+        markStepComplete,
+        canNavigateToStep,
+        setAutoAdvance,
+      }}
+    >
+      {children}
+    </WorkflowContext.Provider>
+  )
+}
+
+export function useWorkflow() {
+  const context = useContext(WorkflowContext)
+  if (!context) {
+    throw new Error('useWorkflow must be used within WorkflowProvider')
+  }
+  return context
+}
