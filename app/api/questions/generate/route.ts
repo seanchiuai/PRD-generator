@@ -39,6 +39,14 @@ Output format (JSON only, no markdown):
   ]
 }`;
 
+/**
+ * Generate clarifying questions for a product requirements document using Anthropic and return them as parsed JSON.
+ *
+ * Sends the provided `productContext` to the Anthropic model, extracts and parses the model's JSON output (handling optional markdown code fences), and returns the resulting questions.
+ *
+ * @param request - The incoming NextRequest whose JSON body must include a `productContext` object.
+ * @returns A NextResponse containing the parsed questions JSON on success; responds with `{ error: "Unauthorized" }` and status 401 when the user is not authenticated, or with `{ error: "Failed to generate questions" }` and status 500 on failure.
+ */
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();

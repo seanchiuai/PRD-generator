@@ -21,6 +21,12 @@ Your goal in this discovery phase is to:
 
 When you have enough basic information, confirm understanding and let the user know you'll move to detailed questions next.`;
 
+/**
+ * Handle POST requests by sending the provided conversation messages to Anthropic Claude and returning the assistant's reply.
+ *
+ * @param request - A NextRequest whose JSON body must include a `messages` array of objects with `role` and `content` fields.
+ * @returns A JSON NextResponse containing `{ message: string, usage: any }` with the assistant's reply text and usage data. On error, returns a JSON error response with status `401` (unauthorized), `400` (bad request), or `500` (internal server error).
+ */
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();

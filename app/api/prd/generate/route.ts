@@ -135,6 +135,16 @@ Output ONLY valid JSON matching this exact structure:
   ]
 }`;
 
+/**
+ * Generate a Product Requirements Document (PRD) JSON from a product discovery conversation.
+ *
+ * Builds a prompt from the provided conversationData (messages, clarifying questions, and optional selected tech stack),
+ * sends it to the Anthropic Claude model to generate a PRD, parses the model's JSON output (including JSON wrapped in ```json code blocks),
+ * validates that the PRD includes a product name, and returns the parsed PRD along with model usage metadata.
+ *
+ * @param request - NextRequest whose JSON body must include `conversationData` with `messages` and optional `clarifyingQuestions` and `selectedTechStack`.
+ * @returns A JSON object containing `prdData` (the parsed PRD structure) and `usage` (Anthropic response usage). On error returns a JSON error with an appropriate HTTP status: 400 if conversation data is missing, 401 if the user is unauthorized, or 500 for other failures (including parse or validation errors).
+ */
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();
