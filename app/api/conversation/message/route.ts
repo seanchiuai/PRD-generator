@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+import { Message, MessageAPIResponse } from "@/types";
+import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
+import {
+  handleAPIError,
+  handleUnauthorizedError,
+  handleValidationError,
+} from "@/lib/api-error-handler";
+import { logger } from "@/lib/logger";
 
 const SYSTEM_PROMPT = `You are a helpful AI assistant helping users create a Product Requirements Document (PRD).
 
@@ -31,25 +34,22 @@ export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return handleUnauthorizedError();
     }
 
     const body = await request.json();
     const { messages } = body;
 
     if (!messages || !Array.isArray(messages)) {
-      return NextResponse.json(
-        { error: "Messages array required" },
-        { status: 400 }
-      );
+      return handleValidationError("Messages array required");
     }
 
     // Call Claude API
     const response = await anthropic.messages.create({
-      model: "claude-haiku-4-5",
-      max_tokens: 1024,
+      model: AI_MODELS.CLAUDE_HAIKU,
+      max_tokens: TOKEN_LIMITS.CONVERSATION,
       system: SYSTEM_PROMPT,
-      messages: messages.map((msg: any) => ({
+      messages: messages.map((msg: Message) => ({
         role: msg.role,
         content: msg.content,
       })),
@@ -60,15 +60,21 @@ export async function POST(request: NextRequest) {
       throw new Error("Unexpected response type");
     }
 
-    return NextResponse.json({
+    const apiResponse: MessageAPIResponse = {
       message: assistantMessage.text,
-      usage: response.usage,
+      usage: {
+        input_tokens: response.usage.input_tokens,
+        output_tokens: response.usage.output_tokens,
+      },
+    };
+
+    logger.info("Conversation Message", "Message processed successfully", {
+      userId,
+      messageCount: messages.length,
     });
+
+    return NextResponse.json(apiResponse);
   } catch (error) {
-    console.error("API Error:", error);
-    return NextResponse.json(
-      { error: "Failed to process message" },
-      { status: 500 }
-    );
+    return handleAPIError(error, "process conversation message");
   }
 }

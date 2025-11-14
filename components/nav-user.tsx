@@ -1,11 +1,11 @@
 "use client"
 
 import {
-  IconDotsVertical,
-  IconLogout,
-  IconSettings,
-  IconUserCircle,
-} from "@tabler/icons-react"
+  MoreVertical,
+  LogOut,
+  Settings,
+  UserCircle,
+} from "lucide-react"
 import { useUser, useClerk } from "@clerk/nextjs"
 
 import {
@@ -62,7 +62,7 @@ export function NavUser() {
                   {userEmail}
                 </span>
               </div>
-              <IconDotsVertical className="ml-auto size-4" />
+              <MoreVertical className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -88,17 +88,17 @@ export function NavUser() {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem onClick={() => openUserProfile()}>
-                <IconUserCircle />
+                <UserCircle />
                 Account
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <IconSettings />
+                <Settings />
                 Settings
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => signOut()}>
-              <IconLogout />
+              <LogOut />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

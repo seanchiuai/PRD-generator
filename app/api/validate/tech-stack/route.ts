@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
+import { handleAPIError, handleUnauthorizedError } from "@/lib/api-error-handler";
+import { parseAIResponse, safeParseAIResponse } from "@/lib/parse-ai-json";
+import { ValidationWarning } from "@/types";
 
 const VALIDATION_PROMPT = `You are a tech stack architecture expert. Analyze the following technology selections for compatibility issues.
 
@@ -36,6 +35,19 @@ Format your response as JSON:
 
 Only include actual issues. If the stack is compatible, return empty arrays.`;
 
+interface ValidationResponse {
+  errors: Array<{
+    message: string;
+    affectedTechnologies: string[];
+    suggestion?: string;
+  }>;
+  warnings: Array<{
+    message: string;
+    affectedTechnologies: string[];
+    suggestion?: string;
+  }>;
+}
+
 /**
  * Validate a submitted tech-stack selection using Anthropic Claude and return consolidated warnings and errors.
  *
@@ -48,7 +60,7 @@ export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return handleUnauthorizedError();
     }
 
     const body = await request.json();
@@ -67,8 +79,8 @@ export async function POST(request: NextRequest) {
 
     // Call Claude for validation
     const response = await anthropic.messages.create({
-      model: "claude-haiku-4-5",
-      max_tokens: 2048,
+      model: AI_MODELS.CLAUDE_HAIKU,
+      max_tokens: TOKEN_LIMITS.VALIDATION,
       messages: [
         {
           role: "user",
@@ -82,25 +94,21 @@ export async function POST(request: NextRequest) {
       throw new Error("Unexpected response type");
     }
 
-    // Parse JSON response
-    let validationResult;
-    try {
-      const jsonMatch = content.text.match(/```json\n([\s\S]*?)\n```/);
-      validationResult = JSON.parse(jsonMatch?.[1] || content.text);
-    } catch (parseError) {
-      console.error("Parse error:", parseError);
-      validationResult = { errors: [], warnings: [] };
-    }
+    // Parse JSON response with fallback
+    const validationResult = safeParseAIResponse<ValidationResponse>(content.text) || {
+      errors: [],
+      warnings: [],
+    };
 
-    // Format warnings
-    const warnings = [
-      ...validationResult.errors.map((e: any) => ({
+    // Format warnings with proper types
+    const warnings: ValidationWarning[] = [
+      ...validationResult.errors.map((e) => ({
         level: "error" as const,
         message: e.message,
         affectedTechnologies: e.affectedTechnologies,
         suggestion: e.suggestion,
       })),
-      ...validationResult.warnings.map((w: any) => ({
+      ...validationResult.warnings.map((w) => ({
         level: "warning" as const,
         message: w.message,
         affectedTechnologies: w.affectedTechnologies,
@@ -110,10 +118,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ warnings });
   } catch (error) {
-    console.error("Validation API Error:", error);
-    return NextResponse.json(
-      { error: "Failed to validate tech stack" },
-      { status: 500 }
-    );
+    return handleAPIError(error, "validate tech stack");
   }
 }

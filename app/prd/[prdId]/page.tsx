@@ -11,11 +11,13 @@ import { exportJSON, exportPDF, sanitizeFilename } from "@/lib/export-utils";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { use } from "react";
 
-export default function PRDViewPage({ params }: { params: { prdId: string } }) {
+export default function PRDViewPage({ params }: { params: Promise<{ prdId: string }> }) {
   const router = useRouter();
   const { toast } = useToast();
-  const prd = useQuery(api.prds.get, { prdId: params.prdId as Id<"prds"> });
+  const { prdId } = use(params);
+  const prd = useQuery(api.prds.get, { prdId: prdId as Id<"prds"> });
 
   const handleExportJSON = async () => {
     if (!prd) return;

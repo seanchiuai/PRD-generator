@@ -9,9 +9,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { PRDData } from "@/types";
 
 interface ExportButtonsProps {
-  prd: any;
+  prd: PRDData;
   productName: string;
   onExportJSON: () => Promise<void>;
   onExportPDF: () => Promise<void>;

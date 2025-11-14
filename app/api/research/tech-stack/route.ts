@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import OpenAI from "openai";
-
-const perplexity = new OpenAI({
-  apiKey: process.env.PERPLEXITY_API_KEY,
-  baseURL: "https://api.perplexity.ai",
-});
+import { perplexity, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
 
 interface ProductContext {
   productName: string;
