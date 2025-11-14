@@ -131,7 +131,7 @@ November 14, 2025
 ## Architecture
 
 ### State Flow
-```
+```text
 User Action
     ↓
 WorkflowContext (Client State)
@@ -149,7 +149,7 @@ Analytics Event
 3. **Sync:** Automatic bidirectional sync
 
 ### Navigation Flow
-```
+```text
 User navigates → canNavigateToStep() → enforceWorkflowOrder() → Route
 ```
 
