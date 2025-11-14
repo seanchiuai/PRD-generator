@@ -125,23 +125,25 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
 
     if (currentIndex < steps.length - 1) {
       const nextStep = steps[currentIndex + 1]
+      const newCompletedSteps = state.completedSteps.includes(state.currentStep)
+        ? state.completedSteps
+        : [...state.completedSteps, state.currentStep]
 
       setIsTransitioning(true)
 
-      // Mark current step as complete
-      await markStepComplete(state.currentStep)
-
-      // Advance to next step
+      // Update state
       setState(prev => ({
         ...prev,
         currentStep: nextStep,
+        completedSteps: newCompletedSteps,
       }))
 
+      // Single Convex update
       if (conversationId) {
         await updateProgress({
           conversationId,
           currentStep: nextStep,
-          completedSteps: [...state.completedSteps, state.currentStep],
+          completedSteps: newCompletedSteps,
           skippedSteps: state.skippedSteps,
         })
       }
@@ -150,17 +152,22 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const goToStep = (step: WorkflowStep) => {
+  const goToStep = async (step: WorkflowStep) => {
     if (canNavigateToStep(step)) {
       setState(prev => ({ ...prev, currentStep: step }))
 
       if (conversationId) {
-        updateProgress({
-          conversationId,
-          currentStep: step,
-          completedSteps: state.completedSteps,
-          skippedSteps: state.skippedSteps,
-        })
+        // Await the promise and handle errors
+        try {
+          await updateProgress({
+            conversationId,
+            currentStep: step,
+            completedSteps: state.completedSteps,
+            skippedSteps: state.skippedSteps,
+          })
+        } catch (error) {
+          console.error('Failed to update workflow progress:', error)
+        }
       }
     }
   }

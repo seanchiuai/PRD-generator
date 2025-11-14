@@ -1,22 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { auth } from "@clerk/nextjs/server";
+import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
+import { handleAPIError, handleUnauthorizedError } from "@/lib/api-error-handler";
+import { safeParseAIResponse } from "@/lib/parse-ai-json";
 import { ConvexHttpClient } from 'convex/browser'
 import { api } from '@/convex/_generated/api'
 import { getDefaultTechStack, generateMockResearchResults } from '@/lib/techStack/defaults'
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-})
+import { Id } from "@/convex/_generated/dataModel";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 export async function POST(request: NextRequest) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return handleUnauthorizedError();
+    }
+
     const { conversationId, useAI = false } = await request.json()
 
     // Fetch conversation data
     const conversation = await convex.query(api.conversations.get, {
-      conversationId,
+      conversationId: conversationId as Id<"conversations">,
     })
 
     if (!conversation) {
@@ -24,6 +29,11 @@ export async function POST(request: NextRequest) {
         { error: 'Conversation not found' },
         { status: 404 }
       )
+    }
+
+    // Verify ownership
+    if (conversation.userId !== userId) {
+      return handleUnauthorizedError();
     }
 
     const extractedContext = conversation.extractedContext
@@ -77,11 +87,7 @@ export async function POST(request: NextRequest) {
       validation,
     })
   } catch (error) {
-    console.error('Default tech stack error:', error)
-    return NextResponse.json(
-      { error: 'Failed to generate defaults', details: (error as Error).message },
-      { status: 500 }
-    )
+    return handleAPIError(error, "generate default tech stack");
   }
 }
 
@@ -121,8 +127,8 @@ Return ONLY a JSON object:
 `
 
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-5-20250929',
-    max_tokens: 1024,
+    model: AI_MODELS.CLAUDE_SONNET,
+    max_tokens: TOKEN_LIMITS.TECH_STACK,
     temperature: 0.3,
     messages: [{ role: 'user', content: prompt }],
   })
@@ -132,7 +138,15 @@ Return ONLY a JSON object:
     throw new Error('Unexpected response type from Claude')
   }
 
-  return JSON.parse(textContent.text)
+  interface TechStack {
+    frontend: string;
+    backend: string;
+    database: string;
+    auth: string;
+    hosting: string;
+  }
+
+  return safeParseAIResponse<TechStack>(textContent.text) || getDefaultTechStack(extractedContext, answers)
 }
 
 async function validateDefaultStack(_stack: any) {

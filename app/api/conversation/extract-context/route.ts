@@ -1,17 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { auth } from "@clerk/nextjs/server";
+import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
+import { handleAPIError, handleUnauthorizedError } from "@/lib/api-error-handler";
+import { safeParseAIResponse } from "@/lib/parse-ai-json";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
-
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+
+const FALLBACK_CONTEXT = {
+  productName: "New Product",
+  description: "A product to be defined",
+  targetAudience: "Target users",
+  keyFeatures: [],
+  problemStatement: "To be determined",
+  technicalPreferences: [],
+  extractedAt: Date.now(),
+};
 
 export async function POST(request: NextRequest) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return handleUnauthorizedError();
+    }
+
     const { conversationId } = await request.json();
 
     if (!conversationId) {
@@ -33,6 +47,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Verify ownership
+    if (conversation.userId !== userId) {
+      return handleUnauthorizedError();
+    }
+
     // Build message history for Claude
     const messageHistory = conversation.messages
       .map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`)
@@ -40,8 +59,8 @@ export async function POST(request: NextRequest) {
 
     // Call Claude to extract context
     const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-5-20250929",
-      max_tokens: 2048,
+      model: AI_MODELS.CLAUDE_SONNET,
+      max_tokens: TOKEN_LIMITS.CONTEXT_EXTRACTION,
       temperature: 0.3,
       messages: [
         {
@@ -62,19 +81,17 @@ export async function POST(request: NextRequest) {
 
     const extractedText = content.text;
 
-    let contextData;
-    try {
-      // Try to parse JSON from the response
-      contextData = JSON.parse(extractedText);
-    } catch {
-      // If parsing fails, try to extract JSON from code block
-      const jsonMatch = extractedText.match(/```(?:json)?\n?([\s\S]*?)\n?```/);
-      if (jsonMatch) {
-        contextData = JSON.parse(jsonMatch[1]);
-      } else {
-        throw new Error("Failed to parse Claude response as JSON");
-      }
+    // Use safe parser with fallback
+    interface ContextData {
+      productName?: string;
+      description?: string;
+      targetAudience?: string;
+      keyFeatures?: string[];
+      problemStatement?: string;
+      technicalPreferences?: string[];
     }
+
+    const contextData = safeParseAIResponse<ContextData>(extractedText) || FALLBACK_CONTEXT;
 
     // Validate extracted context
     const validatedContext = {
@@ -102,14 +119,7 @@ export async function POST(request: NextRequest) {
       context: validatedContext,
     });
   } catch (error) {
-    console.error("Context extraction error:", error);
-    return NextResponse.json(
-      {
-        error: "Failed to extract context",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 }
-    );
+    return handleAPIError(error, "extract context");
   }
 }
 
