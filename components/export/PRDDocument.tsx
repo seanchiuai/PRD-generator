@@ -5,6 +5,7 @@ import {
   View,
   StyleSheet,
 } from "@react-pdf/renderer";
+import { PRDData } from "@/types";
 
 const styles = StyleSheet.create({
   page: {
@@ -64,7 +65,7 @@ const styles = StyleSheet.create({
 });
 
 interface PRDDocumentProps {
-  prd: any;
+  prd: PRDData;
 }
 
 export function PRDDocument({ prd }: PRDDocumentProps) {
@@ -97,7 +98,7 @@ export function PRDDocument({ prd }: PRDDocumentProps) {
           <Text style={styles.text}>{prd.purposeAndGoals.vision}</Text>
 
           <Text style={styles.subsectionTitle}>Key Objectives</Text>
-          {prd.purposeAndGoals.keyObjectives.map((obj: string, i: number) => (
+          {prd.purposeAndGoals.keyObjectives.map((obj, i) => (
             <Text key={i} style={styles.bulletPoint}>
               • {obj}
             </Text>
@@ -115,27 +116,29 @@ export function PRDDocument({ prd }: PRDDocumentProps) {
           <Text style={styles.title}>Technical Stack</Text>
         </View>
 
-        {Object.entries(prd.techStack).map(([key, value]: [string, any]) => {
-          if (key === "reasoning" || key === "additionalTools") return null;
-          return (
-            <View key={key} style={styles.section}>
-              <Text style={styles.sectionTitle}>{key.charAt(0).toUpperCase() + key.slice(1)}</Text>
-              <Text style={styles.subsectionTitle}>{value.name}</Text>
-              <Text style={styles.text}>{value.purpose}</Text>
+        {Object.entries(prd.techStack)
+          .filter(([key]) => key !== "reasoning")
+          .map(([key, value]) => {
+            if (typeof value === "string") return null;
+            return (
+              <View key={key} style={styles.section}>
+                <Text style={styles.sectionTitle}>{key.charAt(0).toUpperCase() + key.slice(1)}</Text>
+                <Text style={styles.subsectionTitle}>{value.name}</Text>
+                <Text style={styles.text}>{value.purpose}</Text>
 
-              <Text style={{ ...styles.subsectionTitle, color: "#059669" }}>Pros</Text>
-              {value.pros.map((pro: string, i: number) => (
-                <Text key={i} style={styles.bulletPoint}>
-                  • {pro}
-                </Text>
-              ))}
+                <Text style={{ ...styles.subsectionTitle, color: "#059669" }}>Pros</Text>
+                {value.pros.map((pro, i) => (
+                  <Text key={i} style={styles.bulletPoint}>
+                    • {pro}
+                  </Text>
+                ))}
 
-              <Text style={{ ...styles.subsectionTitle, color: "#DC2626" }}>Cons</Text>
-              {value.cons.map((con: string, i: number) => (
-                <Text key={i} style={styles.bulletPoint}>
-                  • {con}
-                </Text>
-              ))}
+                <Text style={{ ...styles.subsectionTitle, color: "#DC2626" }}>Cons</Text>
+                {value.cons.map((con, i) => (
+                  <Text key={i} style={styles.bulletPoint}>
+                    • {con}
+                  </Text>
+                ))}
             </View>
           );
         })}
@@ -153,7 +156,7 @@ export function PRDDocument({ prd }: PRDDocumentProps) {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>MVP Features</Text>
-          {prd.features.mvpFeatures.map((feature: any, i: number) => (
+          {prd.features.mvpFeatures.map((feature, i) => (
             <View key={i} style={{ marginBottom: 15 }}>
               <Text style={styles.subsectionTitle}>
                 {i + 1}. {feature.name}
@@ -166,7 +169,7 @@ export function PRDDocument({ prd }: PRDDocumentProps) {
               <Text style={{ fontSize: 10, fontWeight: "bold", marginTop: 5 }}>
                 Acceptance Criteria:
               </Text>
-              {feature.acceptanceCriteria.map((criteria: string, j: number) => (
+              {feature.acceptanceCriteria.map((criteria, j) => (
                 <Text key={j} style={styles.bulletPoint}>
                   • {criteria}
                 </Text>
@@ -193,11 +196,11 @@ export function PRDDocument({ prd }: PRDDocumentProps) {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Data Models</Text>
-          {prd.technicalArchitecture.dataModels.map((model: any, i: number) => (
+          {prd.technicalArchitecture.dataModels.map((model, i) => (
             <View key={i} style={{ marginBottom: 10 }}>
               <Text style={styles.subsectionTitle}>{model.entityName}</Text>
               <Text style={styles.text}>{model.description}</Text>
-              {model.fields.map((field: any, j: number) => (
+              {model.fields.map((field, j) => (
                 <Text key={j} style={{ fontSize: 9, marginLeft: 10 }}>
                   - {field.name}: {field.type} {field.required ? "*" : ""}
                 </Text>
@@ -223,12 +226,12 @@ export function PRDDocument({ prd }: PRDDocumentProps) {
             Estimated Duration: {prd.timeline.estimatedDuration}
           </Text>
 
-          {prd.timeline.phases.map((phase: any, i: number) => (
+          {prd.timeline.phases.map((phase, i) => (
             <View key={i} style={{ marginTop: 10 }}>
               <Text style={styles.subsectionTitle}>
                 {phase.name} ({phase.duration})
               </Text>
-              {phase.deliverables.map((deliverable: string, j: number) => (
+              {phase.deliverables.map((deliverable, j) => (
                 <Text key={j} style={styles.bulletPoint}>
                   • {deliverable}
                 </Text>
@@ -239,7 +242,7 @@ export function PRDDocument({ prd }: PRDDocumentProps) {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Risks & Mitigation</Text>
-          {prd.risks.map((risk: any, i: number) => (
+          {prd.risks.map((risk, i) => (
             <View key={i} style={{ marginBottom: 10 }}>
               <Text style={styles.subsectionTitle}>
                 {risk.category}: {risk.description}
