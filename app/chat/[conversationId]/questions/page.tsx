@@ -10,18 +10,7 @@ import { ProgressIndicator } from "@/components/questions/ProgressIndicator";
 import { useToast } from "@/hooks/use-toast";
 import { WorkflowLayout } from "@/components/workflow/WorkflowLayout";
 import { trackQuestionsSkip } from "@/lib/analytics/questionsEvents";
-
-interface Question {
-  id: string;
-  category: string;
-  question: string;
-  placeholder?: string;
-  answer?: string;
-  required: boolean;
-  type: "text" | "textarea" | "select";
-  suggestedOptions?: string[];
-  autoCompleted?: boolean;
-}
+import { Question } from "@/types";
 
 export default function QuestionsPage() {
   const params = useParams();

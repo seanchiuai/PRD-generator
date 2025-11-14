@@ -28,8 +28,10 @@ export default function ChatPage() {
 
     const userMessages = conversation.messages.filter((m) => m.role === "user");
 
-    // Show skip button after first user message
-    return userMessages.length >= 1;
+    // Require at least one message with minimum 50 characters for meaningful context
+    const hasMinimumContent = userMessages.some((m) => m.content.trim().length >= 50);
+
+    return userMessages.length >= 1 && hasMinimumContent;
   }, [conversation?.messages]);
 
   const handleSendMessage = async (content: string) => {

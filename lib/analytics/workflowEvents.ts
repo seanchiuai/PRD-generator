@@ -39,12 +39,17 @@ export function trackWorkflowComplete(data: {
   completedSteps: string[]
 }) {
   if (typeof window !== 'undefined' && window.analytics) {
+    // Guard against division by zero
+    const skipRate = data.completedSteps.length > 0
+      ? (data.skippedSteps.length / data.completedSteps.length) * 100
+      : 0;
+
     window.analytics.track('Workflow Completed', {
       conversation_id: data.conversationId,
       total_time_seconds: data.totalTime,
       skipped_steps: data.skippedSteps,
       completed_steps: data.completedSteps,
-      skip_rate: (data.skippedSteps.length / data.completedSteps.length) * 100,
+      skip_rate: skipRate,
     })
   }
 }

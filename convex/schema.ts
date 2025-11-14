@@ -160,6 +160,24 @@ export default defineSchema({
         ),
       })
     ),
+    /**
+     * Tech Stack Selection Fields:
+     *
+     * - `selection`: Auto-selected full stack (used when user skips selection phase)
+     *   Simple flat structure with just technology names
+     *   Set by: /api/tech-stack/suggest-defaults
+     *
+     * - `selectedTechStack`: Manual selections with reasoning (used when user reviews options)
+     *   Detailed structure with selection reasoning and alternatives considered
+     *   Set by: saveSelection mutation when user picks from research results
+     *
+     * Both fields serve the same purpose but differ in:
+     * - Origin: auto vs manual
+     * - Detail level: simple vs detailed
+     * - When set: skip vs complete workflow
+     *
+     * PRD generation checks both fields (selection first, then selectedTechStack)
+     */
     selection: v.optional(
       v.object({
         frontend: v.string(),

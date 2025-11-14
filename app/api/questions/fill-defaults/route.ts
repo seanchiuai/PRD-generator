@@ -4,18 +4,9 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 import { handleAPIError, handleUnauthorizedError } from "@/lib/api-error-handler";
 import { Id } from "@/convex/_generated/dataModel";
+import { Question } from "@/types";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
-
-interface Question {
-  id: string;
-  category: string;
-  question: string;
-  type: string;
-  answer?: string;
-  suggestedOptions?: string[];
-  required: boolean;
-}
 
 interface ExtractedContext {
   productName: string;

@@ -55,6 +55,7 @@ export interface Question {
   required: boolean;
   type: QuestionType;
   suggestedOptions?: string[];
+  autoCompleted?: boolean;
 }
 
 export interface QuestionGenerationResponse {
