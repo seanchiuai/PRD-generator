@@ -8,6 +8,8 @@ interface Question {
   answer?: string;
   required: boolean;
   type: string;
+  suggestedOptions?: string[];
+  autoCompleted?: boolean;
 }
 
 interface QuestionCategoryProps {

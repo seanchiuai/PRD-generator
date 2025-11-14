@@ -29,6 +29,7 @@ export const perplexity = new OpenAI({
  * AI Model Configuration
  */
 export const AI_MODELS = {
+  CLAUDE_SONNET: "claude-sonnet-4-5-20250929",
   CLAUDE_HAIKU: "claude-haiku-4-5",
   PERPLEXITY_SONAR: "llama-3.1-sonar-large-128k-online",
 } as const;
@@ -42,4 +43,6 @@ export const TOKEN_LIMITS = {
   PRD_GENERATION: 8192,
   VALIDATION: 2048,
   RESEARCH: 4096,
+  CONTEXT_EXTRACTION: 2048,
+  TECH_STACK: 1024,
 } as const;

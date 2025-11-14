@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Check } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface QuestionCardProps {
   question: {
@@ -17,6 +18,7 @@ interface QuestionCardProps {
     required: boolean;
     type: string;
     suggestedOptions?: string[];
+    autoCompleted?: boolean;
   };
   onAnswerChange: (answer: string) => void;
 }
@@ -87,14 +89,22 @@ export function QuestionCard({ question, onAnswerChange }: QuestionCardProps) {
   // If no suggested options, render traditional input
   if (!question.suggestedOptions || question.suggestedOptions.length === 0) {
     return (
-      <div className="space-y-2">
+      <div className={cn("space-y-2 p-4 rounded-lg", question.autoCompleted && "bg-blue-50 border border-blue-200")}>
         <div className="flex items-start justify-between gap-2">
           <Label className="text-base">{question.question}</Label>
-          {question.required && (
-            <Badge variant="secondary" className="text-xs">
-              Required
-            </Badge>
-          )}
+          <div className="flex gap-2">
+            {question.autoCompleted && (
+              <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
+                <Sparkles className="w-3 h-3 mr-1" />
+                Auto-filled
+              </Badge>
+            )}
+            {question.required && (
+              <Badge variant="secondary" className="text-xs">
+                Required
+              </Badge>
+            )}
+          </div>
         </div>
 
         {question.type === "textarea" ? (
@@ -102,13 +112,14 @@ export function QuestionCard({ question, onAnswerChange }: QuestionCardProps) {
             value={question.answer || ""}
             onChange={(e) => onAnswerChange(e.target.value)}
             placeholder={question.placeholder}
-            className="min-h-[100px]"
+            className={cn("min-h-[100px]", question.autoCompleted && "border-blue-300")}
           />
         ) : (
           <Input
             value={question.answer || ""}
             onChange={(e) => onAnswerChange(e.target.value)}
             placeholder={question.placeholder}
+            className={cn(question.autoCompleted && "border-blue-300")}
           />
         )}
       </div>
@@ -117,14 +128,22 @@ export function QuestionCard({ question, onAnswerChange }: QuestionCardProps) {
 
   // Render with suggested options
   return (
-    <div className="space-y-3">
+    <div className={cn("space-y-3 p-4 rounded-lg", question.autoCompleted && "bg-blue-50 border border-blue-200")}>
       <div className="flex items-start justify-between gap-2">
         <Label className="text-base font-medium">{question.question}</Label>
-        {question.required && (
-          <Badge variant="secondary" className="text-xs">
-            Required
-          </Badge>
-        )}
+        <div className="flex gap-2">
+          {question.autoCompleted && (
+            <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
+              <Sparkles className="w-3 h-3 mr-1" />
+              Auto-filled
+            </Badge>
+          )}
+          {question.required && (
+            <Badge variant="secondary" className="text-xs">
+              Required
+            </Badge>
+          )}
+        </div>
       </div>
 
       {/* Suggested Options */}
@@ -165,7 +184,7 @@ export function QuestionCard({ question, onAnswerChange }: QuestionCardProps) {
             value={otherText}
             onChange={(e) => handleOtherChange(e.target.value)}
             placeholder={question.placeholder || "Enter your answer..."}
-            className="min-h-[100px] transition-all"
+            className={cn("min-h-[100px] transition-all", question.autoCompleted && "border-blue-300")}
           />
         )}
       </div>

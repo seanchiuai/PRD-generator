@@ -5,12 +5,13 @@ import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { Button } from "@/components/ui/button";
 import { ResearchProgress } from "@/components/research/ResearchProgress";
 import { ResearchResults } from "@/components/research/ResearchResults";
 import { LoadingSkeleton } from "@/components/research/LoadingSkeleton";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { WorkflowLayout } from "@/components/workflow/WorkflowLayout";
+import { trackTechStackSkip } from "@/lib/analytics/techStackEvents";
+import { detectProductType } from "@/lib/techStack/defaults";
 
 export default function ResearchPage() {
   const params = useParams();
@@ -22,6 +23,7 @@ export default function ResearchPage() {
   const saveResults = useMutation(api.conversations.saveResearchResults);
 
   const [isResearching, setIsResearching] = useState(false);
+  const [isSkipping, setIsSkipping] = useState(false);
   const [categoryStatuses, setCategoryStatuses] = useState<
     Record<string, "pending" | "in_progress" | "completed" | "failed">
   >({
@@ -90,6 +92,60 @@ export default function ResearchPage() {
     }
   };
 
+  const handleSkip = async () => {
+    setIsSkipping(true);
+    try {
+      // Generate and save default stack
+      const response = await fetch('/api/tech-stack/suggest-defaults', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          conversationId,
+          useAI: true, // Use Claude for smarter defaults
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to generate defaults');
+
+      const { success, techStack } = await response.json();
+
+      if (success) {
+        // Track analytics
+        const productType = detectProductType(
+          conversation?.extractedContext,
+          conversation?.clarifyingQuestions
+        );
+        trackTechStackSkip({
+          conversationId,
+          productType,
+          defaultStack: techStack,
+          useAI: true,
+        });
+
+        // Show brief preview
+        toast({
+          title: "Recommended Stack Selected",
+          description: `${techStack.frontend}, ${techStack.backend}, ${techStack.database}`,
+        });
+
+        // Add 1.5 second delay to show toast
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // Navigate directly to generate (skip selection page)
+        router.push(`/chat/${conversationId}/generate`);
+      }
+    } catch (error) {
+      console.error("Skip research failed:", error);
+      toast({
+        title: "Skip failed",
+        description: "Failed to skip. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSkipping(false);
+    }
+  };
+
   // Auto-start research if no existing results
   useEffect(() => {
     if (conversation && !hasExistingResults && !isResearching) {
@@ -102,64 +158,62 @@ export default function ResearchPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Tech Stack Research</h1>
-        <p className="text-muted-foreground mt-2">
-          AI-powered recommendations based on your product requirements
-        </p>
-      </div>
-
-      {/* Research Progress */}
-      {isResearching && (
-        <ResearchProgress
-          categories={categories.map((cat) => ({
-            name: cat.name,
-            status: categoryStatuses[cat.key],
-          }))}
-        />
-      )}
-
-      {/* Loading State */}
-      {isResearching && <LoadingSkeleton />}
-
-      {/* Research Results */}
-      {!isResearching && hasExistingResults && (
-        <div className="space-y-6">
-          {categories.map((cat) => {
-            const options = conversation.researchResults?.[cat.key];
-            if (!options || options.length === 0) return null;
-
-            return (
-              <ResearchResults
-                key={cat.key}
-                category={cat.name}
-                options={options}
-              />
-            );
-          })}
+    <WorkflowLayout
+      currentStep="research"
+      completedSteps={["discovery", "questions"]}
+      conversationId={conversationId}
+      showSkipButton={true}
+      onSkip={handleSkip}
+      skipButtonText="Use Recommended Stack"
+      skipButtonLoading={isSkipping}
+      skipConfirmMessage="We'll automatically select a tech stack optimized for your product and skip directly to PRD generation. Continue?"
+      skipConfirmTitle="Skip to PRD Generation?"
+      showFooter={true}
+      onBack={() => router.push(`/chat/${conversationId}/questions`)}
+      onNext={() => router.push(`/chat/${conversationId}/select`)}
+      nextButtonText="Continue to Selection"
+      nextButtonDisabled={isResearching || !hasExistingResults}
+    >
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold">Tech Stack Research</h1>
+          <p className="text-muted-foreground mt-2">
+            AI-powered recommendations based on your product requirements
+          </p>
         </div>
-      )}
 
-      {/* Navigation */}
-      <div className="flex justify-between pt-6 border-t">
-        <Button
-          variant="outline"
-          onClick={() => router.push(`/chat/${conversationId}/questions`)}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Questions
-        </Button>
+        {/* Research Progress */}
+        {isResearching && (
+          <ResearchProgress
+            categories={categories.map((cat) => ({
+              name: cat.name,
+              status: categoryStatuses[cat.key],
+            }))}
+          />
+        )}
 
-        <Button
-          onClick={() => router.push(`/chat/${conversationId}/select`)}
-          disabled={isResearching || !hasExistingResults}
-        >
-          Continue to Selection
-          <ArrowRight className="h-4 w-4 ml-2" />
-        </Button>
+        {/* Loading State */}
+        {isResearching && <LoadingSkeleton />}
+
+        {/* Research Results */}
+        {!isResearching && hasExistingResults && (
+          <div className="space-y-6">
+            {categories.map((cat) => {
+              const options = conversation.researchResults?.[cat.key];
+              if (!options || options.length === 0) return null;
+
+              return (
+                <ResearchResults
+                  key={cat.key}
+                  category={cat.name}
+                  options={options}
+                />
+              );
+            })}
+          </div>
+        )}
       </div>
-    </div>
+    </WorkflowLayout>
   );
 }

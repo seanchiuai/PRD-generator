@@ -7,18 +7,10 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { QuestionCategory } from "@/components/questions/QuestionCategory";
 import { ProgressIndicator } from "@/components/questions/ProgressIndicator";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-
-interface Question {
-  id: string;
-  category: string;
-  question: string;
-  placeholder?: string;
-  answer?: string;
-  required: boolean;
-  type: string;
-}
+import { WorkflowLayout } from "@/components/workflow/WorkflowLayout";
+import { trackQuestionsSkip } from "@/lib/analytics/questionsEvents";
+import { Question } from "@/types";
 
 export default function QuestionsPage() {
   const params = useParams();
@@ -33,6 +25,7 @@ export default function QuestionsPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSkipping, setIsSkipping] = useState(false);
 
   // Generate questions on mount if not already generated
   useEffect(() => {
@@ -54,7 +47,9 @@ export default function QuestionsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          conversationId,
           productContext: conversation.productContext || {},
+          extractedContext: conversation.extractedContext,
         }),
       });
 
@@ -83,7 +78,7 @@ export default function QuestionsPage() {
 
   const handleAnswerChange = async (questionId: string, answer: string) => {
     const updatedQuestions = questions.map((q) =>
-      q.id === questionId ? { ...q, answer } : q
+      q.id === questionId ? { ...q, answer, autoCompleted: false } : q
     );
     setQuestions(updatedQuestions);
 
@@ -98,28 +93,7 @@ export default function QuestionsPage() {
     }
   };
 
-  const calculateCompleteness = () => {
-    const requiredQuestions = questions.filter((q) => q.required);
-    if (requiredQuestions.length === 0) return 0;
-
-    const answeredRequired = requiredQuestions.filter(
-      (q) => q.answer && q.answer.trim().length > 0
-    );
-    return (answeredRequired.length / requiredQuestions.length) * 100;
-  };
-
   const handleContinue = async () => {
-    const completeness = calculateCompleteness();
-
-    if (completeness < 70) {
-      toast({
-        title: "More answers needed",
-        description: "Please answer at least 70% of required questions",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsSaving(true);
     try {
       await updateStage({
@@ -136,6 +110,69 @@ export default function QuestionsPage() {
       });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleSkip = async () => {
+    setIsSkipping(true);
+    try {
+      const answeredCount = questions.filter((q) => q.answer?.trim()).length;
+      const totalCount = questions.length;
+
+      // Call API to fill defaults
+      const response = await fetch("/api/questions/fill-defaults", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conversationId,
+          extractedContext: conversation?.extractedContext,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fill defaults");
+      }
+
+      const { questions: filledQuestions } = await response.json();
+
+      const autoFilledCount = filledQuestions.filter((q: Question) => q.autoCompleted).length;
+
+      // Track skip event
+      trackQuestionsSkip({
+        conversationId,
+        answeredCount,
+        totalCount,
+        autoFilledCount,
+        hasExtractedContext: !!conversation?.extractedContext,
+      });
+
+      // Save filled questions to Convex
+      await saveQuestions({
+        conversationId,
+        questions: filledQuestions,
+      });
+
+      // Update stage and navigate to research
+      await updateStage({
+        conversationId,
+        stage: "researching",
+      });
+
+      toast({
+        title: "Questions auto-completed",
+        description: "Unanswered questions have been filled with recommended defaults.",
+      });
+
+      router.push(`/chat/${conversationId}/research`);
+    } catch (error) {
+      console.error("Error skipping:", error);
+      toast({
+        title: "Skip failed",
+        description: "Failed to skip to research. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSkipping(false);
     }
   };
 
@@ -162,55 +199,63 @@ export default function QuestionsPage() {
 
   // Group questions by category
   const categories = questions.reduce((acc, q) => {
-    if (!acc[q.category]) acc[q.category] = [];
-    acc[q.category].push(q);
+    if (!acc[q.category]) {
+      acc[q.category] = [];
+    }
+    acc[q.category]!.push(q);
     return acc;
   }, {} as Record<string, Question[]>);
 
-  const completeness = calculateCompleteness();
   const requiredQuestions = questions.filter((q) => q.required);
   const answeredRequired = requiredQuestions.filter(
     (q) => q.answer?.trim()
   ).length;
 
+  const unansweredCount = requiredQuestions.length - answeredRequired;
+
   return (
-    <div className="container mx-auto py-8 max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Clarifying Questions</h1>
-        <p className="text-muted-foreground">
-          Help us understand your product better by answering these questions.
-          Your answers will help us recommend the best tech stack for your needs.
-        </p>
-      </div>
+    <WorkflowLayout
+      currentStep="questions"
+      completedSteps={["discovery"]}
+      conversationId={conversationId}
+      showSkipButton={true}
+      onSkip={handleSkip}
+      skipButtonText={`Skip (${answeredRequired}/${requiredQuestions.length} answered)`}
+      skipButtonLoading={isSkipping}
+      skipConfirmMessage={`You've answered ${answeredRequired} out of ${requiredQuestions.length} questions. We'll automatically fill the remaining ${unansweredCount} questions with recommended or default answers. You can always come back to review and edit these answers.`}
+      skipConfirmTitle="Skip Questions?"
+      showFooter={true}
+      onBack={() => router.back()}
+      onNext={handleContinue}
+      nextButtonText={isSaving ? "Saving..." : "Continue to Research"}
+      nextButtonDisabled={isSaving}
+    >
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Clarifying Questions</h1>
+          <p className="text-muted-foreground">
+            Help us understand your product better by answering these questions.
+            Your answers will help us recommend the best tech stack for your needs.
+          </p>
+        </div>
 
-      <ProgressIndicator
-        total={requiredQuestions.length}
-        completed={answeredRequired}
-        className="mb-8"
-      />
+        <ProgressIndicator
+          total={requiredQuestions.length}
+          completed={answeredRequired}
+          className="mb-8"
+        />
 
-      <div className="space-y-8 mb-8">
-        {Object.entries(categories).map(([category, categoryQuestions]) => (
-          <QuestionCategory
-            key={category}
-            category={category}
-            questions={categoryQuestions}
-            onAnswerChange={handleAnswerChange}
-          />
-        ))}
+        <div className="space-y-8 mb-8">
+          {Object.entries(categories).map(([category, categoryQuestions]) => (
+            <QuestionCategory
+              key={category}
+              category={category}
+              questions={categoryQuestions}
+              onAnswerChange={handleAnswerChange}
+            />
+          ))}
+        </div>
       </div>
-
-      <div className="flex justify-between sticky bottom-0 bg-background py-4 border-t">
-        <Button variant="outline" onClick={() => router.back()}>
-          Back
-        </Button>
-        <Button
-          onClick={handleContinue}
-          disabled={isSaving || completeness < 70}
-        >
-          {isSaving ? "Saving..." : "Continue to Research"}
-        </Button>
-      </div>
-    </div>
+    </WorkflowLayout>
   );
 }
