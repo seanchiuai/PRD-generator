@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { perplexity, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
+import { perplexity } from "@/lib/ai-clients";
 
 interface ProductContext {
   productName: string;
@@ -30,7 +30,7 @@ function buildCategoryQuery(category: string, context: ProductContext): string {
 }
 
 // Parse Perplexity response into structured format
-function parseResponse(content: string, category: string): any[] {
+function parseResponse(content: string, _category: string): any[] {
   try {
     // Try to extract JSON if present
     const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/) || content.match(/\{[\s\S]*\}/);
@@ -44,12 +44,12 @@ function parseResponse(content: string, category: string): any[] {
 
     sections.forEach((section) => {
       const nameMatch = section.match(/^([^*]+)\*\*/);
-      const descMatch = section.match(/\*\*\s*[-:]?\s*(.+?)(?=\n\n|Pros:|$)/s);
+      const descMatch = section.match(/\*\*\s*[-:]?\s*([\s\S]+?)(?=\n\n|Pros:|$)/);
       const prosMatch = section.match(/Pros:?\s*\n([\s\S]*?)(?=Cons:|$)/);
       const consMatch = section.match(/Cons:?\s*\n([\s\S]*?)(?=Popularity:|$|Learn More:|###)/);
       const popularityMatch = section.match(/Popularity:?\s*(.+?)(?=\n|$)/);
 
-      if (nameMatch) {
+      if (nameMatch && nameMatch[1]) {
         options.push({
           name: nameMatch[1].trim(),
           description: descMatch?.[1]?.trim() || "",
@@ -92,7 +92,8 @@ async function researchCategory(
       temperature: 0.2,
     });
 
-    const content = response.choices[0].message.content || "";
+    const choice = response.choices[0];
+    const content = choice?.message?.content || "";
     return parseResponse(content, category);
   } catch (error) {
     console.error(`Research error for ${category}:`, error);
@@ -129,7 +130,7 @@ export async function POST(request: NextRequest) {
 
     categories.forEach((category, index) => {
       const result = results[index];
-      if (result.status === "fulfilled" && result.value.length > 0) {
+      if (result && result.status === "fulfilled" && result.value.length > 0) {
         researchResults[category] = result.value;
       }
     });

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
 import { handleAPIError, handleUnauthorizedError } from "@/lib/api-error-handler";
-import { parseAIResponse, safeParseAIResponse } from "@/lib/parse-ai-json";
+import { safeParseAIResponse } from "@/lib/parse-ai-json";
 import { ValidationWarning } from "@/types";
 
 const VALIDATION_PROMPT = `You are a tech stack architecture expert. Analyze the following technology selections for compatibility issues.
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
     });
 
     const content = response.content[0];
-    if (content.type !== "text") {
+    if (!content || content.type !== "text") {
       throw new Error("Unexpected response type");
     }
 

@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     });
 
     const assistantMessage = response.content[0];
-    if (assistantMessage.type !== "text") {
+    if (!assistantMessage || assistantMessage.type !== "text") {
       throw new Error("Unexpected response type");
     }
 

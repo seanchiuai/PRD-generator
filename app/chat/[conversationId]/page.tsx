@@ -93,7 +93,9 @@ export default function ChatPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to extract context");
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        console.error("Context extraction failed:", errorData);
+        throw new Error(errorData.error || "Failed to extract context");
       }
 
       const { success } = await response.json();
@@ -108,7 +110,7 @@ export default function ChatPage() {
       console.error("Skip failed:", error);
       toast({
         title: "Skip failed",
-        description: "Failed to skip. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to skip. Please try again.",
         variant: "destructive",
       });
     } finally {

@@ -8,14 +8,22 @@ import { api } from '@/convex/_generated/api'
 import { getDefaultTechStack, generateMockResearchResults } from '@/lib/techStack/defaults'
 import { Id } from "@/convex/_generated/dataModel";
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
-
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth();
+    const { userId, getToken } = await auth();
     if (!userId) {
       return handleUnauthorizedError();
     }
+
+    // Get Clerk token for Convex authentication
+    const token = await getToken({ template: "convex" });
+    if (!token) {
+      return handleUnauthorizedError();
+    }
+
+    // Create authenticated Convex client
+    const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+    convex.setAuth(token);
 
     const { conversationId, useAI = false } = await request.json()
 

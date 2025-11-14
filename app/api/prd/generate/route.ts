@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
+import { anthropic } from "@/lib/ai-clients";
 
 const PRD_SYSTEM_PROMPT = `You are a senior product manager and technical architect creating a comprehensive Product Requirements Document.
 
@@ -196,7 +196,7 @@ Generate a complete PRD for this product.
     });
 
     const content = response.content[0];
-    if (content.type !== "text") {
+    if (!content || content.type !== "text") {
       throw new Error("Unexpected response type");
     }
 
@@ -205,7 +205,7 @@ Generate a complete PRD for this product.
     try {
       // Try to extract JSON from code blocks first
       const jsonMatch = content.text.match(/```json\n([\s\S]*?)\n```/);
-      if (jsonMatch) {
+      if (jsonMatch && jsonMatch[1]) {
         prdData = JSON.parse(jsonMatch[1]);
       } else {
         // Try parsing the entire response

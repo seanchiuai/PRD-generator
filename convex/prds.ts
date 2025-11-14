@@ -95,7 +95,7 @@ export const getByConversation = query({
     if (prds.length === 0) return null;
 
     const prd = prds[0];
-    if (prd.userId !== identity.subject) return null;
+    if (!prd || prd.userId !== identity.subject) return null;
 
     return prd;
   },

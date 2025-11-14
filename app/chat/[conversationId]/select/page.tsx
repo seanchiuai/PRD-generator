@@ -84,6 +84,7 @@ export default function SelectionPage() {
     } else if (showCountdown && countdown === 0) {
       router.push(`/chat/${conversationId}/generate`);
     }
+    return undefined;
   }, [showCountdown, countdown, conversationId, router]);
 
   const validateSelections = useCallback(async (currentSelections: Record<string, string>) => {

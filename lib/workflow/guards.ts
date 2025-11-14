@@ -56,7 +56,7 @@ export function getNextStepRoute(currentStep: WorkflowStep, conversationId: stri
 
   if (currentIndex < steps.length - 1) {
     const nextStep = steps[currentIndex + 1]
-    return getStepRoute(nextStep, conversationId)
+    return getStepRoute(nextStep as WorkflowStep, conversationId)
   }
 
   return null

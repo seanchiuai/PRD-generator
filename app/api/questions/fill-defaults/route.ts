@@ -6,8 +6,6 @@ import { handleAPIError, handleUnauthorizedError } from "@/lib/api-error-handler
 import { Id } from "@/convex/_generated/dataModel";
 import { Question } from "@/types";
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
-
 interface ExtractedContext {
   productName: string;
   description: string;
@@ -19,10 +17,20 @@ interface ExtractedContext {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth();
+    const { userId, getToken } = await auth();
     if (!userId) {
       return handleUnauthorizedError();
     }
+
+    // Get Clerk token for Convex authentication
+    const token = await getToken({ template: "convex" });
+    if (!token) {
+      return handleUnauthorizedError();
+    }
+
+    // Create authenticated Convex client
+    const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+    convex.setAuth(token);
 
     const { conversationId, extractedContext } = await request.json();
 

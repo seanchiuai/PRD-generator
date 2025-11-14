@@ -7,8 +7,6 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
-
 const FALLBACK_CONTEXT = {
   productName: "New Product",
   description: "A product to be defined",
@@ -21,10 +19,20 @@ const FALLBACK_CONTEXT = {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth();
+    const { userId, getToken } = await auth();
     if (!userId) {
       return handleUnauthorizedError();
     }
+
+    // Get Clerk token for Convex authentication
+    const token = await getToken({ template: "convex" });
+    if (!token) {
+      return handleUnauthorizedError();
+    }
+
+    // Create authenticated Convex client
+    const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+    convex.setAuth(token);
 
     const { conversationId } = await request.json();
 

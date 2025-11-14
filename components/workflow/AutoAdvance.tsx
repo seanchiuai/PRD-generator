@@ -25,7 +25,7 @@ export function AutoAdvance({
   const [isPaused, setIsPaused] = useState(false)
 
   useEffect(() => {
-    if (!enabled || isPaused) return
+    if (!enabled || isPaused) return undefined
 
     if (countdown > 0) {
       const timer = setTimeout(() => {
@@ -37,6 +37,7 @@ export function AutoAdvance({
       // Countdown finished, advance
       onAdvance()
     }
+    return undefined
   }, [enabled, countdown, isPaused, onAdvance])
 
   const handlePause = () => {
