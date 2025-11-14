@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { perplexity } from "@/lib/ai-clients";
+import { perplexity, AI_MODELS } from "@/lib/ai-clients";
 import { handleAPIError, handleValidationError } from "@/lib/api-error-handler";
 import { logger } from "@/lib/logger";
 import { withAuth } from "@/lib/middleware/withAuth";
@@ -83,7 +83,7 @@ async function researchCategory(
     const query = buildCategoryQuery(category, context);
 
     const response = await perplexity.chat.completions.create({
-      model: "sonar",
+      model: AI_MODELS.PERPLEXITY_SONAR,
       messages: [
         {
           role: "user",

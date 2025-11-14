@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ConvexHttpClient } from "convex/browser";
+import { convexClient } from "@/lib/convex-client";
 import { api } from "@/convex/_generated/api";
 import { handleAPIError } from "@/lib/api-error-handler";
 import { Id } from "@/convex/_generated/dataModel";
 import { Question } from "@/types";
 import { withAuth } from "@/lib/middleware/withAuth";
-
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 interface ExtractedContext {
   productName: string;
@@ -22,7 +20,7 @@ export const POST = withAuth(async (request) => {
     const { conversationId, extractedContext } = await request.json();
 
     // Fetch conversation with questions
-    const conversation = await convex.query(api.conversations.get, {
+    const conversation = await convexClient.query(api.conversations.get, {
       conversationId: conversationId as Id<"conversations">,
     });
 

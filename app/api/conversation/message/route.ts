@@ -4,21 +4,7 @@ import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
 import { handleAPIError, handleValidationError } from "@/lib/api-error-handler";
 import { logger } from "@/lib/logger";
 import { withAuth } from "@/lib/middleware/withAuth";
-
-const SYSTEM_PROMPT = `You are a helpful AI assistant helping users create a Product Requirements Document (PRD).
-
-Your goal in this discovery phase is to:
-1. Understand the user's product idea
-2. Ask clarifying questions about vague or incomplete aspects
-3. Be conversational and encouraging
-4. Keep responses concise (2-3 sentences max)
-5. Gradually gather information about:
-   - What the product does
-   - Who will use it
-   - Core features needed
-   - Any specific requirements
-
-When you have enough basic information, confirm understanding and let the user know you'll move to detailed questions next.`;
+import { CONVERSATION_SYSTEM_PROMPT } from "@/lib/prompts/conversation";
 
 /**
  * Handle POST requests by sending the provided conversation messages to Anthropic Claude and returning the assistant's reply.
@@ -39,7 +25,7 @@ export const POST = withAuth(async (request, { userId }) => {
     const response = await anthropic.messages.create({
       model: AI_MODELS.CLAUDE_HAIKU,
       max_tokens: TOKEN_LIMITS.CONVERSATION,
-      system: SYSTEM_PROMPT,
+      system: CONVERSATION_SYSTEM_PROMPT,
       messages: messages.map((msg: Message) => ({
         role: msg.role,
         content: msg.content,
