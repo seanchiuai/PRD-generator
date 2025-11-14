@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
-import {
-  handleAPIError,
-  handleUnauthorizedError,
-  handleValidationError,
-} from "@/lib/api-error-handler";
+import { handleAPIError, handleValidationError } from "@/lib/api-error-handler";
 import { safeParseAIResponse } from "@/lib/parse-ai-json";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { withAuth } from "@/lib/middleware/withAuth";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
@@ -23,13 +19,8 @@ const FALLBACK_CONTEXT = {
   extractedAt: Date.now(),
 };
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request, { userId }) => {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return handleUnauthorizedError();
-    }
-
     const { conversationId } = await request.json();
 
     if (!conversationId) {
@@ -123,7 +114,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return handleAPIError(error, "extract context");
   }
-}
+});
 
 const CONTEXT_EXTRACTION_PROMPT = `
 Analyze the following product discovery conversation and extract key information about the product being discussed.

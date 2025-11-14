@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { Message, MessageAPIResponse } from "@/types";
 import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
-import {
-  handleAPIError,
-  handleUnauthorizedError,
-  handleValidationError,
-} from "@/lib/api-error-handler";
+import { handleAPIError, handleValidationError } from "@/lib/api-error-handler";
 import { logger } from "@/lib/logger";
+import { withAuth } from "@/lib/middleware/withAuth";
 
 const SYSTEM_PROMPT = `You are a helpful AI assistant helping users create a Product Requirements Document (PRD).
 
@@ -30,13 +26,8 @@ When you have enough basic information, confirm understanding and let the user k
  * @param request - A NextRequest whose JSON body must include a `messages` array of objects with `role` and `content` fields.
  * @returns A JSON NextResponse containing `{ message: string, usage: any }` with the assistant's reply text and usage data. On error, returns a JSON error response with status `401` (unauthorized), `400` (bad request), or `500` (internal server error).
  */
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request, { userId }) => {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return handleUnauthorizedError();
-    }
-
     const body = await request.json();
     const { messages } = body;
 
@@ -77,4 +68,4 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return handleAPIError(error, "process conversation message");
   }
-}
+});

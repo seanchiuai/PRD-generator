@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { perplexity, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
-import {
-  handleAPIError,
-  handleUnauthorizedError,
-  handleValidationError,
-} from "@/lib/api-error-handler";
+import { perplexity } from "@/lib/ai-clients";
+import { handleAPIError, handleValidationError } from "@/lib/api-error-handler";
 import { logger } from "@/lib/logger";
+import { withAuth } from "@/lib/middleware/withAuth";
 
 interface ProductContext {
   productName: string;
@@ -106,13 +102,8 @@ async function researchCategory(
   }
 }
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request) => {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return handleUnauthorizedError();
-    }
-
     const body = await request.json();
     const { productContext } = body as { productContext: ProductContext };
 
@@ -141,4 +132,4 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return handleAPIError(error, "complete research");
   }
-}
+});

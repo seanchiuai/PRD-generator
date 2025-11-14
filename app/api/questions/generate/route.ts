@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
-import { handleAPIError, handleUnauthorizedError } from "@/lib/api-error-handler";
+import { handleAPIError } from "@/lib/api-error-handler";
 import { parseAIResponse } from "@/lib/parse-ai-json";
 import { QuestionGenerationResponse } from "@/types";
+import { withAuth } from "@/lib/middleware/withAuth";
 
 const QUESTION_GENERATION_PROMPT = `Generate 12-15 clarifying questions for creating a Product Requirements Document.
 
@@ -53,13 +53,8 @@ Output format (JSON only, no markdown):
  * @param request - The incoming NextRequest whose JSON body must include a `productContext` object.
  * @returns A NextResponse containing the parsed questions JSON on success; responds with `{ error: "Unauthorized" }` and status 401 when the user is not authenticated, or with `{ error: "Failed to generate questions" }` and status 500 on failure.
  */
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request) => {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return handleUnauthorizedError();
-    }
-
     const { productContext, extractedContext } = await request.json();
 
     // Build context-aware prompt
@@ -106,4 +101,4 @@ Use this context to generate highly relevant questions.
   } catch (error) {
     return handleAPIError(error, "generate questions");
   }
-}
+});

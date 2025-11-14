@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
-import { handleAPIError, handleUnauthorizedError } from "@/lib/api-error-handler";
-import { parseAIResponse, safeParseAIResponse } from "@/lib/parse-ai-json";
+import { handleAPIError } from "@/lib/api-error-handler";
+import { safeParseAIResponse } from "@/lib/parse-ai-json";
 import { ValidationWarning } from "@/types";
+import { withAuth } from "@/lib/middleware/withAuth";
 
 const VALIDATION_PROMPT = `You are a tech stack architecture expert. Analyze the following technology selections for compatibility issues.
 
@@ -56,13 +56,8 @@ interface ValidationResponse {
  *  - `warnings`: an array of entries `{ level: "error" | "warning", message, affectedTechnologies, suggestion }` when validation completes, or
  *  - `error`: an error message when the request is unauthorized (401) or an internal validation failure occurs (500).
  */
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request) => {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return handleUnauthorizedError();
-    }
-
     const body = await request.json();
     const { selections } = body as { selections: Record<string, string> };
 
@@ -120,4 +115,4 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return handleAPIError(error, "validate tech stack");
   }
-}
+});

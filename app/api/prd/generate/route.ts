@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
-import {
-  handleAPIError,
-  handleUnauthorizedError,
-  handleValidationError,
-} from "@/lib/api-error-handler";
+import { handleAPIError, handleValidationError } from "@/lib/api-error-handler";
 import { parseAIResponse } from "@/lib/parse-ai-json";
+import { withAuth } from "@/lib/middleware/withAuth";
 
 const PRD_SYSTEM_PROMPT = `You are a senior product manager and technical architect creating a comprehensive Product Requirements Document.
 
@@ -147,13 +143,8 @@ Output ONLY valid JSON matching this exact structure:
  * @param request - NextRequest whose JSON body must include `conversationData` with `messages` and optional `clarifyingQuestions` and `selectedTechStack`.
  * @returns A JSON object containing `prdData` (the parsed PRD structure) and `usage` (Anthropic response usage). On error returns a JSON error with an appropriate HTTP status: 400 if conversation data is missing, 401 if the user is unauthorized, or 500 for other failures (including parse or validation errors).
  */
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request) => {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return handleUnauthorizedError();
-    }
-
     const body = await request.json();
     const { conversationData } = body;
 
@@ -218,4 +209,4 @@ Generate a complete PRD for this product.
   } catch (error) {
     return handleAPIError(error, "generate PRD");
   }
-}
+});

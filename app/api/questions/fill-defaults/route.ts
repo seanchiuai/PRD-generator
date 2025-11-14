@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
-import { handleAPIError, handleUnauthorizedError } from "@/lib/api-error-handler";
+import { handleAPIError } from "@/lib/api-error-handler";
 import { Id } from "@/convex/_generated/dataModel";
 import { Question } from "@/types";
+import { withAuth } from "@/lib/middleware/withAuth";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
@@ -17,13 +17,8 @@ interface ExtractedContext {
   technicalPreferences: string[];
 }
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request) => {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return handleUnauthorizedError();
-    }
-
     const { conversationId, extractedContext } = await request.json();
 
     // Fetch conversation with questions
@@ -65,7 +60,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return handleAPIError(error, "fill default answers");
   }
-}
+});
 
 function getDefaultAnswer(
   question: Question,
