@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
-import { handleAPIError } from "@/lib/api-error-handler";
+import {
+  handleAPIError,
+  handleValidationError,
+  handleUnauthorizedError,
+} from "@/lib/api-error-handler";
 import { safeParseAIResponse } from "@/lib/parse-ai-json";
 import { convexClient } from "@/lib/convex-client";
 import { api } from '@/convex/_generated/api'
@@ -12,16 +16,21 @@ export const POST = withAuth(async (request, { userId }) => {
   try {
     const { conversationId, useAI = false } = await request.json()
 
+    if (!conversationId) {
+      return handleValidationError("Conversation ID required");
+    }
+
     // Fetch conversation data
     const conversation = await convexClient.query(api.conversations.get, {
       conversationId: conversationId as Id<"conversations">,
     })
 
     if (!conversation) {
-      return NextResponse.json(
-        { error: 'Conversation not found' },
-        { status: 404 }
-      )
+      return handleAPIError(
+        new Error("Conversation not found"),
+        "find conversation",
+        404
+      );
     }
 
     // Verify ownership

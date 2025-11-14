@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { convexClient } from "@/lib/convex-client";
 import { api } from "@/convex/_generated/api";
-import { handleAPIError } from "@/lib/api-error-handler";
+import {
+  handleAPIError,
+  handleValidationError,
+  handleUnauthorizedError,
+} from "@/lib/api-error-handler";
 import { Id } from "@/convex/_generated/dataModel";
 import { Question } from "@/types";
 import { withAuth } from "@/lib/middleware/withAuth";
@@ -15,16 +19,33 @@ interface ExtractedContext {
   technicalPreferences: string[];
 }
 
-export const POST = withAuth(async (request) => {
+export const POST = withAuth(async (request, { userId }) => {
   try {
     const { conversationId, extractedContext } = await request.json();
+
+    if (!conversationId) {
+      return handleValidationError("Conversation ID required");
+    }
 
     // Fetch conversation with questions
     const conversation = await convexClient.query(api.conversations.get, {
       conversationId: conversationId as Id<"conversations">,
     });
 
-    if (!conversation || !conversation.clarifyingQuestions) {
+    if (!conversation) {
+      return handleAPIError(
+        new Error("Conversation not found"),
+        "find conversation",
+        404
+      );
+    }
+
+    // Verify ownership
+    if (conversation.userId !== userId) {
+      return handleUnauthorizedError();
+    }
+
+    if (!conversation.clarifyingQuestions) {
       return handleAPIError(
         new Error("Questions not found"),
         "find questions",

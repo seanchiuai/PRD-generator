@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
-import { handleAPIError, handleValidationError } from "@/lib/api-error-handler";
+import {
+  handleAPIError,
+  handleValidationError,
+  handleUnauthorizedError,
+} from "@/lib/api-error-handler";
 import { safeParseAIResponse } from "@/lib/parse-ai-json";
 import { convexClient } from "@/lib/convex-client";
 import { api } from "@/convex/_generated/api";
