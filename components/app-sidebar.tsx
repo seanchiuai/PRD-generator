@@ -2,11 +2,11 @@
 
 import * as React from "react"
 import {
-  IconHelp,
-  IconInnerShadowTop,
-  IconListDetails,
-  IconSettings,
-} from "@tabler/icons-react"
+  HelpCircle,
+  Component,
+  ListChecks,
+  Settings,
+} from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
@@ -26,19 +26,19 @@ const data = {
     {
       title: "Tasks",
       url: "/tasks",
-      icon: IconListDetails,
+      icon: ListChecks,
     },
   ],
   navSecondary: [
     {
       title: "Settings",
       url: "#",
-      icon: IconSettings,
+      icon: Settings,
     },
     {
       title: "Help",
       url: "#",
-      icon: IconHelp,
+      icon: HelpCircle,
     },
   ],
 }
@@ -54,7 +54,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <a href="/tasks">
-                <IconInnerShadowTop className="!size-5" />
+                <Component className="!size-5" />
                 <span className="text-base font-semibold">VIBED</span>
               </a>
             </SidebarMenuButton>
