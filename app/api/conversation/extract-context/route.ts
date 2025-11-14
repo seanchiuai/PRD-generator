@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
-import { handleAPIError, handleUnauthorizedError } from "@/lib/api-error-handler";
+import {
+  handleAPIError,
+  handleUnauthorizedError,
+  handleValidationError,
+} from "@/lib/api-error-handler";
 import { safeParseAIResponse } from "@/lib/parse-ai-json";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
@@ -29,10 +33,7 @@ export async function POST(request: NextRequest) {
     const { conversationId } = await request.json();
 
     if (!conversationId) {
-      return NextResponse.json(
-        { error: "Conversation ID required" },
-        { status: 400 }
-      );
+      return handleValidationError("Conversation ID required");
     }
 
     // Fetch conversation messages
@@ -41,9 +42,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (!conversation) {
-      return NextResponse.json(
-        { error: "Conversation not found" },
-        { status: 404 }
+      return handleAPIError(
+        new Error("Conversation not found"),
+        "find conversation",
+        404
       );
     }
 

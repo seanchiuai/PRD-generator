@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
+import {
+  handleAPIError,
+  handleUnauthorizedError,
+  handleValidationError,
+} from "@/lib/api-error-handler";
+import { parseAIResponse } from "@/lib/parse-ai-json";
 
 const PRD_SYSTEM_PROMPT = `You are a senior product manager and technical architect creating a comprehensive Product Requirements Document.
 
@@ -145,17 +151,14 @@ export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return handleUnauthorizedError();
     }
 
     const body = await request.json();
     const { conversationData } = body;
 
     if (!conversationData) {
-      return NextResponse.json(
-        { error: "Conversation data required" },
-        { status: 400 }
-      );
+      return handleValidationError("Conversation data required");
     }
 
     // Build comprehensive prompt
@@ -184,8 +187,8 @@ Generate a complete PRD for this product.
 
     // Call Claude API
     const response = await anthropic.messages.create({
-      model: "claude-haiku-4-5",
-      max_tokens: 8192,
+      model: AI_MODELS.CLAUDE_HAIKU,
+      max_tokens: TOKEN_LIMITS.PRD_GENERATION,
       system: PRD_SYSTEM_PROMPT,
       messages: [
         {
@@ -200,22 +203,8 @@ Generate a complete PRD for this product.
       throw new Error("Unexpected response type");
     }
 
-    // Parse JSON response
-    let prdData;
-    try {
-      // Try to extract JSON from code blocks first
-      const jsonMatch = content.text.match(/```json\n([\s\S]*?)\n```/);
-      if (jsonMatch) {
-        prdData = JSON.parse(jsonMatch[1]);
-      } else {
-        // Try parsing the entire response
-        prdData = JSON.parse(content.text);
-      }
-    } catch (parseError) {
-      console.error("JSON parse error:", parseError);
-      console.error("Raw response:", content.text);
-      throw new Error("Failed to parse PRD JSON");
-    }
+    // Parse JSON response using centralized utility
+    const prdData = parseAIResponse(content.text);
 
     // Validate required fields
     if (!prdData.projectOverview?.productName) {
@@ -227,13 +216,6 @@ Generate a complete PRD for this product.
       usage: response.usage,
     });
   } catch (error) {
-    console.error("PRD Generation API Error:", error);
-    return NextResponse.json(
-      {
-        error: "Failed to generate PRD",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 }
-    );
+    return handleAPIError(error, "generate PRD");
   }
 }

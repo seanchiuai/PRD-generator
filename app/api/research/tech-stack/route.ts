@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { perplexity, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
+import {
+  handleAPIError,
+  handleUnauthorizedError,
+  handleValidationError,
+} from "@/lib/api-error-handler";
+import { logger } from "@/lib/logger";
 
 interface ProductContext {
   productName: string;
@@ -68,7 +74,7 @@ function parseResponse(content: string, category: string): any[] {
 
     return options.length > 0 ? options : [];
   } catch (error) {
-    console.error("Parse error:", error);
+    logger.error("Research Parse Error", "Failed to parse research response", { error });
     return [];
   }
 }
@@ -95,7 +101,7 @@ async function researchCategory(
     const content = response.choices[0].message.content || "";
     return parseResponse(content, category);
   } catch (error) {
-    console.error(`Research error for ${category}:`, error);
+    logger.error("Research Category Error", `Failed to research ${category}`, { category, error });
     return [];
   }
 }
@@ -104,17 +110,14 @@ export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return handleUnauthorizedError();
     }
 
     const body = await request.json();
     const { productContext } = body as { productContext: ProductContext };
 
     if (!productContext) {
-      return NextResponse.json(
-        { error: "Product context required" },
-        { status: 400 }
-      );
+      return handleValidationError("Product context required");
     }
 
     // Research all categories in parallel
@@ -136,10 +139,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ researchResults });
   } catch (error) {
-    console.error("Research API Error:", error);
-    return NextResponse.json(
-      { error: "Failed to complete research" },
-      { status: 500 }
-    );
+    return handleAPIError(error, "complete research");
   }
 }

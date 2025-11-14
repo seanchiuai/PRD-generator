@@ -32,9 +32,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (!conversation || !conversation.clarifyingQuestions) {
-      return NextResponse.json(
-        { error: "Questions not found" },
-        { status: 404 }
+      return handleAPIError(
+        new Error("Questions not found"),
+        "find questions",
+        404
       );
     }
 
