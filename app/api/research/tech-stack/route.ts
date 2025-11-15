@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { perplexity } from "@/lib/ai-clients";
+import { perplexity, AI_MODELS } from "@/lib/ai-clients";
+import { handleAPIError, handleValidationError } from "@/lib/api-error-handler";
+import { logger } from "@/lib/logger";
+import { withAuth } from "@/lib/middleware/withAuth";
 
 interface ProductContext {
   productName: string;
@@ -68,7 +70,7 @@ function parseResponse(content: string, _category: string): any[] {
 
     return options.length > 0 ? options : [];
   } catch (error) {
-    console.error("Parse error:", error);
+    logger.error("Research Parse Error", error);
     return [];
   }
 }
@@ -81,7 +83,7 @@ async function researchCategory(
     const query = buildCategoryQuery(category, context);
 
     const response = await perplexity.chat.completions.create({
-      model: "sonar",
+      model: AI_MODELS.PERPLEXITY_SONAR,
       messages: [
         {
           role: "user",
@@ -92,30 +94,21 @@ async function researchCategory(
       temperature: 0.2,
     });
 
-    const choice = response.choices[0];
-    const content = choice?.message?.content || "";
+    const content = response.choices[0]?.message?.content || "";
     return parseResponse(content, category);
   } catch (error) {
-    console.error(`Research error for ${category}:`, error);
+    logger.error(`Failed to research ${category}`, error, { category });
     return [];
   }
 }
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request) => {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const body = await request.json();
     const { productContext } = body as { productContext: ProductContext };
 
     if (!productContext) {
-      return NextResponse.json(
-        { error: "Product context required" },
-        { status: 400 }
-      );
+      return handleValidationError("Product context required");
     }
 
     // Research all categories in parallel
@@ -137,10 +130,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ researchResults });
   } catch (error) {
-    console.error("Research API Error:", error);
-    return NextResponse.json(
-      { error: "Failed to complete research" },
-      { status: 500 }
-    );
+    return handleAPIError(error, "complete research");
   }
-}
+});

@@ -1,39 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
-import { handleAPIError, handleUnauthorizedError } from "@/lib/api-error-handler";
+import { handleAPIError } from "@/lib/api-error-handler";
 import { safeParseAIResponse } from "@/lib/parse-ai-json";
 import { ValidationWarning } from "@/types";
-
-const VALIDATION_PROMPT = `You are a tech stack architecture expert. Analyze the following technology selections for compatibility issues.
-
-Selected Technologies:
-{selections}
-
-Provide:
-1. Any INCOMPATIBLE combinations (these prevent the stack from working)
-2. Any WARNINGS about suboptimal combinations (these work but have issues)
-3. SUGGESTIONS for better alternatives if issues exist
-
-Format your response as JSON:
-{
-  "errors": [
-    {
-      "message": "Brief explanation",
-      "affectedTechnologies": ["Tech A", "Tech B"],
-      "suggestion": "Try using X instead of Y"
-    }
-  ],
-  "warnings": [
-    {
-      "message": "Brief explanation",
-      "affectedTechnologies": ["Tech C"],
-      "suggestion": "Consider Z for better performance"
-    }
-  ]
-}
-
-Only include actual issues. If the stack is compatible, return empty arrays.`;
+import { withAuth } from "@/lib/middleware/withAuth";
+import { TECH_STACK_VALIDATION_PROMPT } from "@/lib/prompts/validation";
 
 interface ValidationResponse {
   errors: Array<{
@@ -51,18 +22,13 @@ interface ValidationResponse {
 /**
  * Validate a submitted tech-stack selection using Anthropic Claude and return consolidated warnings and errors.
  *
- * @param request - NextRequest whose JSON body must include `selections: Record<string, string>` mapping categories to chosen technologies.
- * @returns A JSON response containing either:
- *  - `warnings`: an array of entries `{ level: "error" | "warning", message, affectedTechnologies, suggestion }` when validation completes, or
- *  - `error`: an error message when the request is unauthorized (401) or an internal validation failure occurs (500).
+ * Authentication is handled by the withAuth middleware wrapper.
+ * The request body must include `selections: Record<string, string>` mapping categories to chosen technologies.
+ *
+ * @returns A JSON response containing an array of validation warnings/errors, or an error response on failure.
  */
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request, { userId: _userId }) => {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return handleUnauthorizedError();
-    }
-
     const body = await request.json();
     const { selections } = body as { selections: Record<string, string> };
 
@@ -75,7 +41,7 @@ export async function POST(request: NextRequest) {
       .map(([category, name]) => `${category}: ${name}`)
       .join("\n");
 
-    const prompt = VALIDATION_PROMPT.replace("{selections}", selectionsText);
+    const prompt = TECH_STACK_VALIDATION_PROMPT.replace("{selections}", selectionsText);
 
     // Call Claude for validation
     const response = await anthropic.messages.create({
@@ -120,4 +86,4 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return handleAPIError(error, "validate tech stack");
   }
-}
+});

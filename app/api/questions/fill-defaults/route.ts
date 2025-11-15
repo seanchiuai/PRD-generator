@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { ConvexHttpClient } from "convex/browser";
+import { convexClient } from "@/lib/convex-client";
 import { api } from "@/convex/_generated/api";
-import { handleAPIError, handleUnauthorizedError } from "@/lib/api-error-handler";
+import {
+  handleAPIError,
+  handleValidationError,
+  handleUnauthorizedError,
+} from "@/lib/api-error-handler";
 import { Id } from "@/convex/_generated/dataModel";
 import { Question } from "@/types";
+import { withAuth } from "@/lib/middleware/withAuth";
 
 interface ExtractedContext {
   productName: string;
@@ -15,34 +19,37 @@ interface ExtractedContext {
   technicalPreferences: string[];
 }
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request, { userId }) => {
   try {
-    const { userId, getToken } = await auth();
-    if (!userId) {
-      return handleUnauthorizedError();
-    }
-
-    // Get Clerk token for Convex authentication
-    const token = await getToken({ template: "convex" });
-    if (!token) {
-      return handleUnauthorizedError();
-    }
-
-    // Create authenticated Convex client
-    const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
-    convex.setAuth(token);
-
     const { conversationId, extractedContext } = await request.json();
 
+    if (!conversationId) {
+      return handleValidationError("Conversation ID required");
+    }
+
     // Fetch conversation with questions
-    const conversation = await convex.query(api.conversations.get, {
+    const conversation = await convexClient.query(api.conversations.get, {
       conversationId: conversationId as Id<"conversations">,
     });
 
-    if (!conversation || !conversation.clarifyingQuestions) {
-      return NextResponse.json(
-        { error: "Questions not found" },
-        { status: 404 }
+    if (!conversation) {
+      return handleAPIError(
+        new Error("Conversation not found"),
+        "find conversation",
+        404
+      );
+    }
+
+    // Verify ownership
+    if (conversation.userId !== userId) {
+      return handleUnauthorizedError();
+    }
+
+    if (!conversation.clarifyingQuestions) {
+      return handleAPIError(
+        new Error("Questions not found"),
+        "find questions",
+        404
       );
     }
 
@@ -72,7 +79,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return handleAPIError(error, "fill default answers");
   }
-}
+});
 
 function getDefaultAnswer(
   question: Question,
