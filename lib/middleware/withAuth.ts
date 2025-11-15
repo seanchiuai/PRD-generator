@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { handleUnauthorizedError } from "@/lib/api-error-handler";
+import { handleUnauthorizedError, handleAPIError } from "@/lib/api-error-handler";
 
 /**
  * Authenticated request context
@@ -52,14 +52,19 @@ export function withAuth(handler: AuthenticatedHandler) {
   return async function authenticatedRoute(
     request: NextRequest
   ): Promise<NextResponse> {
-    // Check authentication
-    const { userId } = await auth();
+    try {
+      // Check authentication
+      const { userId } = await auth();
 
-    if (!userId) {
-      return handleUnauthorizedError();
+      if (!userId) {
+        return handleUnauthorizedError();
+      }
+
+      // Call the original handler with authenticated context
+      return handler(request, { userId });
+    } catch (error) {
+      // Handle authentication errors (e.g., invalid token, Clerk API issues)
+      return handleAPIError(error, "authenticate user");
     }
-
-    // Call the original handler with authenticated context
-    return handler(request, { userId });
   };
 }

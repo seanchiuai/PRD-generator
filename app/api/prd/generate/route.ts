@@ -4,16 +4,20 @@ import { handleAPIError, handleValidationError } from "@/lib/api-error-handler";
 import { parseAIResponse } from "@/lib/parse-ai-json";
 import { withAuth } from "@/lib/middleware/withAuth";
 import { PRD_SYSTEM_PROMPT } from "@/lib/prompts/prd-generation";
+import { PRDData } from "@/types";
 
 /**
  * Generate a Product Requirements Document (PRD) JSON from a product discovery conversation.
  *
+ * Authentication is handled by the withAuth middleware wrapper.
  * Builds a prompt from the provided conversationData (messages, clarifying questions, and optional selected tech stack),
- * sends it to the Anthropic Claude model to generate a PRD, parses the model's JSON output (including JSON wrapped in ```json code blocks),
+ * sends it to the Anthropic Claude model to generate a PRD, parses the model's JSON output,
  * validates that the PRD includes a product name, and returns the parsed PRD along with model usage metadata.
  *
- * @param request - NextRequest whose JSON body must include `conversationData` with `messages` and optional `clarifyingQuestions` and `selectedTechStack`.
- * @returns A JSON object containing `prdData` (the parsed PRD structure) and `usage` (Anthropic response usage). On error returns a JSON error with an appropriate HTTP status: 400 if conversation data is missing, 401 if the user is unauthorized, or 500 for other failures (including parse or validation errors).
+ * The request body must include `conversationData` with `messages` and optional `clarifyingQuestions` and `selectedTechStack`.
+ *
+ * @returns A JSON object containing `prdData` (the parsed PRD structure) and `usage` (Anthropic response usage).
+ * On error returns a JSON error with status 400 (validation error) or 500 (generation/parse errors).
  */
 export const POST = withAuth(async (request) => {
   try {
@@ -62,12 +66,12 @@ Generate a complete PRD for this product.
     });
 
     const content = response.content[0];
-    if (content.type !== "text") {
+    if (!content || content.type !== "text") {
       throw new Error("Unexpected response type");
     }
 
     // Parse JSON response using centralized utility
-    const prdData = parseAIResponse(content.text);
+    const prdData = parseAIResponse<PRDData>(content.text);
 
     // Validate required fields
     if (!prdData.projectOverview?.productName) {

@@ -56,7 +56,7 @@ export const POST = withAuth(async (request) => {
     });
 
     const content = response.content[0];
-    if (content.type !== "text") {
+    if (!content || content.type !== "text") {
       throw new Error("Unexpected response type");
     }
 

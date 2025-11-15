@@ -9,10 +9,13 @@ import { QUESTION_GENERATION_PROMPT } from "@/lib/prompts/questions";
 /**
  * Generate clarifying questions for a product requirements document using Anthropic and return them as parsed JSON.
  *
- * Sends the provided `productContext` to the Anthropic model, extracts and parses the model's JSON output (handling optional markdown code fences), and returns the resulting questions.
+ * Authentication is handled by the withAuth middleware wrapper.
+ * Sends the provided `productContext` to the Anthropic model, extracts and parses the model's JSON output,
+ * and returns the resulting questions.
  *
- * @param request - The incoming NextRequest whose JSON body must include a `productContext` object.
- * @returns A NextResponse containing the parsed questions JSON on success; responds with `{ error: "Unauthorized" }` and status 401 when the user is not authenticated, or with `{ error: "Failed to generate questions" }` and status 500 on failure.
+ * The request body must include a `productContext` object and optionally `extractedContext`.
+ *
+ * @returns A NextResponse containing the parsed questions JSON on success, or a JSON error with status 500 on failure.
  */
 export const POST = withAuth(async (request) => {
   try {
@@ -51,7 +54,7 @@ Use this context to generate highly relevant questions.
     });
 
     const content = response.content[0];
-    if (content.type !== "text") {
+    if (!content || content.type !== "text") {
       throw new Error("Unexpected response type");
     }
 

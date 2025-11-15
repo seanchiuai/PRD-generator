@@ -9,8 +9,11 @@ import { CONVERSATION_SYSTEM_PROMPT } from "@/lib/prompts/conversation";
 /**
  * Handle POST requests by sending the provided conversation messages to Anthropic Claude and returning the assistant's reply.
  *
- * @param request - A NextRequest whose JSON body must include a `messages` array of objects with `role` and `content` fields.
- * @returns A JSON NextResponse containing `{ message: string, usage: any }` with the assistant's reply text and usage data. On error, returns a JSON error response with status `401` (unauthorized), `400` (bad request), or `500` (internal server error).
+ * Authentication is handled by the withAuth middleware wrapper.
+ * The request body must include a `messages` array of objects with `role` and `content` fields.
+ *
+ * @returns A JSON NextResponse containing `{ message: string, usage: any }` with the assistant's reply text and usage data.
+ * On error, returns a JSON error response with status `400` (bad request) or `500` (internal server error).
  */
 export const POST = withAuth(async (request, { userId }) => {
   try {
@@ -33,7 +36,7 @@ export const POST = withAuth(async (request, { userId }) => {
     });
 
     const assistantMessage = response.content[0];
-    if (assistantMessage.type !== "text") {
+    if (!assistantMessage || assistantMessage.type !== "text") {
       throw new Error("Unexpected response type");
     }
 
