@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Download, ExternalLink, MoreVertical, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Id } from "@/convex/_generated/dataModel";
+import type { Id } from "@/convex/_generated/dataModel";
 
 interface PRDCardProps {
   prd: {
@@ -36,11 +36,11 @@ export function PRDCard({ prd, onDelete }: PRDCardProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "completed":
-        return "bg-macaron-mint/30 text-[#1A4D3E] border-macaron-mint/50";
+        return "bg-macaron-mint/30 text-primary-foreground border-macaron-mint/50";
       case "generating":
-        return "bg-macaron-lavender/30 text-[#3D2066] border-macaron-lavender/50";
+        return "bg-macaron-lavender/30 text-secondary-foreground border-macaron-lavender/50";
       case "failed":
-        return "bg-macaron-berry/30 text-[#8B2952] border-macaron-berry/50";
+        return "bg-macaron-berry/30 text-accent-foreground border-macaron-berry/50";
       default:
         return "";
     }

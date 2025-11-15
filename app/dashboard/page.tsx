@@ -98,16 +98,16 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex justify-between items-center animate-fade-in-up">
         <div>
-          <h1 className="text-4xl font-display font-bold bg-gradient-to-r from-[#3D2066] to-[#1A4D3E] bg-clip-text text-transparent">
+          <h1 className="text-4xl font-display font-bold text-gradient-primary">
             My PRDs
           </h1>
           {stats && (
             <p className="text-muted-foreground mt-2 text-lg">
               <span className="inline-flex items-center gap-2">
-                <span className="px-3 py-1 rounded-full bg-macaron-lavender/20 text-[#3D2066] font-medium">
+                <span className="px-3 py-1 rounded-full bg-macaron-lavender/20 text-secondary-foreground font-medium">
                   {stats.total} total
                 </span>
-                <span className="px-3 py-1 rounded-full bg-macaron-mint/20 text-[#1A4D3E] font-medium">
+                <span className="px-3 py-1 rounded-full bg-macaron-mint/20 text-primary-foreground font-medium">
                   {stats.completed} completed
                 </span>
               </span>

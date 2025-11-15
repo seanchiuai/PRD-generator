@@ -10,19 +10,25 @@ export function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-20 px-4 relative">
       {/* Decorative background elements */}
-      <div className="absolute top-10 left-1/4 w-24 h-24 rounded-full bg-macaron-lavender/20 blur-2xl animate-float"></div>
-      <div className="absolute bottom-10 right-1/4 w-32 h-32 rounded-full bg-macaron-mint/20 blur-2xl animate-float" style={{ animationDelay: '1s' }}></div>
+      <div
+        className="absolute top-10 left-1/4 w-24 h-24 rounded-full bg-macaron-lavender/20 blur-2xl animate-float"
+        aria-hidden="true"
+      />
+      <div
+        className="absolute bottom-10 right-1/4 w-32 h-32 rounded-full bg-macaron-mint/20 blur-2xl animate-float [animation-delay:1s]"
+        aria-hidden="true"
+      />
 
       <div className="relative z-10 flex flex-col items-center animate-fade-in-up">
-        <div className="mb-6">
+        <div className="mb-6" aria-hidden="true">
           <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-macaron-lavender via-macaron-mint to-macaron-peach p-1">
             <div className="w-full h-full rounded-3xl bg-white flex items-center justify-center">
-              <FileText className="h-12 w-12 text-[#3D2066]" />
+              <FileText className="h-12 w-12 text-secondary-foreground" />
             </div>
           </div>
         </div>
 
-        <h3 className="text-3xl font-display font-bold mb-3 bg-gradient-to-r from-[#3D2066] to-[#1A4D3E] bg-clip-text text-transparent">
+        <h3 className="text-3xl font-display font-bold mb-3 text-gradient-primary">
           No PRDs Yet
         </h3>
 

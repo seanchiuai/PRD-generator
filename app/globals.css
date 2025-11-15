@@ -35,6 +35,11 @@
   --macaron-lavender: #D4BDFC;
   --macaron-rose: #FFD4E5;
 
+  /* Gradient colors - extracted for consistency */
+  --gradient-purple: #3D2066;
+  --gradient-green: #1A4D3E;
+  --gradient-rose: #8B2952;
+
   --chart-1: #FF9EB7; /* Berry */
   --chart-2: #B8E6D5; /* Mint */
   --chart-3: #D4BDFC; /* Lavender */
@@ -78,6 +83,11 @@
   --color-macaron-mint: var(--macaron-mint);
   --color-macaron-lavender: var(--macaron-lavender);
   --color-macaron-rose: var(--macaron-rose);
+
+  /* Gradient colors */
+  --color-gradient-purple: var(--gradient-purple);
+  --color-gradient-green: var(--gradient-green);
+  --color-gradient-rose: var(--gradient-rose);
 
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -232,4 +242,18 @@ body {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(232, 221, 212, 0.5);
+}
+
+.text-gradient-primary {
+  background: linear-gradient(to right, var(--gradient-purple), var(--gradient-green));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.text-gradient-accent {
+  background: linear-gradient(to right, var(--gradient-purple), var(--gradient-green), var(--gradient-rose));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }

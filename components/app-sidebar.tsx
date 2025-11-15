@@ -57,7 +57,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-macaron-lavender to-macaron-mint flex items-center justify-center">
                   <Component className="!size-4 text-secondary-foreground" />
                 </div>
-                <span className="text-lg font-display font-bold bg-gradient-to-r from-[#3D2066] to-[#1A4D3E] bg-clip-text text-transparent">VIBED</span>
+                <span className="text-lg font-display font-bold text-gradient-primary">VIBED</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
