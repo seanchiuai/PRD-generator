@@ -5,6 +5,8 @@ Check `.claude/skills/` → `.claude/agents/` → `.claude/plans/` first.
 
 **Agents:** clerk (auth), convex (backend), deployment (EAS), nextjs (frontend)
 
+**CodeRabbit:** After writing code, run `coderabbit review --plain` from repo root for detailed analysis and suggestions. Apply feedback iteratively for quality improvements.
+
 ## Stack & Patterns
 Next.js 15 • Tailwind 4 + shadcn/ui • Clerk → JWT → Convex • TypeScript strict • `@/*` imports
 

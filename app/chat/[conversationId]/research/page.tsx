@@ -24,7 +24,7 @@ export default function ResearchPage() {
 
   const [isResearching, setIsResearching] = useState(false);
   const [isSkipping, setIsSkipping] = useState(false);
-  const [categoryStatuses, setCategoryStatuses] = useState<
+  const [categoryStatuses, _setCategoryStatuses] = useState<
     Record<string, "pending" | "in_progress" | "completed" | "failed">
   >({
     frontend: "pending",
@@ -188,7 +188,7 @@ export default function ResearchPage() {
           <ResearchProgress
             categories={categories.map((cat) => ({
               name: cat.name,
-              status: categoryStatuses[cat.key],
+              status: categoryStatuses[cat.key] || "pending",
             }))}
           />
         )}
@@ -200,7 +200,7 @@ export default function ResearchPage() {
         {!isResearching && hasExistingResults && (
           <div className="space-y-6">
             {categories.map((cat) => {
-              const options = conversation.researchResults?.[cat.key];
+              const options = conversation.researchResults?.[cat.key as keyof typeof conversation.researchResults];
               if (!options || options.length === 0) return null;
 
               return (

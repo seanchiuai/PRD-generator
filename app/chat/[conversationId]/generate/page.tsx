@@ -24,12 +24,12 @@ export default function GeneratePage() {
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [prd, setPrd] = useState<any>(null);
-  const [generationSteps, setGenerationSteps] = useState([
-    { name: "Analyzing conversation data", status: "pending" as const },
-    { name: "Extracting product requirements", status: "pending" as const },
-    { name: "Structuring features and architecture", status: "pending" as const },
-    { name: "Generating timeline and risks", status: "pending" as const },
-    { name: "Finalizing PRD", status: "pending" as const },
+  const [generationSteps, setGenerationSteps] = useState<Array<{ name: string; status: "pending" | "in_progress" | "completed" }>>([
+    { name: "Analyzing conversation data", status: "pending" },
+    { name: "Extracting product requirements", status: "pending" },
+    { name: "Structuring features and architecture", status: "pending" },
+    { name: "Generating timeline and risks", status: "pending" },
+    { name: "Finalizing PRD", status: "pending" },
   ]);
 
   // Load existing PRD if available

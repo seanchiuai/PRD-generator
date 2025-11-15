@@ -127,14 +127,14 @@ export function PRDDocument({ prd }: PRDDocumentProps) {
                 <Text style={styles.text}>{value.purpose}</Text>
 
                 <Text style={{ ...styles.subsectionTitle, color: "#059669" }}>Pros</Text>
-                {value.pros.map((pro, i) => (
+                {value.pros.map((pro: string, i: number) => (
                   <Text key={i} style={styles.bulletPoint}>
                     • {pro}
                   </Text>
                 ))}
 
                 <Text style={{ ...styles.subsectionTitle, color: "#DC2626" }}>Cons</Text>
-                {value.cons.map((con, i) => (
+                {value.cons.map((con: string, i: number) => (
                   <Text key={i} style={styles.bulletPoint}>
                     • {con}
                   </Text>

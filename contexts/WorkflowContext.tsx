@@ -134,7 +134,7 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
       // Update state
       setState(prev => ({
         ...prev,
-        currentStep: nextStep,
+        currentStep: nextStep as WorkflowStep,
         completedSteps: newCompletedSteps,
       }))
 
@@ -142,7 +142,7 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
       if (conversationId) {
         await updateProgress({
           conversationId,
-          currentStep: nextStep,
+          currentStep: nextStep as WorkflowStep,
           completedSteps: newCompletedSteps,
           skippedSteps: state.skippedSteps,
         })

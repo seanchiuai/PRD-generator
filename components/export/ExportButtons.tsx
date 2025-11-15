@@ -19,8 +19,8 @@ interface ExportButtonsProps {
 }
 
 export function ExportButtons({
-  prd,
-  productName,
+  prd: _prd,
+  productName: _productName,
   onExportJSON,
   onExportPDF,
 }: ExportButtonsProps) {

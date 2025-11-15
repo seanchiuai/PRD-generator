@@ -88,7 +88,7 @@ export function PRDDisplay({ prd }: PRDDisplayProps) {
                         Pros
                       </h5>
                       <ul className="list-disc list-inside space-y-1 text-sm">
-                        {value.pros.map((pro, i) => (
+                        {value.pros.map((pro: string, i: number) => (
                           <li key={i}>{pro}</li>
                         ))}
                       </ul>
@@ -98,7 +98,7 @@ export function PRDDisplay({ prd }: PRDDisplayProps) {
                         Cons
                       </h5>
                       <ul className="list-disc list-inside space-y-1 text-sm">
-                        {value.cons.map((con, i) => (
+                        {value.cons.map((con: string, i: number) => (
                           <li key={i}>{con}</li>
                         ))}
                       </ul>
