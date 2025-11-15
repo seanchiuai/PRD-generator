@@ -70,7 +70,7 @@ function parseResponse(content: string, _category: string): any[] {
 
     return options.length > 0 ? options : [];
   } catch (error) {
-    logger.error("Research Parse Error", "Failed to parse research response", { error });
+    logger.error("Research Parse Error", error);
     return [];
   }
 }
@@ -97,7 +97,7 @@ async function researchCategory(
     const content = response.choices[0]?.message?.content || "";
     return parseResponse(content, category);
   } catch (error) {
-    logger.error("Research Category Error", `Failed to research ${category}`, { category, error });
+    logger.error(`Failed to research ${category}`, error, { category });
     return [];
   }
 }

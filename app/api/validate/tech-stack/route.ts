@@ -22,12 +22,12 @@ interface ValidationResponse {
 /**
  * Validate a submitted tech-stack selection using Anthropic Claude and return consolidated warnings and errors.
  *
- * @param request - NextRequest whose JSON body must include `selections: Record<string, string>` mapping categories to chosen technologies.
- * @returns A JSON response containing either:
- *  - `warnings`: an array of entries `{ level: "error" | "warning", message, affectedTechnologies, suggestion }` when validation completes, or
- *  - `error`: an error message when the request is unauthorized (401) or an internal validation failure occurs (500).
+ * Authentication is handled by the withAuth middleware wrapper.
+ * The request body must include `selections: Record<string, string>` mapping categories to chosen technologies.
+ *
+ * @returns A JSON response containing an array of validation warnings/errors, or an error response on failure.
  */
-export const POST = withAuth(async (request) => {
+export const POST = withAuth(async (request, { userId: _userId }) => {
   try {
     const body = await request.json();
     const { selections } = body as { selections: Record<string, string> };

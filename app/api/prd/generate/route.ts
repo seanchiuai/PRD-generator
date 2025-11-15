@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
-import { handleAPIError, handleValidationError } from "@/lib/api-error-handler";
+import { handleAPIError, handleValidationError, handleUnauthorizedError } from "@/lib/api-error-handler";
 import { parseAIResponse } from "@/lib/parse-ai-json";
 import { withAuth } from "@/lib/middleware/withAuth";
 import { PRD_SYSTEM_PROMPT } from "@/lib/prompts/prd-generation";
 import { PRDData } from "@/types";
+import { convexClient } from "@/lib/convex-client";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 
 /**
  * Generate a Product Requirements Document (PRD) JSON from a product discovery conversation.
@@ -14,19 +17,43 @@ import { PRDData } from "@/types";
  * sends it to the Anthropic Claude model to generate a PRD, parses the model's JSON output,
  * validates that the PRD includes a product name, and returns the parsed PRD along with model usage metadata.
  *
- * The request body must include `conversationData` with `messages` and optional `clarifyingQuestions` and `selectedTechStack`.
+ * The request body must include `conversationId` to verify ownership.
  *
  * @returns A JSON object containing `prdData` (the parsed PRD structure) and `usage` (Anthropic response usage).
- * On error returns a JSON error with status 400 (validation error) or 500 (generation/parse errors).
+ * On error returns a JSON error with status 400 (validation error), 401 (unauthorized), 404 (not found), or 500 (generation/parse errors).
  */
-export const POST = withAuth(async (request) => {
+export const POST = withAuth(async (request, { userId }) => {
   try {
     const body = await request.json();
-    const { conversationData } = body;
+    const { conversationId } = body;
 
-    if (!conversationData) {
-      return handleValidationError("Conversation data required");
+    if (!conversationId) {
+      return handleValidationError("Conversation ID required");
     }
+
+    // Fetch and verify conversation ownership
+    const conversation = await convexClient.query(api.conversations.get, {
+      conversationId: conversationId as Id<"conversations">,
+    });
+
+    if (!conversation) {
+      return handleAPIError(
+        new Error("Conversation not found"),
+        "find conversation",
+        404
+      );
+    }
+
+    if (conversation.userId !== userId) {
+      return handleUnauthorizedError();
+    }
+
+    // Build conversation data from the verified conversation
+    const conversationData = {
+      messages: conversation.messages,
+      clarifyingQuestions: conversation.clarifyingQuestions,
+      selectedTechStack: conversation.selectedTechStack,
+    };
 
     // Build comprehensive prompt
     const userPrompt = `
