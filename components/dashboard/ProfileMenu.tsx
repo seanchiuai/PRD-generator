@@ -28,7 +28,18 @@ export function ProfileMenu() {
   const userName = user.fullName || user.firstName || user.emailAddresses?.[0]?.emailAddress || "User";
   const userEmail = user.primaryEmailAddress?.emailAddress || "";
   const userAvatar = user.imageUrl || "";
-  const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+
+  // Safely compute initials with proper fallbacks
+  const nameParts = userName
+    .trim()
+    .split(/\s+/)
+    .filter(part => part.length > 0)
+    .map(part => part[0])
+    .filter(char => char !== undefined);
+
+  const initials = nameParts.length > 0
+    ? nameParts.join('').toUpperCase().slice(0, 2)
+    : (userEmail[0]?.toUpperCase() || "U");
 
   // Format the date joined
   const dateJoined = user.createdAt
