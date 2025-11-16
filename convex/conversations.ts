@@ -12,7 +12,7 @@ export const create = mutation({
     const conversationId = await ctx.db.insert("conversations", {
       userId: identity.subject,
       messages: [],
-      currentStage: "discovery",
+      currentStage: "setup",
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
@@ -134,6 +134,7 @@ export const updateStage = mutation({
   args: {
     conversationId: v.id("conversations"),
     stage: v.union(
+      v.literal("setup"),
       v.literal("discovery"),
       v.literal("clarifying"),
       v.literal("researching"),
@@ -376,5 +377,57 @@ export const saveExtractedContext = mutation({
     });
 
     return { success: true };
+  },
+});
+
+export const saveProjectSetup = mutation({
+  args: {
+    conversationId: v.id("conversations"),
+    projectName: v.string(),
+    projectDescription: v.string(),
+  },
+  handler: async (ctx, args): Promise<{ success: boolean; prdId: string }> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    // Get conversation and verify ownership
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+    if (conversation.userId !== identity.subject) {
+      throw new Error("Unauthorized");
+    }
+
+    // Create PRD record with status "generating"
+    const prdId = await ctx.db.insert("prds", {
+      conversationId: args.conversationId,
+      userId: identity.subject,
+      productName: args.projectName,
+      prdData: null, // Will be populated later during generation
+      version: 1,
+      status: "generating",
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+
+    // Update conversation with project info and PRD link
+    await ctx.db.patch(args.conversationId, {
+      projectName: args.projectName,
+      projectDescription: args.projectDescription,
+      prdId: prdId,
+      currentStage: "discovery",
+      workflowProgress: {
+        currentStep: "discovery",
+        completedSteps: ["setup"],
+        skippedSteps: [],
+        lastUpdated: Date.now(),
+      },
+      updatedAt: Date.now(),
+    });
+
+    return { success: true, prdId };
   },
 });

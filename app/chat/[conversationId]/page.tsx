@@ -9,6 +9,10 @@ import { ChatContainer } from "@/components/chat/ChatContainer";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { useToast } from "@/hooks/use-toast";
 import { WorkflowLayout } from "@/components/workflow/WorkflowLayout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 export default function ChatPage() {
   const params = useParams();
@@ -18,9 +22,15 @@ export default function ChatPage() {
 
   const conversation = useQuery(api.conversations.get, { conversationId });
   const addMessage = useMutation(api.conversations.addMessage);
+  const saveProjectSetup = useMutation(api.conversations.saveProjectSetup);
 
   const [isTyping, setIsTyping] = useState(false);
   const [isSkipping, setIsSkipping] = useState(false);
+  const [isSavingSetup, setIsSavingSetup] = useState(false);
+
+  // Setup form state
+  const [projectName, setProjectName] = useState("");
+  const [projectDescription, setProjectDescription] = useState("");
 
   // Validation: Check if user has provided enough context to skip
   const canSkip = useMemo(() => {
@@ -81,6 +91,47 @@ export default function ChatPage() {
     }
   };
 
+  const handleSetupSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!projectName.trim() || !projectDescription.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please provide both a project name and description.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsSavingSetup(true);
+
+      // Save project setup to database and create PRD
+      await saveProjectSetup({
+        conversationId,
+        projectName: projectName.trim(),
+        projectDescription: projectDescription.trim(),
+      });
+
+      toast({
+        title: "Project saved",
+        description: "Your project has been created in the database.",
+      });
+
+      // The mutation updates the stage to "discovery", so the page will re-render
+      // showing the discovery chat
+    } catch (error) {
+      console.error("Failed to save project setup:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save project setup. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingSetup(false);
+    }
+  };
+
   const handleSkip = async () => {
     try {
       setIsSkipping(true);
@@ -126,10 +177,70 @@ export default function ChatPage() {
     );
   }
 
+  // Show setup form if in setup stage
+  if (conversation.currentStage === "setup") {
+    return (
+      <WorkflowLayout
+        currentStep="setup"
+        completedSteps={[]}
+        conversationId={conversationId}
+        showSkipButton={false}
+      >
+        <div className="flex flex-col max-w-2xl mx-auto p-8">
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold mb-2">Create Your Project</h1>
+            <p className="text-muted-foreground">
+              Let's start by giving your project a name and description. This will be saved to the database and used throughout the PRD generation process.
+            </p>
+          </div>
+
+          <form onSubmit={handleSetupSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="projectName">Project Name *</Label>
+              <Input
+                id="projectName"
+                placeholder="e.g., Task Management App"
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                disabled={isSavingSetup}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="projectDescription">Project Description *</Label>
+              <Textarea
+                id="projectDescription"
+                placeholder="Briefly describe what your project is about and what problem it solves..."
+                value={projectDescription}
+                onChange={(e) => setProjectDescription(e.target.value)}
+                disabled={isSavingSetup}
+                rows={6}
+                required
+              />
+              <p className="text-sm text-muted-foreground">
+                Minimum 50 characters recommended
+              </p>
+            </div>
+
+            <Button
+              type="submit"
+              disabled={isSavingSetup || !projectName.trim() || !projectDescription.trim()}
+              className="w-full"
+            >
+              {isSavingSetup ? "Saving..." : "Continue to Product Discovery"}
+            </Button>
+          </form>
+        </div>
+      </WorkflowLayout>
+    );
+  }
+
+  // Show discovery chat for all other stages
   return (
     <WorkflowLayout
       currentStep="discovery"
-      completedSteps={[]}
+      completedSteps={conversation.workflowProgress?.completedSteps || []}
       conversationId={conversationId}
       showSkipButton={canSkip}
       onSkip={handleSkip}

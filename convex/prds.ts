@@ -119,16 +119,36 @@ export const create = mutation({
       throw new Error("Unauthorized");
     }
 
-    const prdId = await ctx.db.insert("prds", {
-      conversationId: args.conversationId,
-      userId: identity.subject,
-      productName: args.productName,
-      prdData: args.prdData,
-      version: 1,
-      status: "completed",
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    });
+    let prdId: string;
+
+    // Check if PRD already exists (created during setup)
+    if (conversation.prdId) {
+      // Update existing PRD
+      await ctx.db.patch(conversation.prdId, {
+        productName: args.productName,
+        prdData: args.prdData,
+        status: "completed",
+        updatedAt: Date.now(),
+      });
+      prdId = conversation.prdId;
+    } else {
+      // Create new PRD (fallback for legacy conversations)
+      prdId = await ctx.db.insert("prds", {
+        conversationId: args.conversationId,
+        userId: identity.subject,
+        productName: args.productName,
+        prdData: args.prdData,
+        version: 1,
+        status: "completed",
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+
+      // Link PRD to conversation
+      await ctx.db.patch(args.conversationId, {
+        prdId: prdId,
+      });
+    }
 
     // Update conversation stage to completed
     await ctx.db.patch(args.conversationId, {
