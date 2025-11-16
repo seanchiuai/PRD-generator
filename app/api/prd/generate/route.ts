@@ -4,7 +4,7 @@ import { handleAPIError, handleValidationError, handleUnauthorizedError } from "
 import { parseAIResponse } from "@/lib/parse-ai-json";
 import { withAuth } from "@/lib/middleware/withAuth";
 import { PRD_SYSTEM_PROMPT } from "@/lib/prompts/prd-generation";
-import { PRDData } from "@/types";
+import { PRDData, Message, Question } from "@/types";
 import { getAuthenticatedConvexClient } from "@/lib/convex-client";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -61,11 +61,11 @@ export const POST = withAuth(async (request, { userId, token }) => {
     // Build comprehensive prompt
     const userPrompt = `
 # Product Discovery Conversation
-${conversationData.messages.map((m: any) => `${m.role}: ${m.content}`).join("\n")}
+${conversationData.messages.map((m: Message) => `${m.role}: ${m.content}`).join("\n")}
 
 # Clarifying Questions & Answers
 ${conversationData.clarifyingQuestions
-  ?.map((q: any) => `Q: ${q.question}\nA: ${q.answer || "Not answered"}`)
+  ?.map((q: Question) => `Q: ${q.question}\nA: ${q.answer || "Not answered"}`)
   .join("\n\n")}
 
 # Selected Tech Stack

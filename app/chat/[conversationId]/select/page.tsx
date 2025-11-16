@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import type { TechOption } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CategorySection } from "@/components/selection/CategorySection";
@@ -134,7 +135,7 @@ export default function SelectionPage() {
       selection: {
         name: optionName,
         reasoning: `Selected from ${options.length} options`,
-        selectedFrom: options.map((o: any) => o.name),
+        selectedFrom: options.map((o: TechOption) => o.name),
       },
     });
 

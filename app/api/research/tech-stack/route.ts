@@ -317,7 +317,7 @@ export const POST = withAuth(async (request) => {
     // Step 3: Build structured results object
     const researchResults: Record<
       string,
-      { options: any[]; reasoning: string }
+      { options: TechOption[]; reasoning: string }
     > = {};
     const queriesGenerated: Array<{ category: string; reasoning: string }> = [];
 

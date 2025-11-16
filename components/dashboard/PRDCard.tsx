@@ -12,13 +12,14 @@ import {
 import { Download, ExternalLink, MoreVertical, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { Id } from "@/convex/_generated/dataModel";
+import type { PRDData } from "@/types";
 
 interface PRDCardProps {
   prd: {
     _id: Id<"prds">;
     conversationId: Id<"conversations">;
     productName: string;
-    prdData: any;
+    prdData: PRDData;
     createdAt: number;
     updatedAt: number;
     version: number;
