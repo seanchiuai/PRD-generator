@@ -85,25 +85,40 @@ export default function DashboardPage() {
   if (prds === undefined) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <p>Loading...</p>
+        <div className="text-center animate-fade-in-up">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-3xl bg-gradient-to-br from-macaron-lavender to-macaron-mint animate-pulse"></div>
+          <p className="text-muted-foreground font-medium">Loading your PRDs...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="max-w-7xl mx-auto p-6 space-y-8">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center animate-fade-in-up">
         <div>
-          <h1 className="text-3xl font-bold">My PRDs</h1>
+          <h1 className="text-4xl font-display font-bold text-gradient-primary">
+            My PRDs
+          </h1>
           {stats && (
-            <p className="text-muted-foreground mt-1">
-              {stats.total} total • {stats.completed} completed
+            <p className="text-muted-foreground mt-2 text-lg">
+              <span className="inline-flex items-center gap-2">
+                <span className="px-3 py-1 rounded-full bg-macaron-lavender/20 text-secondary-foreground font-medium">
+                  {stats.total} total
+                </span>
+                <span className="px-3 py-1 rounded-full bg-macaron-mint/20 text-primary-foreground font-medium">
+                  {stats.completed} completed
+                </span>
+              </span>
             </p>
           )}
         </div>
-        <Button onClick={() => router.push("/chat/new")}>
-          <Plus className="h-4 w-4 mr-2" />
+        <Button
+          onClick={() => router.push("/chat/new")}
+          className="bg-gradient-to-r from-macaron-lavender to-macaron-mint text-secondary-foreground hover:shadow-xl hover:scale-105 transition-all duration-300 font-display font-semibold px-6 py-6 text-base rounded-2xl"
+        >
+          <Plus className="h-5 w-5 mr-2" />
           New PRD
         </Button>
       </div>

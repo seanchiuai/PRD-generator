@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Download, ExternalLink, MoreVertical, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Id } from "@/convex/_generated/dataModel";
+import type { Id } from "@/convex/_generated/dataModel";
 
 interface PRDCardProps {
   prd: {
@@ -36,23 +36,23 @@ export function PRDCard({ prd, onDelete }: PRDCardProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "completed":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+        return "bg-macaron-mint/30 text-primary-foreground border-macaron-mint/50";
       case "generating":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
+        return "bg-macaron-lavender/30 text-secondary-foreground border-macaron-lavender/50";
       case "failed":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
+        return "bg-macaron-berry/30 text-accent-foreground border-macaron-berry/50";
       default:
         return "";
     }
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card className="hover:shadow-2xl transition-all duration-300 hover:scale-105 group animate-scale-in border-2">
       <CardHeader>
         <div className="flex justify-between items-start">
           <div className="flex-1">
-            <CardTitle className="text-xl">{prd.productName}</CardTitle>
-            <CardDescription className="mt-1">
+            <CardTitle className="text-xl font-display group-hover:text-secondary-foreground transition-colors">{prd.productName}</CardTitle>
+            <CardDescription className="mt-1.5 font-medium">
               Created {new Date(prd.createdAt).toLocaleDateString()}
             </CardDescription>
           </div>
@@ -83,19 +83,21 @@ export function PRDCard({ prd, onDelete }: PRDCardProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
-          <Badge className={getStatusColor(prd.status)}>{prd.status}</Badge>
+        <div className="space-y-3">
+          <Badge className={`${getStatusColor(prd.status)} border font-semibold px-3 py-1 rounded-full`}>
+            {prd.status}
+          </Badge>
           {prd.prdData?.projectOverview?.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2">
+            <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
               {prd.prdData.projectOverview.description}
             </p>
           )}
           {prd.prdData?.techStack && (
-            <div className="flex flex-wrap gap-2 mt-2">
+            <div className="flex flex-wrap gap-2 mt-3">
               {Object.entries(prd.prdData.techStack).slice(0, 3).map(([key, value]: [string, any]) => {
                 if (key === "reasoning" || !value?.name) return null;
                 return (
-                  <Badge key={key} variant="outline">
+                  <Badge key={key} variant="outline" className="rounded-full border-2 px-3 py-1 font-medium">
                     {value.name}
                   </Badge>
                 );
@@ -105,7 +107,7 @@ export function PRDCard({ prd, onDelete }: PRDCardProps) {
         </div>
       </CardContent>
       <CardFooter>
-        <Button onClick={handleView} className="w-full">
+        <Button onClick={handleView} className="w-full bg-gradient-to-r from-macaron-lavender to-macaron-mint text-secondary-foreground font-display font-semibold">
           View Details
         </Button>
       </CardFooter>

@@ -11,7 +11,7 @@ afterEach(() => {
 })
 
 // Mock environment variables for tests
-process.env.NODE_ENV = 'test'
+Object.defineProperty(process.env, 'NODE_ENV', { value: 'test', writable: true })
 process.env.ANTHROPIC_API_KEY = 'test-anthropic-key'
 process.env.PERPLEXITY_API_KEY = 'test-perplexity-key'
 process.env.NEXT_PUBLIC_CONVEX_URL = 'https://test.convex.cloud'
