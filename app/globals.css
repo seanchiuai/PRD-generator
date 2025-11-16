@@ -271,15 +271,19 @@ body {
 }
 
 .text-gradient-primary {
+  color: var(--gradient-purple); /* Fallback for browsers without background-clip support */
   background: linear-gradient(to right, var(--gradient-purple), var(--gradient-green));
   -webkit-background-clip: text;
   background-clip: text;
+  -webkit-text-fill-color: transparent;
   color: transparent;
 }
 
 .text-gradient-accent {
+  color: var(--gradient-purple); /* Fallback for browsers without background-clip support */
   background: linear-gradient(to right, var(--gradient-purple), var(--gradient-green), var(--gradient-rose));
   -webkit-background-clip: text;
   background-clip: text;
+  -webkit-text-fill-color: transparent;
   color: transparent;
 }
