@@ -79,7 +79,15 @@ export default defineSchema({
     autoCompletedQuestions: v.optional(v.array(v.string())),
     // Dynamic tech stack research results - Claude determines which categories are needed
     // Structure: Record<category, { options: TechOption[], reasoning: string }>
-    researchResults: v.optional(v.any()),
+    researchResults: v.optional(
+      v.record(
+        v.string(), // category key
+        v.object({
+          options: v.array(v.any()),
+          reasoning: v.optional(v.string()),
+        })
+      )
+    ),
     // Track which queries were generated for transparency
     queriesGenerated: v.optional(
       v.array(

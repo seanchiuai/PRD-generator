@@ -200,7 +200,7 @@ export const saveResearchResults = mutation({
 
     // Support both parameter names for compatibility
     const results = args.researchResults || args.results;
-    if (!results || (typeof results === 'object' && Object.keys(results).length === 0)) {
+    if (!results || (typeof results === 'object' && results !== null && !Array.isArray(results) && Object.keys(results).length === 0)) {
       throw new Error("Research results are required and must contain data");
     }
 

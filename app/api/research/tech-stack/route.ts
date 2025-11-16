@@ -231,6 +231,8 @@ async function executeResearchQuery(
       max_tokens: 2048,
       temperature: 0.2,
     }, {
+      // NOTE: Perplexity SDK does not officially support AbortController per-request.
+      // This is a workaround to enable request cancellation. Monitor SDK updates for official support.
       signal: abortController.signal,
     } as any);
 
@@ -273,10 +275,8 @@ async function executeResearchQuery(
 }
 
 export const POST = withAuth(async (request) => {
-  console.log("=== Tech Stack Research API Called ===");
   try {
     const body = await request.json();
-    console.log("Request body received:", JSON.stringify(body, null, 2));
     const { productContext } = body as { productContext: ProductContext };
 
     if (!productContext) {
