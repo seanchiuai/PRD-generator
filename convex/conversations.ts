@@ -1,6 +1,19 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
+// Helper function to merge workflow steps without duplicates
+function mergeCompletedSteps(
+  existingSteps: string[] | undefined,
+  newSteps: string[]
+): string[] {
+  const allSteps = [...(existingSteps || []), ...newSteps];
+  // Define step order for proper sequencing
+  const stepOrder = ["setup", "discovery", "questions", "research", "selection", "generate"];
+  // Remove duplicates and sort by defined order
+  const uniqueSteps = Array.from(new Set(allSteps));
+  return uniqueSteps.sort((a, b) => stepOrder.indexOf(a) - stepOrder.indexOf(b));
+}
+
 export const create = mutation({
   args: {},
   handler: async (ctx): Promise<string> => {
@@ -273,6 +286,11 @@ export const saveSelection = mutation({
     // Check if this is a full stack selection or individual category
     if ("frontend" in args.selection) {
       // Full stack selection
+      const completedSteps = mergeCompletedSteps(
+        conversation.workflowProgress?.completedSteps,
+        ["discovery", "questions", "research", "selection"]
+      );
+
       await ctx.db.patch(args.conversationId, {
         selection: {
           ...args.selection,
@@ -281,7 +299,7 @@ export const saveSelection = mutation({
         currentStage: "generating",
         workflowProgress: {
           currentStep: "generate",
-          completedSteps: ["discovery", "questions", "research", "selection"],
+          completedSteps,
           skippedSteps: args.autoSelected ? ["research", "selection"] : [],
           lastUpdated: Date.now(),
         },
@@ -364,12 +382,17 @@ export const saveExtractedContext = mutation({
     }
 
     // Update conversation with extracted context
+    const completedSteps = mergeCompletedSteps(
+      conversation.workflowProgress?.completedSteps,
+      ["discovery"]
+    );
+
     await ctx.db.patch(args.conversationId, {
       extractedContext: args.context,
       currentStage: "clarifying",
       workflowProgress: {
         currentStep: "questions",
-        completedSteps: ["discovery"],
+        completedSteps,
         skippedSteps: ["discovery"],
         lastUpdated: Date.now(),
       },
