@@ -11,6 +11,7 @@ import { api } from '@/convex/_generated/api'
 import { getDefaultTechStack, generateMockResearchResults } from '@/lib/techStack/defaults'
 import { Id } from "@/convex/_generated/dataModel";
 import { withAuth } from "@/lib/middleware/withAuth";
+import { TechStack, ValidationResponse } from "@/types";
 
 export const POST = withAuth(async (request, { userId, token }) => {
   try {
@@ -141,14 +142,6 @@ Return ONLY a JSON object:
   const textContent = response.content.find((block) => block.type === 'text')
   if (!textContent || textContent.type !== 'text') {
     throw new Error('Unexpected response type from Claude')
-  }
-
-  interface TechStack {
-    frontend: string;
-    backend: string;
-    database: string;
-    auth: string;
-    hosting: string;
   }
 
   return safeParseAIResponse<TechStack>(textContent.text) || getDefaultTechStack(extractedContext, answers)

@@ -40,6 +40,18 @@ export interface ProductContext {
   coreFeatures?: string[];
 }
 
+/**
+ * Extended context extracted from conversation with all required fields
+ */
+export interface ExtractedContext {
+  productName: string;
+  description: string;
+  targetAudience: string;
+  keyFeatures: string[];
+  problemStatement: string;
+  technicalPreferences: string[];
+}
+
 // ============================================================================
 // QUESTION TYPES
 // ============================================================================
@@ -65,6 +77,15 @@ export interface QuestionGenerationResponse {
 // ============================================================================
 // TECH STACK RESEARCH TYPES
 // ============================================================================
+
+/**
+ * Research query for investigating tech stack options
+ */
+export interface ResearchQuery {
+  category: string;
+  query: string;
+  reasoning: string;
+}
 
 export interface TechOption {
   name: string;
@@ -105,6 +126,17 @@ export interface ResearchMetadata {
 // TECH STACK SELECTION TYPES
 // ============================================================================
 
+/**
+ * Simple tech stack structure for defaults/suggestions
+ */
+export interface TechStack {
+  frontend: string;
+  backend: string;
+  database: string;
+  auth: string;
+  hosting: string;
+}
+
 export interface TechSelection {
   name: string;
   reasoning: string;
@@ -135,6 +167,21 @@ export interface ValidationWarning {
   message: string;
   affectedTechnologies: string[];
   suggestion?: string;
+}
+
+export interface ValidationIssue {
+  message: string;
+  affectedTechnologies: string[];
+  suggestion?: string;
+}
+
+/**
+ * Response from tech stack validation
+ */
+export interface ValidationResponse {
+  isValid?: boolean;
+  errors: ValidationIssue[];
+  warnings: ValidationIssue[];
 }
 
 // ============================================================================

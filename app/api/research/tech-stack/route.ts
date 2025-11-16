@@ -3,6 +3,7 @@ import { perplexity, anthropic, AI_MODELS } from "@/lib/ai-clients";
 import { handleAPIError, handleValidationError } from "@/lib/api-error-handler";
 import { logger } from "@/lib/logger";
 import { withAuth } from "@/lib/middleware/withAuth";
+import { ResearchQuery } from "@/types";
 
 interface ProductContext {
   productName: string;
@@ -10,12 +11,6 @@ interface ProductContext {
   targetAudience: string;
   coreFeatures: string[];
   answers: Record<string, string>;
-}
-
-interface ResearchQuery {
-  category: string;
-  query: string;
-  reasoning: string;
 }
 
 // Use Claude to intelligently generate research queries based on product context

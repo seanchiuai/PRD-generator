@@ -11,6 +11,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { withAuth } from "@/lib/middleware/withAuth";
 import { CONTEXT_EXTRACTION_PROMPT } from "@/lib/prompts/conversation";
+import { ExtractedContext } from "@/types";
 
 const FALLBACK_CONTEXT = {
   productName: "New Product",
@@ -81,16 +82,7 @@ export const POST = withAuth(async (request, { userId, token }) => {
     const extractedText = content.text;
 
     // Use safe parser with fallback
-    interface ContextData {
-      productName?: string;
-      description?: string;
-      targetAudience?: string;
-      keyFeatures?: string[];
-      problemStatement?: string;
-      technicalPreferences?: string[];
-    }
-
-    const contextData = safeParseAIResponse<ContextData>(extractedText) || FALLBACK_CONTEXT;
+    const contextData = safeParseAIResponse<Partial<ExtractedContext>>(extractedText) || FALLBACK_CONTEXT;
 
     // Validate extracted context
     const validatedContext = {

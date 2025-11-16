@@ -2,22 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
 import { handleAPIError } from "@/lib/api-error-handler";
 import { safeParseAIResponse } from "@/lib/parse-ai-json";
-import { ValidationWarning } from "@/types";
+import { ValidationWarning, ValidationResponse } from "@/types";
 import { withAuth } from "@/lib/middleware/withAuth";
 import { TECH_STACK_VALIDATION_PROMPT } from "@/lib/prompts/validation";
-
-interface ValidationResponse {
-  errors: Array<{
-    message: string;
-    affectedTechnologies: string[];
-    suggestion?: string;
-  }>;
-  warnings: Array<{
-    message: string;
-    affectedTechnologies: string[];
-    suggestion?: string;
-  }>;
-}
 
 /**
  * Validate a submitted tech-stack selection using Anthropic Claude and return consolidated warnings and errors.
