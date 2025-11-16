@@ -41,9 +41,9 @@ export function ProfileMenu() {
     ? nameParts.join('').toUpperCase().slice(0, 2)
     : (userEmail[0]?.toUpperCase() || "U");
 
-  // Format the date joined
+  // Format the date joined using user's preferred locale
   const dateJoined = user.createdAt
-    ? new Date(user.createdAt).toLocaleDateString('en-US', {
+    ? new Date(user.createdAt).toLocaleDateString(undefined, {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
@@ -56,6 +56,8 @@ export function ProfileMenu() {
         <Button
           variant="ghost"
           className="relative h-10 w-10 rounded-full hover:ring-2 hover:ring-macaron-lavender transition-all"
+          aria-label={`Open profile menu for ${userName || 'user'}`}
+          aria-haspopup="true"
         >
           <Avatar className="h-10 w-10">
             <AvatarImage src={userAvatar} alt={userName} />
