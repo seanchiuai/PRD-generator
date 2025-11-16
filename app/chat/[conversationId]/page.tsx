@@ -267,10 +267,12 @@ export default function ChatPage() {
       currentStep="discovery"
       completedSteps={conversation.workflowProgress?.completedSteps || []}
       conversationId={conversationId}
-      showSkipButton={canSkip}
+      showSkipButton={true}
       onSkip={handleSkip}
       skipButtonText="Skip to Questions"
       skipButtonLoading={isSkipping}
+      skipButtonDisabled={!canSkip}
+      skipButtonDisabledMessage="Please send at least one message with 50+ characters to provide context before skipping"
       skipConfirmMessage="Are you sure you want to skip? We recommend having a conversation to better understand your product."
       skipConfirmTitle="Skip Discovery Phase?"
     >

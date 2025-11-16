@@ -14,6 +14,8 @@ export interface WorkflowLayoutProps {
   onSkip?: () => void | Promise<void>
   skipButtonText?: string
   skipButtonLoading?: boolean
+  skipButtonDisabled?: boolean
+  skipButtonDisabledMessage?: string
   skipConfirmMessage?: string
   skipConfirmTitle?: string
   showFooter?: boolean
@@ -33,6 +35,8 @@ export function WorkflowLayout({
   onSkip,
   skipButtonText,
   skipButtonLoading = false,
+  skipButtonDisabled = false,
+  skipButtonDisabledMessage,
   skipConfirmMessage,
   skipConfirmTitle,
   showFooter = false,
@@ -58,6 +62,8 @@ export function WorkflowLayout({
                 onSkip={onSkip}
                 buttonText={skipButtonText}
                 loading={skipButtonLoading}
+                disabled={skipButtonDisabled}
+                disabledMessage={skipButtonDisabledMessage}
                 confirmMessage={skipConfirmMessage}
                 confirmTitle={skipConfirmTitle}
               />
@@ -71,6 +77,8 @@ export function WorkflowLayout({
               onSkip={onSkip}
               buttonText={skipButtonText}
               loading={skipButtonLoading}
+              disabled={skipButtonDisabled}
+              disabledMessage={skipButtonDisabledMessage}
               confirmMessage={skipConfirmMessage}
               confirmTitle={skipConfirmTitle}
             />

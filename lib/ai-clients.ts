@@ -31,7 +31,7 @@ export const perplexity = new OpenAI({
 export const AI_MODELS = {
   CLAUDE_SONNET: "claude-sonnet-4-5-20250929",
   CLAUDE_HAIKU: "claude-haiku-4-5",
-  PERPLEXITY_SONAR: "llama-3.1-sonar-large-128k-online",
+  PERPLEXITY_SONAR: "sonar-pro",
 } as const;
 
 /**

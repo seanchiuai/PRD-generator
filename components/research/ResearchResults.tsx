@@ -17,15 +17,16 @@ interface TechOption {
 interface ResearchResultsProps {
   category: string;
   options: TechOption[];
+  reasoning?: string;
 }
 
-export function ResearchResults({ category, options }: ResearchResultsProps) {
+export function ResearchResults({ category, options, reasoning }: ResearchResultsProps) {
   return (
     <Card>
       <CardHeader>
         <CardTitle>{category}</CardTitle>
         <CardDescription>
-          Top {options.length} recommendations for your product
+          {reasoning || `Top ${options.length} recommendations for your product`}
         </CardDescription>
       </CardHeader>
       <CardContent>

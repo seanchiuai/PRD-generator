@@ -43,13 +43,14 @@ export default function SelectionPage() {
   // Detect if the stack was auto-selected
   const isAutoSelected = conversation?.selection?.autoSelected || false;
 
-  const categories = [
-    { name: "Frontend Framework", key: "frontend" },
-    { name: "Backend Framework", key: "backend" },
-    { name: "Database", key: "database" },
-    { name: "Authentication", key: "authentication" },
-    { name: "Hosting Platform", key: "hosting" },
-  ];
+  // Dynamically build categories from queriesGenerated or researchResults
+  const categories = conversation?.queriesGenerated?.map(q => ({
+    key: q.category,
+    name: q.category.charAt(0).toUpperCase() + q.category.slice(1).replace(/-/g, ' '),
+  })) || Object.keys(conversation?.researchResults || {}).map(key => ({
+    key,
+    name: key.charAt(0).toUpperCase() + key.slice(1).replace(/-/g, ' '),
+  })) || [];
 
   // Load existing selections
   useEffect(() => {
@@ -124,7 +125,9 @@ export default function SelectionPage() {
     setSelections(newSelections);
 
     // Save to Convex
-    const options = (conversation?.researchResults as any)?.[category] || [];
+    const categoryData = (conversation?.researchResults as any)?.[category];
+    // Handle both old format (array) and new format ({ options, reasoning })
+    const options = Array.isArray(categoryData) ? categoryData : (categoryData?.options || []);
     await saveSelection({
       conversationId,
       category,
@@ -266,7 +269,11 @@ export default function SelectionPage() {
         {/* Category Sections */}
         <div className="space-y-12">
           {categories.map((cat) => {
-            const options = (conversation.researchResults as any)?.[cat.key];
+            const categoryData = (conversation.researchResults as any)?.[cat.key];
+            if (!categoryData) return null;
+
+            // Handle both old format (array) and new format ({ options, reasoning })
+            const options = Array.isArray(categoryData) ? categoryData : categoryData.options;
             if (!options || options.length === 0) return null;
 
             return (

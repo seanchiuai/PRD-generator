@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { perplexity, AI_MODELS } from "@/lib/ai-clients";
+import { perplexity, anthropic, AI_MODELS } from "@/lib/ai-clients";
 import { handleAPIError, handleValidationError } from "@/lib/api-error-handler";
 import { logger } from "@/lib/logger";
 import { withAuth } from "@/lib/middleware/withAuth";
@@ -12,23 +12,158 @@ interface ProductContext {
   answers: Record<string, string>;
 }
 
-// Build context-aware queries
-function buildCategoryQuery(category: string, context: ProductContext): string {
-  const { productName, description, targetAudience } = context;
+interface ResearchQuery {
+  category: string;
+  query: string;
+  reasoning: string;
+}
 
-  const queries: Record<string, string> = {
-    frontend: `For a ${productName} (${description}) targeting ${targetAudience}, recommend the top 3 frontend frameworks or libraries in 2025. Consider: modern best practices, performance, developer experience, and community support. For each option, provide: name, brief description, 3-4 pros, 3-4 cons, and current popularity/adoption rate. Format as structured data.`,
+// Use Claude to intelligently generate research queries based on product context
+async function generateResearchQueries(context: ProductContext): Promise<ResearchQuery[]> {
+  const { productName, description, targetAudience, coreFeatures, answers } = context;
 
-    backend: `For a ${productName} application, recommend the top 3 backend frameworks or runtime environments in 2025. Consider: scalability, performance, ease of development, and ecosystem. Product context: ${description}. For each option, provide: name, brief description, 3-4 pros, 3-4 cons, and popularity. Format as structured data.`,
+  const prompt = `You are a technical architect analyzing a product to determine what technology stack research is needed.
 
-    database: `For a ${productName} with these requirements: ${description}, recommend the top 3 database solutions in 2025. Consider: data structure needs, scalability, real-time capabilities, and cost. For each option, provide: name, brief description, 3-4 pros, 3-4 cons, and adoption rate. Format as structured data.`,
+Product Context:
+- Name: ${productName}
+- Description: ${description}
+- Target Audience: ${targetAudience}
+- Core Features: ${coreFeatures.join(", ")}
+- Additional Context: ${JSON.stringify(answers, null, 2)}
 
-    authentication: `For a ${productName} targeting ${targetAudience}, recommend the top 3 authentication solutions in 2025. Consider: security, user experience, ease of integration, and pricing. For each option, provide: name, brief description, 3-4 pros, 3-4 cons, and market position. Format as structured data.`,
+Your task is to generate targeted research queries for technology stack recommendations.
 
-    hosting: `For a ${productName} application, recommend the top 3 hosting/deployment platforms in 2025. Consider: scalability, pricing, developer experience, and infrastructure quality. For each option, provide: name, brief description, 3-4 pros, 3-4 cons, and popularity among similar products. Format as structured data.`,
-  };
+Consider these common categories, but ONLY include them if they're relevant to this specific product:
+- Frontend (web UI, mobile app, desktop app)
+- Backend (server, API, runtime)
+- Database (if data persistence is needed)
+- Authentication (if user accounts are needed)
+- Hosting/Deployment (infrastructure, cloud platforms)
+- External APIs/Services (if the product relies on third-party services instead of custom backend)
+- Other categories that might be relevant (e.g., real-time communication, payment processing, AI/ML services)
 
-  return queries[category] || "";
+For each relevant category, generate a specific research query that:
+1. Asks for the top 3 options for that category in 2025
+2. Includes product-specific context and requirements
+3. Requests structured data with: name, description, 3-4 pros, 3-4 cons, and popularity/adoption rate
+
+Generate a JSON array of research queries. Each query should have:
+- category: The tech stack category (e.g., "frontend", "database", "external-apis")
+- query: The detailed research query to send to Perplexity
+- reasoning: Brief explanation (1-2 sentences) of why this category is needed for this product
+
+Be smart about what's actually needed. For example:
+- A static marketing website might not need a database
+- A mobile app might not need traditional backend if it uses Firebase/Supabase
+- A data dashboard might need external API integrations instead of a custom backend`;
+
+  try {
+    console.log("Calling Claude to generate research queries...");
+
+    // Create AbortController for timeout
+    const abortController = new AbortController();
+    const timeoutId = setTimeout(() => abortController.abort(), 30000); // 30 second timeout
+
+    try {
+      const response = await anthropic.messages.create({
+        model: AI_MODELS.CLAUDE_SONNET,
+        max_tokens: 4096,
+        temperature: 0.3,
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+      }, {
+        signal: abortController.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      const content = response.content[0];
+      if (!content || content.type !== "text") {
+        throw new Error("Unexpected response type from Claude");
+      }
+
+      // Extract JSON from Claude's response
+      const text = content.text;
+      console.log("Claude response received, extracting queries...");
+
+      // Try code block first, then find any valid JSON array
+      let jsonMatch = text.match(/```json\n([\s\S]*?)\n```/);
+      if (!jsonMatch) {
+        // Find the first '[' and last ']' to capture the entire array
+        const firstBracket = text.indexOf('[');
+        const lastBracket = text.lastIndexOf(']');
+        if (firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket) {
+          const jsonStr = text.substring(firstBracket, lastBracket + 1);
+          jsonMatch = [jsonStr, jsonStr];
+        }
+      }
+
+      if (!jsonMatch) {
+        console.error("Failed to extract JSON from Claude response:", text);
+        logger.error("Failed to extract JSON from Claude response", { text });
+        throw new Error("Could not parse research queries from Claude");
+      }
+
+      const jsonStr = jsonMatch[1] || jsonMatch[0];
+
+      // Validate JSON string size to prevent DoS
+      if (jsonStr.length > 50000) {
+        throw new Error("Response too large to parse safely");
+      }
+
+      const queries = JSON.parse(jsonStr) as ResearchQuery[];
+
+      // Validate structure of parsed queries
+      if (!Array.isArray(queries)) {
+        throw new Error("Expected array of queries");
+      }
+
+      // Validate each query has required fields
+      queries.forEach((q, idx) => {
+        if (!q.category || !q.query || !q.reasoning) {
+          throw new Error(`Invalid query at index ${idx}: missing required fields`);
+        }
+      });
+
+      // Limit number of queries to prevent performance issues
+      if (queries.length > 20) {
+        logger.warn(
+          "Excessive queries generated",
+          `Limiting from ${queries.length} to 20 queries`,
+          { originalCount: queries.length }
+        );
+        return queries.slice(0, 20);
+      }
+
+      console.log(`Successfully parsed ${queries.length} research queries`);
+
+      logger.info(
+        "Generated research queries",
+        `Generated ${queries.length} queries for ${productName}`,
+        {
+          productName,
+          queryCount: queries.length,
+          categories: queries.map(q => q.category)
+        }
+      );
+
+      return queries;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  } catch (error) {
+    // Handle abort/timeout errors
+    if (error instanceof Error && error.name === 'AbortError') {
+      logger.error("Claude API request timed out after 30 seconds", error);
+      throw new Error("Claude API request timed out. Please try again.");
+    }
+    logger.error("Failed to generate research queries with Claude", error);
+    throw error;
+  }
 }
 
 // Parse Perplexity response into structured format
@@ -75,61 +210,159 @@ function parseResponse(content: string, _category: string): any[] {
   }
 }
 
-async function researchCategory(
-  category: string,
-  context: ProductContext
-): Promise<any[]> {
-  try {
-    const query = buildCategoryQuery(category, context);
+async function executeResearchQuery(
+  researchQuery: ResearchQuery
+): Promise<{ category: string; options: any[]; reasoning: string }> {
+  console.log(`Researching category: ${researchQuery.category}`);
 
+  // Create AbortController for timeout
+  const abortController = new AbortController();
+  const timeoutId = setTimeout(() => abortController.abort(), 20000); // 20 second timeout
+
+  try {
     const response = await perplexity.chat.completions.create({
       model: AI_MODELS.PERPLEXITY_SONAR,
       messages: [
         {
           role: "user",
-          content: query,
+          content: researchQuery.query,
         },
       ],
       max_tokens: 2048,
       temperature: 0.2,
-    });
+    }, {
+      signal: abortController.signal,
+    } as any);
+
+    clearTimeout(timeoutId);
 
     const content = response.choices[0]?.message?.content || "";
-    return parseResponse(content, category);
+    console.log(`Perplexity response for ${researchQuery.category}: ${content.substring(0, 200)}...`);
+    const options = parseResponse(content, researchQuery.category);
+    console.log(`Parsed ${options.length} options for ${researchQuery.category}`);
+
+    return {
+      category: researchQuery.category,
+      options,
+      reasoning: researchQuery.reasoning,
+    };
   } catch (error) {
-    logger.error(`Failed to research ${category}`, error, { category });
-    return [];
+    clearTimeout(timeoutId);
+
+    // Handle timeout specifically
+    if (error instanceof Error && error.name === 'AbortError') {
+      logger.warn(
+        "Perplexity API timeout",
+        `Timeout researching ${researchQuery.category}, returning empty results`,
+        { category: researchQuery.category }
+      );
+      console.warn(`Timeout researching ${researchQuery.category}, returning empty results`);
+    } else {
+      console.error(`Error researching ${researchQuery.category}:`, error);
+      logger.error(`Failed to research ${researchQuery.category}`, error, {
+        category: researchQuery.category,
+      });
+    }
+
+    return {
+      category: researchQuery.category,
+      options: [],
+      reasoning: researchQuery.reasoning,
+    };
   }
 }
 
 export const POST = withAuth(async (request) => {
+  console.log("=== Tech Stack Research API Called ===");
   try {
     const body = await request.json();
+    console.log("Request body received:", JSON.stringify(body, null, 2));
     const { productContext } = body as { productContext: ProductContext };
 
     if (!productContext) {
+      console.error("No product context provided");
       return handleValidationError("Product context required");
     }
 
-    // Research all categories in parallel
-    const categories = ["frontend", "backend", "database", "authentication", "hosting"];
+    console.log("Product context validated:", {
+      productName: productContext.productName,
+      description: productContext.description?.substring(0, 100),
+      targetAudience: productContext.targetAudience,
+      coreFeatures: productContext.coreFeatures,
+      answerCount: Object.keys(productContext.answers || {}).length
+    });
 
-    const results = await Promise.allSettled(
-      categories.map((category) => researchCategory(category, productContext))
+    logger.info(
+      "Starting tech stack research",
+      `Starting research for ${productContext.productName}`,
+      {
+        productName: productContext.productName,
+      }
     );
 
-    // Build structured results object
-    const researchResults: Record<string, any[]> = {};
+    // Step 1: Use Claude to intelligently determine what research queries are needed
+    const researchQueries = await generateResearchQueries(productContext);
 
-    categories.forEach((category, index) => {
-      const result = results[index];
-      if (result && result.status === "fulfilled" && result.value.length > 0) {
-        researchResults[category] = result.value;
+    if (researchQueries.length === 0) {
+      logger.warn(
+        "No research queries generated",
+        `Claude did not generate any research queries for ${productContext.productName}`,
+        {
+          productName: productContext.productName,
+        }
+      );
+      return NextResponse.json({
+        researchResults: {},
+        queriesGenerated: [],
+      });
+    }
+
+    // Step 2: Execute all research queries in parallel using Perplexity
+    const results = await Promise.allSettled(
+      researchQueries.map((query) => executeResearchQuery(query))
+    );
+
+    // Step 3: Build structured results object
+    const researchResults: Record<
+      string,
+      { options: any[]; reasoning: string }
+    > = {};
+    const queriesGenerated: Array<{ category: string; reasoning: string }> = [];
+
+    results.forEach((result) => {
+      if (result.status === "fulfilled") {
+        const { category, options, reasoning } = result.value;
+        queriesGenerated.push({ category, reasoning });
+
+        if (options.length > 0) {
+          researchResults[category] = {
+            options,
+            reasoning,
+          };
+        }
       }
     });
 
-    return NextResponse.json({ researchResults });
+    logger.info(
+      "Tech stack research completed",
+      `Completed research for ${productContext.productName}: ${Object.keys(researchResults).length} categories`,
+      {
+        productName: productContext.productName,
+        categoriesResearched: Object.keys(researchResults).length,
+        queriesGenerated: queriesGenerated.length,
+      }
+    );
+
+    console.log("=== Research Complete ===");
+    console.log(`Categories researched: ${Object.keys(researchResults).join(", ")}`);
+    console.log(`Total queries generated: ${queriesGenerated.length}`);
+
+    return NextResponse.json({
+      researchResults,
+      queriesGenerated,
+    });
   } catch (error) {
+    console.error("=== Research API Error ===", error);
     return handleAPIError(error, "complete research");
   }
 });
