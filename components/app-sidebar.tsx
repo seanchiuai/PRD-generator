@@ -4,7 +4,6 @@ import * as React from "react"
 import {
   HelpCircle,
   Component,
-  ListChecks,
   Settings,
 } from "lucide-react"
 
@@ -22,13 +21,7 @@ import {
 } from "@/components/ui/sidebar"
 
 const data = {
-  navMain: [
-    {
-      title: "Tasks",
-      url: "/tasks",
-      icon: ListChecks,
-    },
-  ],
+  navMain: [],
   navSecondary: [
     {
       title: "Settings",

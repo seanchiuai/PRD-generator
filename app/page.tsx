@@ -33,7 +33,7 @@ function RedirectToDashboard() {
         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-macaron-lavender to-macaron-mint flex items-center justify-center">
           <Sparkles className="w-8 h-8 text-secondary-foreground" />
         </div>
-        <h1 className="text-2xl font-display font-semibold mb-2">PRD Generator</h1>
+        <h1 className="text-2xl font-display font-semibold mb-2">VIBED</h1>
         <p className="text-muted-foreground">Redirecting to dashboard...</p>
       </div>
     </div>
@@ -67,7 +67,7 @@ function SignInForm() {
             </div>
           </div>
           <h1 className="text-5xl font-display font-bold mb-4 text-gradient-accent">
-            PRD Generator
+            VIBED
           </h1>
           <p className="text-xl text-muted-foreground max-w-md mx-auto">
             Create professional Product Requirements Documents with AI assistance
