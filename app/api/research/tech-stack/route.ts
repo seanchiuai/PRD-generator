@@ -211,13 +211,17 @@ function parseResponse(content: string, _category: string): any[] {
 }
 
 async function executeResearchQuery(
-  researchQuery: ResearchQuery
+  researchQuery: ResearchQuery,
+  retryCount = 0
 ): Promise<{ category: string; options: any[]; reasoning: string }> {
-  console.log(`Researching category: ${researchQuery.category}`);
+  const MAX_RETRIES = 2;
+  const RETRY_DELAY = 2000; // 2 seconds between retries
+
+  console.log(`Researching category: ${researchQuery.category}${retryCount > 0 ? ` (retry ${retryCount}/${MAX_RETRIES})` : ''}`);
 
   // Create AbortController for timeout
   const abortController = new AbortController();
-  const timeoutId = setTimeout(() => abortController.abort(), 20000); // 20 second timeout
+  const timeoutId = setTimeout(() => abortController.abort(), 30000); // Increased to 30 second timeout
 
   try {
     const response = await perplexity.chat.completions.create({
@@ -251,14 +255,29 @@ async function executeResearchQuery(
   } catch (error) {
     clearTimeout(timeoutId);
 
-    // Handle timeout specifically
-    if (error instanceof Error && error.name === 'AbortError') {
-      logger.warn(
-        "Perplexity API timeout",
-        `Timeout researching ${researchQuery.category}, returning empty results`,
-        { category: researchQuery.category }
-      );
-      console.warn(`Timeout researching ${researchQuery.category}, returning empty results`);
+    // Retry logic for aborted requests
+    if (error instanceof Error && (error.name === 'AbortError' || error.message.includes('aborted'))) {
+      if (retryCount < MAX_RETRIES) {
+        logger.warn(
+          "Perplexity API request aborted",
+          `Request aborted for ${researchQuery.category}, retrying (${retryCount + 1}/${MAX_RETRIES})`,
+          { category: researchQuery.category, retryCount }
+        );
+        console.warn(`Request aborted for ${researchQuery.category}, retrying in ${RETRY_DELAY}ms...`);
+
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+
+        // Retry the request
+        return executeResearchQuery(researchQuery, retryCount + 1);
+      } else {
+        logger.warn(
+          "Perplexity API max retries reached",
+          `Max retries reached for ${researchQuery.category}, returning empty results`,
+          { category: researchQuery.category }
+        );
+        console.warn(`Max retries reached for ${researchQuery.category}, returning empty results`);
+      }
     } else {
       console.error(`Error researching ${researchQuery.category}:`, error);
       logger.error(`Failed to research ${researchQuery.category}`, error, {
@@ -317,10 +336,35 @@ export const POST = withAuth(async (request) => {
       });
     }
 
-    // Step 2: Execute all research queries in parallel using Perplexity
-    const results = await Promise.allSettled(
-      researchQueries.map((query) => executeResearchQuery(query))
-    );
+    // Step 2: Execute research queries sequentially to avoid rate limits
+    // Add a small delay between requests to prevent API overload
+    const DELAY_BETWEEN_REQUESTS = 1000; // 1 second delay
+    const results: Array<{ category: string; options: any[]; reasoning: string }> = [];
+
+    console.log(`Processing ${researchQueries.length} research queries sequentially...`);
+
+    for (let i = 0; i < researchQueries.length; i++) {
+      const query = researchQueries[i];
+      console.log(`[${i + 1}/${researchQueries.length}] Processing: ${query.category}`);
+
+      try {
+        const result = await executeResearchQuery(query);
+        results.push(result);
+
+        // Add delay between requests (except after the last one)
+        if (i < researchQueries.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_REQUESTS));
+        }
+      } catch (error) {
+        logger.error(`Failed to execute research query for ${query.category}`, error);
+        // Continue with other queries even if one fails
+        results.push({
+          category: query.category,
+          options: [],
+          reasoning: query.reasoning,
+        });
+      }
+    }
 
     // Step 3: Build structured results object
     const researchResults: Record<
@@ -330,16 +374,14 @@ export const POST = withAuth(async (request) => {
     const queriesGenerated: Array<{ category: string; reasoning: string }> = [];
 
     results.forEach((result) => {
-      if (result.status === "fulfilled") {
-        const { category, options, reasoning } = result.value;
-        queriesGenerated.push({ category, reasoning });
+      const { category, options, reasoning } = result;
+      queriesGenerated.push({ category, reasoning });
 
-        if (options.length > 0) {
-          researchResults[category] = {
-            options,
-            reasoning,
-          };
-        }
+      if (options.length > 0) {
+        researchResults[category] = {
+          options,
+          reasoning,
+        };
       }
     });
 
