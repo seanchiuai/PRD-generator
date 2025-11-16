@@ -12,6 +12,7 @@ import { SortControls } from "@/components/dashboard/SortControls";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { useToast } from "@/hooks/use-toast";
 import { Plus } from "lucide-react";
+import { ProfileMenu } from "@/components/dashboard/ProfileMenu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -94,34 +95,42 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-8">
-      {/* Header */}
-      <div className="flex justify-between items-center animate-fade-in-up">
-        <div>
-          <h1 className="text-4xl font-display font-bold text-gradient-primary">
-            My PRDs
-          </h1>
-          {stats && (
-            <p className="text-muted-foreground mt-2 text-lg">
-              <span className="inline-flex items-center gap-2">
-                <span className="px-3 py-1 rounded-full bg-macaron-lavender/20 text-secondary-foreground font-medium">
-                  {stats.total} total
-                </span>
-                <span className="px-3 py-1 rounded-full bg-macaron-mint/20 text-primary-foreground font-medium">
-                  {stats.completed} completed
-                </span>
-              </span>
-            </p>
-          )}
+    <div className="min-h-screen">
+      {/* Top Navigation Bar */}
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-end">
+          <ProfileMenu />
         </div>
-        <Button
-          onClick={() => router.push("/chat/new")}
-          className="bg-gradient-to-r from-macaron-lavender to-macaron-mint text-secondary-foreground hover:shadow-xl hover:scale-105 transition-all duration-300 font-display font-semibold px-6 py-6 text-base rounded-2xl"
-        >
-          <Plus className="h-5 w-5 mr-2" />
-          New PRD
-        </Button>
       </div>
+
+      <div className="max-w-7xl mx-auto p-6 space-y-8">
+        {/* Header */}
+        <div className="flex justify-between items-center animate-fade-in-up">
+          <div>
+            <h1 className="text-4xl font-display font-bold text-gradient-primary">
+              My PRDs
+            </h1>
+            {stats && (
+              <p className="text-muted-foreground mt-2 text-lg">
+                <span className="inline-flex items-center gap-2">
+                  <span className="px-3 py-1 rounded-full bg-macaron-lavender/20 text-secondary-foreground font-medium">
+                    {stats.total} total
+                  </span>
+                  <span className="px-3 py-1 rounded-full bg-macaron-mint/20 text-primary-foreground font-medium">
+                    {stats.completed} completed
+                  </span>
+                </span>
+              </p>
+            )}
+          </div>
+          <Button
+            onClick={() => router.push("/chat/new")}
+            className="bg-gradient-to-r from-macaron-lavender to-macaron-mint text-secondary-foreground hover:shadow-xl hover:scale-105 transition-all duration-300 font-display font-semibold px-6 py-6 text-base rounded-2xl"
+          >
+            <Plus className="h-5 w-5 mr-2" />
+            New PRD
+          </Button>
+        </div>
 
       {/* Search and Sort */}
       {prds.length > 0 && (
@@ -144,24 +153,25 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete PRD?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. The PRD and all associated data will be permanently
-              deleted.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete PRD?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. The PRD and all associated data will be permanently
+                deleted.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </div>
   );
 }
