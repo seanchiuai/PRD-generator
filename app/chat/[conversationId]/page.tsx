@@ -113,13 +113,38 @@ export default function ChatPage() {
         projectDescription: projectDescription.trim(),
       });
 
+      // Generate initial discovery message using Anthropic API
+      const response = await fetch("/api/conversation/initial-message", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          projectName: projectName.trim(),
+          projectDescription: projectDescription.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate initial message");
+      }
+
+      const { message } = await response.json();
+
+      // Add the generated message to the conversation
+      await addMessage({
+        conversationId,
+        role: "assistant",
+        content: message,
+      });
+
       toast({
         title: "Project saved",
-        description: "Your project has been created in the database.",
+        description: "Your project has been created. Let's start the discovery!",
       });
 
       // The mutation updates the stage to "discovery", so the page will re-render
-      // showing the discovery chat
+      // showing the discovery chat with the generated initial message
     } catch (error) {
       console.error("Failed to save project setup:", error);
       toast({
@@ -257,11 +282,18 @@ export default function ChatPage() {
           </p>
         </div>
 
-        <ChatContainer messages={conversation.messages} isTyping={isTyping} />
+        <ChatContainer
+          messages={conversation.messages}
+          isTyping={isTyping}
+          isLoadingInitialMessage={isSavingSetup && conversation.messages.length === 0}
+        />
 
         <div className="border-t bg-background">
           <div className="p-4">
-            <ChatInput onSendMessage={handleSendMessage} disabled={isTyping} />
+            <ChatInput
+              onSendMessage={handleSendMessage}
+              disabled={isTyping || isSavingSetup}
+            />
           </div>
         </div>
       </div>

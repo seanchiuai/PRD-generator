@@ -5,7 +5,7 @@ import { SignUpButton } from "@clerk/nextjs";
 import { SignInButton } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Sparkles, FileText, Zap, ArrowRight, Box, Layers, Wand2 } from "lucide-react";
+import { Sparkles, FileText, ArrowRight, Box, Layers, Wand2 } from "lucide-react";
 
 export default function Home() {
   return (

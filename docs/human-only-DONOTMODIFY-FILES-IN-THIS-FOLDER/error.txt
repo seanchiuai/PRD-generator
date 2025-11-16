@@ -1,0 +1,385 @@
+seanchiu@Seans-MacBook-Pro PRD-generator % 
+npm run dev
+npm run dev
+
+> my-app@0.1.0 dev
+> npm-run-all --parallel dev:frontend dev:backend
+
+
+> my-app@0.1.0 dev:frontend
+> NODE_OPTIONS='--max-http-header-size=32768' next dev --turbopack
+
+
+> my-app@0.1.0 dev:backend
+> convex dev --once
+
+   ▲ Next.js 15.5.6 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://10.0.0.16:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Compiled middleware in 273ms
+ ✓ Ready in 1143ms
+A patch update is available for Convex (1.29.0 → 1.29.1)
+Changelog: https://github.com/get-convex/convex-js/blob/main/CHANGELOG.md#changelog
+✔ 22:12:27 Convex functions ready! (2.14s)
+ ○ Compiling / ...
+ ✓ Compiled / in 1582ms
+ GET / 200 in 1828ms
+ POST / 200 in 47ms
+ ✓ Compiled /dashboard in 387ms
+ GET /dashboard 200 in 424ms
+ GET /dashboard 200 in 31ms
+ ✓ Compiled /chat/new in 432ms
+ GET /chat/new 200 in 493ms
+ ○ Compiling /chat/[conversationId] ...
+ ✓ Compiled /chat/[conversationId] in 657ms
+ GET /chat/jh7ebycdfppe4jv04qxmxbe5h17vgwpw 200 in 1071ms
+ GET /chat/jh70gd3cc2g5psyavrcjts50vd7vg83v 200 in 1046ms
+ ○ Compiling /api/conversation/initial-message ...
+ ✓ Compiled /api/conversation/initial-message in 523ms
+[INFO] [2025-11-16T06:21:50.755Z] Initial Message Generated: Generated discovery greeting {
+  userId: 'user_35Izv72DRO02H5tAYgjnwND5VNZ',
+  projectName: 'Bookmark AI'
+}
+ POST /api/conversation/initial-message 200 in 3107ms
+ ✓ Compiled /api/conversation/message in 337ms
+[INFO] [2025-11-16T06:23:40.345Z] Conversation Message: Message processed successfully { userId: 'user_35Izv72DRO02H5tAYgjnwND5VNZ', messageCount: 2 }
+ POST /api/conversation/message 200 in 3108ms
+ ✓ Compiled in 164ms
+[INFO] [2025-11-16T06:24:04.837Z] Conversation Message: Message processed successfully { userId: 'user_35Izv72DRO02H5tAYgjnwND5VNZ', messageCount: 4 }
+ POST /api/conversation/message 200 in 2193ms
+ ✓ Compiled in 113ms
+[INFO] [2025-11-16T06:24:55.315Z] Conversation Message: Message processed successfully { userId: 'user_35Izv72DRO02H5tAYgjnwND5VNZ', messageCount: 6 }
+ POST /api/conversation/message 200 in 2631ms
+[INFO] [2025-11-16T06:25:33.746Z] Conversation Message: Message processed successfully { userId: 'user_35Izv72DRO02H5tAYgjnwND5VNZ', messageCount: 8 }
+ POST /api/conversation/message 200 in 2109ms
+[INFO] [2025-11-16T06:26:00.383Z] Conversation Message: Message processed successfully { userId: 'user_35Izv72DRO02H5tAYgjnwND5VNZ', messageCount: 10 }
+ POST /api/conversation/message 200 in 2233ms
+[INFO] [2025-11-16T06:26:09.153Z] Conversation Message: Message processed successfully { userId: 'user_35Izv72DRO02H5tAYgjnwND5VNZ', messageCount: 12 }
+ POST /api/conversation/message 200 in 2131ms
+ ✓ Compiled /api/conversation/extract-context in 356ms
+ POST /api/conversation/extract-context 200 in 6651ms
+ ✓ Compiled /chat/[conversationId]/questions in 441ms
+ GET /chat/jh70gd3cc2g5psyavrcjts50vd7vg83v/questions 200 in 845ms
+ ✓ Compiled /api/questions/generate in 176ms
+ POST /api/questions/generate 200 in 13451ms
+ POST /api/questions/generate 200 in 13586ms
+ POST /api/questions/generate 200 in 14638ms
+ ✓ Compiled /chat/[conversationId]/research in 416ms
+ GET /chat/jh70gd3cc2g5psyavrcjts50vd7vg83v/research 200 in 775ms
+ ✓ Compiled /api/research/tech-stack in 116ms
+[ERROR] [2025-11-16T06:27:40.060Z] Failed to research backend: {
+  message: "400 Invalid model 'llama-3.1-sonar-large-128k-online'. Permitted models can be found in the documentation at https://docs.perplexity.ai/getting-started/models.",
+  stack: "Error: 400 Invalid model 'llama-3.1-sonar-large-128k-online'. Permitted models can be found in the documentation at https://docs.perplexity.ai/getting-started/models.\n" +
+    '    at APIError.generate (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:158:20)\n' +
+    '    at OpenAI.makeStatusError (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:8973:167)\n' +
+    '    at OpenAI.makeRequest (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:9144:30)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n' +
+    '    at async researchCategory (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/[root-of-the-server]__e99dcacc._.js:345:26)\n' +
+    '    at async Promise.allSettled (index 1)\n' +
+    '    at async /Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/[root-of-the-server]__e99dcacc._.js:380:25\n' +
+    '    at async AppRouteRouteModule.do (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:38696)\n' +
+    '    at async AppRouteRouteModule.handle (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45978)\n' +
+    '    at async responseGenerator (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14770:38)\n' +
+    '    at async AppRouteRouteModule.handleResponse (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187643)\n' +
+    '    at async handleResponse (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14832:32)\n' +
+    '    at async handler (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14884:13)\n' +
+    '    at async DevServer.renderToResponseWithComponentsImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1422:9)\n' +
+    '    at async DevServer.renderPageComponent (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1474:24)\n' +
+    '    at async DevServer.renderToResponseImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1514:32)\n' +
+    '    at async DevServer.pipeImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1025:25)\n' +
+    '    at async NextNodeServer.handleCatchallRenderRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/next-server.js:393:17)\n' +
+    '    at async DevServer.handleRequestImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:916:17)\n' +
+    '    at async /Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/dev/next-dev-server.js:399:20\n' +
+    '    at async Span.traceAsyncFn (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/trace/trace.js:157:20)\n' +
+    '    at async DevServer.handleRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/dev/next-dev-server.js:395:24)\n' +
+    '    at async invokeRender (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:240:21)\n' +
+    '    at async handleRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:437:24)\n' +
+    '    at async requestHandlerImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:485:13)\n' +
+    '    at async Server.requestListener (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/start-server.js:226:13)',
+  category: 'backend'
+}
+[ERROR] [2025-11-16T06:27:40.065Z] Failed to research frontend: {
+  message: "400 Invalid model 'llama-3.1-sonar-large-128k-online'. Permitted models can be found in the documentation at https://docs.perplexity.ai/getting-started/models.",
+  stack: "Error: 400 Invalid model 'llama-3.1-sonar-large-128k-online'. Permitted models can be found in the documentation at https://docs.perplexity.ai/getting-started/models.\n" +
+    '    at APIError.generate (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:158:20)\n' +
+    '    at OpenAI.makeStatusError (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:8973:167)\n' +
+    '    at OpenAI.makeRequest (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:9144:30)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n' +
+    '    at async researchCategory (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/[root-of-the-server]__e99dcacc._.js:345:26)\n' +
+    '    at async Promise.allSettled (index 0)\n' +
+    '    at async /Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/[root-of-the-server]__e99dcacc._.js:380:25\n' +
+    '    at async AppRouteRouteModule.do (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:38696)\n' +
+    '    at async AppRouteRouteModule.handle (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45978)\n' +
+    '    at async responseGenerator (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14770:38)\n' +
+    '    at async AppRouteRouteModule.handleResponse (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187643)\n' +
+    '    at async handleResponse (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14832:32)\n' +
+    '    at async handler (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14884:13)\n' +
+    '    at async DevServer.renderToResponseWithComponentsImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1422:9)\n' +
+    '    at async DevServer.renderPageComponent (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1474:24)\n' +
+    '    at async DevServer.renderToResponseImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1514:32)\n' +
+    '    at async DevServer.pipeImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1025:25)\n' +
+    '    at async NextNodeServer.handleCatchallRenderRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/next-server.js:393:17)\n' +
+    '    at async DevServer.handleRequestImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:916:17)\n' +
+    '    at async /Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/dev/next-dev-server.js:399:20\n' +
+    '    at async Span.traceAsyncFn (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/trace/trace.js:157:20)\n' +
+    '    at async DevServer.handleRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/dev/next-dev-server.js:395:24)\n' +
+    '    at async invokeRender (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:240:21)\n' +
+    '    at async handleRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:437:24)\n' +
+    '    at async requestHandlerImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:485:13)\n' +
+    '    at async Server.requestListener (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/start-server.js:226:13)',
+  category: 'frontend'
+}
+[ERROR] [2025-11-16T06:27:40.071Z] Failed to research database: {
+  message: "400 Invalid model 'llama-3.1-sonar-large-128k-online'. Permitted models can be found in the documentation at https://docs.perplexity.ai/getting-started/models.",
+  stack: "Error: 400 Invalid model 'llama-3.1-sonar-large-128k-online'. Permitted models can be found in the documentation at https://docs.perplexity.ai/getting-started/models.\n" +
+    '    at APIError.generate (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:158:20)\n' +
+    '    at OpenAI.makeStatusError (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:8973:167)\n' +
+    '    at OpenAI.makeRequest (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:9144:30)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n' +
+    '    at async researchCategory (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/[root-of-the-server]__e99dcacc._.js:345:26)\n' +
+    '    at async Promise.allSettled (index 2)\n' +
+    '    at async /Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/[root-of-the-server]__e99dcacc._.js:380:25\n' +
+    '    at async AppRouteRouteModule.do (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:38696)\n' +
+    '    at async AppRouteRouteModule.handle (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45978)\n' +
+    '    at async responseGenerator (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14770:38)\n' +
+    '    at async AppRouteRouteModule.handleResponse (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187643)\n' +
+    '    at async handleResponse (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14832:32)\n' +
+    '    at async handler (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14884:13)\n' +
+    '    at async DevServer.renderToResponseWithComponentsImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1422:9)\n' +
+    '    at async DevServer.renderPageComponent (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1474:24)\n' +
+    '    at async DevServer.renderToResponseImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1514:32)\n' +
+    '    at async DevServer.pipeImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1025:25)\n' +
+    '    at async NextNodeServer.handleCatchallRenderRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/next-server.js:393:17)\n' +
+    '    at async DevServer.handleRequestImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:916:17)\n' +
+    '    at async /Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/dev/next-dev-server.js:399:20\n' +
+    '    at async Span.traceAsyncFn (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/trace/trace.js:157:20)\n' +
+    '    at async DevServer.handleRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/dev/next-dev-server.js:395:24)\n' +
+    '    at async invokeRender (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:240:21)\n' +
+    '    at async handleRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:437:24)\n' +
+    '    at async requestHandlerImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:485:13)\n' +
+    '    at async Server.requestListener (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/start-server.js:226:13)',
+  category: 'database'
+}
+[ERROR] [2025-11-16T06:27:40.075Z] Failed to research hosting: {
+  message: "400 Invalid model 'llama-3.1-sonar-large-128k-online'. Permitted models can be found in the documentation at https://docs.perplexity.ai/getting-started/models.",
+  stack: "Error: 400 Invalid model 'llama-3.1-sonar-large-128k-online'. Permitted models can be found in the documentation at https://docs.perplexity.ai/getting-started/models.\n" +
+    '    at APIError.generate (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:158:20)\n' +
+    '    at OpenAI.makeStatusError (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:8973:167)\n' +
+    '    at OpenAI.makeRequest (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:9144:30)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n' +
+    '    at async researchCategory (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/[root-of-the-server]__e99dcacc._.js:345:26)\n' +
+    '    at async Promise.allSettled (index 4)\n' +
+    '    at async /Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/[root-of-the-server]__e99dcacc._.js:380:25\n' +
+    '    at async AppRouteRouteModule.do (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:38696)\n' +
+    '    at async AppRouteRouteModule.handle (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45978)\n' +
+    '    at async responseGenerator (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14770:38)\n' +
+    '    at async AppRouteRouteModule.handleResponse (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187643)\n' +
+    '    at async handleResponse (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14832:32)\n' +
+    '    at async handler (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14884:13)\n' +
+    '    at async DevServer.renderToResponseWithComponentsImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1422:9)\n' +
+    '    at async DevServer.renderPageComponent (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1474:24)\n' +
+    '    at async DevServer.renderToResponseImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1514:32)\n' +
+    '    at async DevServer.pipeImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1025:25)\n' +
+    '    at async NextNodeServer.handleCatchallRenderRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/next-server.js:393:17)\n' +
+    '    at async DevServer.handleRequestImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:916:17)\n' +
+    '    at async /Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/dev/next-dev-server.js:399:20\n' +
+    '    at async Span.traceAsyncFn (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/trace/trace.js:157:20)\n' +
+    '    at async DevServer.handleRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/dev/next-dev-server.js:395:24)\n' +
+    '    at async invokeRender (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:240:21)\n' +
+    '    at async handleRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:437:24)\n' +
+    '    at async requestHandlerImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:485:13)\n' +
+    '    at async Server.requestListener (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/start-server.js:226:13)',
+  category: 'hosting'
+}
+[ERROR] [2025-11-16T06:27:40.081Z] Failed to research backend: {
+  message: "400 Invalid model 'llama-3.1-sonar-large-128k-online'. Permitted models can be found in the documentation at https://docs.perplexity.ai/getting-started/models.",
+  stack: "Error: 400 Invalid model 'llama-3.1-sonar-large-128k-online'. Permitted models can be found in the documentation at https://docs.perplexity.ai/getting-started/models.\n" +
+    '    at APIError.generate (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:158:20)\n' +
+    '    at OpenAI.makeStatusError (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:8973:167)\n' +
+    '    at OpenAI.makeRequest (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:9144:30)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n' +
+    '    at async researchCategory (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/[root-of-the-server]__e99dcacc._.js:345:26)\n' +
+    '    at async Promise.allSettled (index 1)\n' +
+    '    at async /Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/[root-of-the-server]__e99dcacc._.js:380:25\n' +
+    '    at async AppRouteRouteModule.do (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:38696)\n' +
+    '    at async AppRouteRouteModule.handle (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45978)\n' +
+    '    at async responseGenerator (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14770:38)\n' +
+    '    at async AppRouteRouteModule.handleResponse (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187643)\n' +
+    '    at async handleResponse (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14832:32)\n' +
+    '    at async handler (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14884:13)\n' +
+    '    at async DevServer.renderToResponseWithComponentsImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1422:9)\n' +
+    '    at async DevServer.renderPageComponent (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1474:24)\n' +
+    '    at async DevServer.renderToResponseImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1514:32)\n' +
+    '    at async DevServer.pipeImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1025:25)\n' +
+    '    at async NextNodeServer.handleCatchallRenderRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/next-server.js:393:17)\n' +
+    '    at async DevServer.handleRequestImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:916:17)\n' +
+    '    at async /Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/dev/next-dev-server.js:399:20\n' +
+    '    at async Span.traceAsyncFn (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/trace/trace.js:157:20)\n' +
+    '    at async DevServer.handleRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/dev/next-dev-server.js:395:24)\n' +
+    '    at async invokeRender (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:240:21)\n' +
+    '    at async handleRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:437:24)\n' +
+    '    at async requestHandlerImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:485:13)\n' +
+    '    at async Server.requestListener (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/start-server.js:226:13)',
+  category: 'backend'
+}
+[ERROR] [2025-11-16T06:27:40.084Z] Failed to research frontend: {
+  message: "400 Invalid model 'llama-3.1-sonar-large-128k-online'. Permitted models can be found in the documentation at https://docs.perplexity.ai/getting-started/models.",
+  stack: "Error: 400 Invalid model 'llama-3.1-sonar-large-128k-online'. Permitted models can be found in the documentation at https://docs.perplexity.ai/getting-started/models.\n" +
+    '    at APIError.generate (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:158:20)\n' +
+    '    at OpenAI.makeStatusError (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:8973:167)\n' +
+    '    at OpenAI.makeRequest (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:9144:30)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n' +
+    '    at async researchCategory (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/[root-of-the-server]__e99dcacc._.js:345:26)\n' +
+    '    at async Promise.allSettled (index 0)\n' +
+    '    at async /Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/[root-of-the-server]__e99dcacc._.js:380:25\n' +
+    '    at async AppRouteRouteModule.do (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:38696)\n' +
+    '    at async AppRouteRouteModule.handle (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45978)\n' +
+    '    at async responseGenerator (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14770:38)\n' +
+    '    at async AppRouteRouteModule.handleResponse (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187643)\n' +
+    '    at async handleResponse (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14832:32)\n' +
+    '    at async handler (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14884:13)\n' +
+    '    at async DevServer.renderToResponseWithComponentsImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1422:9)\n' +
+    '    at async DevServer.renderPageComponent (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1474:24)\n' +
+    '    at async DevServer.renderToResponseImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1514:32)\n' +
+    '    at async DevServer.pipeImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1025:25)\n' +
+    '    at async NextNodeServer.handleCatchallRenderRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/next-server.js:393:17)\n' +
+    '    at async DevServer.handleRequestImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:916:17)\n' +
+    '    at async /Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/dev/next-dev-server.js:399:20\n' +
+    '    at async Span.traceAsyncFn (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/trace/trace.js:157:20)\n' +
+    '    at async DevServer.handleRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/dev/next-dev-server.js:395:24)\n' +
+    '    at async invokeRender (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:240:21)\n' +
+    '    at async handleRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:437:24)\n' +
+    '    at async requestHandlerImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:485:13)\n' +
+    '    at async Server.requestListener (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/start-server.js:226:13)',
+  category: 'frontend'
+}
+[ERROR] [2025-11-16T06:27:40.094Z] Failed to research authentication: {
+  message: "400 Invalid model 'llama-3.1-sonar-large-128k-online'. Permitted models can be found in the documentation at https://docs.perplexity.ai/getting-started/models.",
+  stack: "Error: 400 Invalid model 'llama-3.1-sonar-large-128k-online'. Permitted models can be found in the documentation at https://docs.perplexity.ai/getting-started/models.\n" +
+    '    at APIError.generate (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:158:20)\n' +
+    '    at OpenAI.makeStatusError (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:8973:167)\n' +
+    '    at OpenAI.makeRequest (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:9144:30)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n' +
+    '    at async researchCategory (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/[root-of-the-server]__e99dcacc._.js:345:26)\n' +
+    '    at async Promise.allSettled (index 3)\n' +
+    '    at async /Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/[root-of-the-server]__e99dcacc._.js:380:25\n' +
+    '    at async AppRouteRouteModule.do (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:38696)\n' +
+    '    at async AppRouteRouteModule.handle (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45978)\n' +
+    '    at async responseGenerator (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14770:38)\n' +
+    '    at async AppRouteRouteModule.handleResponse (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187643)\n' +
+    '    at async handleResponse (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14832:32)\n' +
+    '    at async handler (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14884:13)\n' +
+    '    at async DevServer.renderToResponseWithComponentsImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1422:9)\n' +
+    '    at async DevServer.renderPageComponent (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1474:24)\n' +
+    '    at async DevServer.renderToResponseImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1514:32)\n' +
+    '    at async DevServer.pipeImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1025:25)\n' +
+    '    at async NextNodeServer.handleCatchallRenderRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/next-server.js:393:17)\n' +
+    '    at async DevServer.handleRequestImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:916:17)\n' +
+    '    at async /Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/dev/next-dev-server.js:399:20\n' +
+    '    at async Span.traceAsyncFn (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/trace/trace.js:157:20)\n' +
+    '    at async DevServer.handleRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/dev/next-dev-server.js:395:24)\n' +
+    '    at async invokeRender (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:240:21)\n' +
+    '    at async handleRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:437:24)\n' +
+    '    at async requestHandlerImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:485:13)\n' +
+    '    at async Server.requestListener (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/start-server.js:226:13)',
+  category: 'authentication'
+}
+ POST /api/research/tech-stack 200 in 1093ms
+[ERROR] [2025-11-16T06:27:40.098Z] Failed to research hosting: {
+  message: "400 Invalid model 'llama-3.1-sonar-large-128k-online'. Permitted models can be found in the documentation at https://docs.perplexity.ai/getting-started/models.",
+  stack: "Error: 400 Invalid model 'llama-3.1-sonar-large-128k-online'. Permitted models can be found in the documentation at https://docs.perplexity.ai/getting-started/models.\n" +
+    '    at APIError.generate (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:158:20)\n' +
+    '    at OpenAI.makeStatusError (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:8973:167)\n' +
+    '    at OpenAI.makeRequest (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:9144:30)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n' +
+    '    at async researchCategory (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/[root-of-the-server]__e99dcacc._.js:345:26)\n' +
+    '    at async Promise.allSettled (index 4)\n' +
+    '    at async /Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/[root-of-the-server]__e99dcacc._.js:380:25\n' +
+    '    at async AppRouteRouteModule.do (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:38696)\n' +
+    '    at async AppRouteRouteModule.handle (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45978)\n' +
+    '    at async responseGenerator (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14770:38)\n' +
+    '    at async AppRouteRouteModule.handleResponse (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187643)\n' +
+    '    at async handleResponse (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14832:32)\n' +
+    '    at async handler (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14884:13)\n' +
+    '    at async DevServer.renderToResponseWithComponentsImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1422:9)\n' +
+    '    at async DevServer.renderPageComponent (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1474:24)\n' +
+    '    at async DevServer.renderToResponseImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1514:32)\n' +
+    '    at async DevServer.pipeImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1025:25)\n' +
+    '    at async NextNodeServer.handleCatchallRenderRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/next-server.js:393:17)\n' +
+    '    at async DevServer.handleRequestImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:916:17)\n' +
+    '    at async /Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/dev/next-dev-server.js:399:20\n' +
+    '    at async Span.traceAsyncFn (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/trace/trace.js:157:20)\n' +
+    '    at async DevServer.handleRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/dev/next-dev-server.js:395:24)\n' +
+    '    at async invokeRender (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:240:21)\n' +
+    '    at async handleRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:437:24)\n' +
+    '    at async requestHandlerImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:485:13)\n' +
+    '    at async Server.requestListener (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/start-server.js:226:13)',
+  category: 'hosting'
+}
+[ERROR] [2025-11-16T06:27:40.099Z] Failed to research database: {
+  message: "400 Invalid model 'llama-3.1-sonar-large-128k-online'. Permitted models can be found in the documentation at https://docs.perplexity.ai/getting-started/models.",
+  stack: "Error: 400 Invalid model 'llama-3.1-sonar-large-128k-online'. Permitted models can be found in the documentation at https://docs.perplexity.ai/getting-started/models.\n" +
+    '    at APIError.generate (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:158:20)\n' +
+    '    at OpenAI.makeStatusError (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:8973:167)\n' +
+    '    at OpenAI.makeRequest (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:9144:30)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n' +
+    '    at async researchCategory (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/[root-of-the-server]__e99dcacc._.js:345:26)\n' +
+    '    at async Promise.allSettled (index 2)\n' +
+    '    at async /Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/[root-of-the-server]__e99dcacc._.js:380:25\n' +
+    '    at async AppRouteRouteModule.do (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:38696)\n' +
+    '    at async AppRouteRouteModule.handle (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45978)\n' +
+    '    at async responseGenerator (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14770:38)\n' +
+    '    at async AppRouteRouteModule.handleResponse (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187643)\n' +
+    '    at async handleResponse (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14832:32)\n' +
+    '    at async handler (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14884:13)\n' +
+    '    at async DevServer.renderToResponseWithComponentsImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1422:9)\n' +
+    '    at async DevServer.renderPageComponent (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1474:24)\n' +
+    '    at async DevServer.renderToResponseImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1514:32)\n' +
+    '    at async DevServer.pipeImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1025:25)\n' +
+    '    at async NextNodeServer.handleCatchallRenderRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/next-server.js:393:17)\n' +
+    '    at async DevServer.handleRequestImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:916:17)\n' +
+    '    at async /Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/dev/next-dev-server.js:399:20\n' +
+    '    at async Span.traceAsyncFn (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/trace/trace.js:157:20)\n' +
+    '    at async DevServer.handleRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/dev/next-dev-server.js:395:24)\n' +
+    '    at async invokeRender (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:240:21)\n' +
+    '    at async handleRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:437:24)\n' +
+    '    at async requestHandlerImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:485:13)\n' +
+    '    at async Server.requestListener (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/start-server.js:226:13)',
+  category: 'database'
+}
+[ERROR] [2025-11-16T06:27:40.100Z] Failed to research authentication: {
+  message: "400 Invalid model 'llama-3.1-sonar-large-128k-online'. Permitted models can be found in the documentation at https://docs.perplexity.ai/getting-started/models.",
+  stack: "Error: 400 Invalid model 'llama-3.1-sonar-large-128k-online'. Permitted models can be found in the documentation at https://docs.perplexity.ai/getting-started/models.\n" +
+    '    at APIError.generate (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:158:20)\n' +
+    '    at OpenAI.makeStatusError (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:8973:167)\n' +
+    '    at OpenAI.makeRequest (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_openai_f417a314._.js:9144:30)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n' +
+    '    at async researchCategory (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/[root-of-the-server]__e99dcacc._.js:345:26)\n' +
+    '    at async Promise.allSettled (index 3)\n' +
+    '    at async /Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/[root-of-the-server]__e99dcacc._.js:380:25\n' +
+    '    at async AppRouteRouteModule.do (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:38696)\n' +
+    '    at async AppRouteRouteModule.handle (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45978)\n' +
+    '    at async responseGenerator (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14770:38)\n' +
+    '    at async AppRouteRouteModule.handleResponse (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187643)\n' +
+    '    at async handleResponse (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14832:32)\n' +
+    '    at async handler (/Users/seanchiu/Desktop/PRD-generator/.next/server/chunks/node_modules_next_613b55b3._.js:14884:13)\n' +
+    '    at async DevServer.renderToResponseWithComponentsImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1422:9)\n' +
+    '    at async DevServer.renderPageComponent (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1474:24)\n' +
+    '    at async DevServer.renderToResponseImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1514:32)\n' +
+    '    at async DevServer.pipeImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:1025:25)\n' +
+    '    at async NextNodeServer.handleCatchallRenderRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/next-server.js:393:17)\n' +
+    '    at async DevServer.handleRequestImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/base-server.js:916:17)\n' +
+    '    at async /Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/dev/next-dev-server.js:399:20\n' +
+    '    at async Span.traceAsyncFn (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/trace/trace.js:157:20)\n' +
+    '    at async DevServer.handleRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/dev/next-dev-server.js:395:24)\n' +
+    '    at async invokeRender (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:240:21)\n' +
+    '    at async handleRequest (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:437:24)\n' +
+    '    at async requestHandlerImpl (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/router-server.js:485:13)\n' +
+    '    at async Server.requestListener (/Users/seanchiu/Desktop/PRD-generator/node_modules/next/dist/server/lib/start-server.js:226:13)',
+  category: 'authentication'
+}
+ POST /api/research/tech-stack 200 in 1097ms
+  

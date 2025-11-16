@@ -11,10 +11,11 @@ import { handleUnauthorizedError, handleAPIError } from "@/lib/api-error-handler
 
 /**
  * Authenticated request context
- * Extends the handler with guaranteed userId
+ * Extends the handler with guaranteed userId and token
  */
 export interface AuthenticatedContext {
   userId: string;
+  token: string;
 }
 
 /**
@@ -54,14 +55,21 @@ export function withAuth(handler: AuthenticatedHandler) {
   ): Promise<NextResponse> {
     try {
       // Check authentication
-      const { userId } = await auth();
+      const { userId, getToken } = await auth();
 
       if (!userId) {
         return handleUnauthorizedError();
       }
 
+      // Get the JWT token for Convex authentication
+      const token = await getToken({ template: "convex" });
+
+      if (!token) {
+        return handleUnauthorizedError();
+      }
+
       // Call the original handler with authenticated context
-      return handler(request, { userId });
+      return handler(request, { userId, token });
     } catch (error) {
       // Handle authentication errors (e.g., invalid token, Clerk API issues)
       return handleAPIError(error, "authenticate user");

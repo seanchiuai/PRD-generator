@@ -6,19 +6,22 @@ import {
   handleUnauthorizedError,
 } from "@/lib/api-error-handler";
 import { safeParseAIResponse } from "@/lib/parse-ai-json";
-import { convexClient } from "@/lib/convex-client";
+import { getAuthenticatedConvexClient } from "@/lib/convex-client";
 import { api } from '@/convex/_generated/api'
 import { getDefaultTechStack, generateMockResearchResults } from '@/lib/techStack/defaults'
 import { Id } from "@/convex/_generated/dataModel";
 import { withAuth } from "@/lib/middleware/withAuth";
 
-export const POST = withAuth(async (request, { userId }) => {
+export const POST = withAuth(async (request, { userId, token }) => {
   try {
     const { conversationId, useAI = false } = await request.json()
 
     if (!conversationId) {
       return handleValidationError("Conversation ID required");
     }
+
+    // Get authenticated Convex client
+    const convexClient = getAuthenticatedConvexClient(token);
 
     // Fetch conversation data
     const conversation = await convexClient.query(api.conversations.get, {

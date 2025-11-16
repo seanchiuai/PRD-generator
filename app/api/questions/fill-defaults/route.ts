@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { convexClient } from "@/lib/convex-client";
+import { getAuthenticatedConvexClient } from "@/lib/convex-client";
 import { api } from "@/convex/_generated/api";
 import {
   handleAPIError,
@@ -19,13 +19,16 @@ interface ExtractedContext {
   technicalPreferences: string[];
 }
 
-export const POST = withAuth(async (request, { userId }) => {
+export const POST = withAuth(async (request, { userId, token }) => {
   try {
     const { conversationId, extractedContext } = await request.json();
 
     if (!conversationId) {
       return handleValidationError("Conversation ID required");
     }
+
+    // Get authenticated Convex client
+    const convexClient = getAuthenticatedConvexClient(token);
 
     // Fetch conversation with questions
     const conversation = await convexClient.query(api.conversations.get, {

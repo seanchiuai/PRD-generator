@@ -5,7 +5,7 @@ import { parseAIResponse } from "@/lib/parse-ai-json";
 import { withAuth } from "@/lib/middleware/withAuth";
 import { PRD_SYSTEM_PROMPT } from "@/lib/prompts/prd-generation";
 import { PRDData } from "@/types";
-import { convexClient } from "@/lib/convex-client";
+import { getAuthenticatedConvexClient } from "@/lib/convex-client";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 
@@ -22,7 +22,7 @@ import { Id } from "@/convex/_generated/dataModel";
  * @returns A JSON object containing `prdData` (the parsed PRD structure) and `usage` (Anthropic response usage).
  * On error returns a JSON error with status 400 (validation error), 401 (unauthorized), 404 (not found), or 500 (generation/parse errors).
  */
-export const POST = withAuth(async (request, { userId }) => {
+export const POST = withAuth(async (request, { userId, token }) => {
   try {
     const body = await request.json();
     const { conversationId } = body;
@@ -30,6 +30,9 @@ export const POST = withAuth(async (request, { userId }) => {
     if (!conversationId) {
       return handleValidationError("Conversation ID required");
     }
+
+    // Get authenticated Convex client
+    const convexClient = getAuthenticatedConvexClient(token);
 
     // Fetch and verify conversation ownership
     const conversation = await convexClient.query(api.conversations.get, {

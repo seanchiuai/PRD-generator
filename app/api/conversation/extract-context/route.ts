@@ -6,7 +6,7 @@ import {
   handleUnauthorizedError,
 } from "@/lib/api-error-handler";
 import { safeParseAIResponse } from "@/lib/parse-ai-json";
-import { convexClient } from "@/lib/convex-client";
+import { getAuthenticatedConvexClient } from "@/lib/convex-client";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { withAuth } from "@/lib/middleware/withAuth";
@@ -22,13 +22,16 @@ const FALLBACK_CONTEXT = {
   extractedAt: Date.now(),
 };
 
-export const POST = withAuth(async (request, { userId }) => {
+export const POST = withAuth(async (request, { userId, token }) => {
   try {
     const { conversationId } = await request.json();
 
     if (!conversationId) {
       return handleValidationError("Conversation ID required");
     }
+
+    // Get authenticated Convex client
+    const convexClient = getAuthenticatedConvexClient(token);
 
     // Fetch conversation messages
     const conversation = await convexClient.query(api.conversations.get, {
