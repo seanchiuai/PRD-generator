@@ -1,3 +1,5 @@
+import { ExtractedContext, Question, ResearchResults, TechOption } from "@/types";
+
 export interface TechStackSelection {
   frontend: string
   backend: string
@@ -66,8 +68,8 @@ export const DEFAULT_STACKS: Record<string, TechStackSelection> = {
 }
 
 export function detectProductType(
-  extractedContext: any,
-  answers: any
+  extractedContext: Partial<ExtractedContext> | null,
+  answers: Question[] | null
 ): keyof typeof DEFAULT_STACKS {
   if (!extractedContext && !answers) return 'general'
 
@@ -119,8 +121,8 @@ export function detectProductType(
 }
 
 export function getDefaultTechStack(
-  extractedContext: any,
-  answers: any
+  extractedContext: Partial<ExtractedContext> | null,
+  answers: Question[] | null
 ): TechStackSelection {
   const productType = detectProductType(extractedContext, answers)
   return DEFAULT_STACKS[productType] as TechStackSelection
@@ -128,72 +130,52 @@ export function getDefaultTechStack(
 
 export function generateMockResearchResults(
   stack: TechStackSelection
-): Record<string, any> {
+): ResearchResults {
   return {
-    frontend: {
-      category: 'frontend',
-      recommendations: [
-        {
-          name: stack.frontend,
-          description: `${stack.frontend} is a modern, production-ready framework.`,
-          pros: ['Fast development', 'Great DX', 'Large community'],
-          cons: ['Learning curve'],
-          popularity: 'High',
-          recommended: true,
-        },
-      ],
-    },
-    backend: {
-      category: 'backend',
-      recommendations: [
-        {
-          name: stack.backend,
-          description: `${stack.backend} provides a robust backend solution.`,
-          pros: ['Scalable', 'Well-documented', 'Ecosystem'],
-          cons: ['Setup complexity'],
-          popularity: 'High',
-          recommended: true,
-        },
-      ],
-    },
-    database: {
-      category: 'database',
-      recommendations: [
-        {
-          name: stack.database,
-          description: `${stack.database} is a reliable database choice.`,
-          pros: ['ACID compliant', 'Mature', 'Performant'],
-          cons: ['Requires management'],
-          popularity: 'High',
-          recommended: true,
-        },
-      ],
-    },
-    auth: {
-      category: 'auth',
-      recommendations: [
-        {
-          name: stack.auth,
-          description: `${stack.auth} simplifies authentication.`,
-          pros: ['Easy integration', 'Secure', 'Feature-rich'],
-          cons: ['Third-party dependency'],
-          popularity: 'High',
-          recommended: true,
-        },
-      ],
-    },
-    hosting: {
-      category: 'hosting',
-      recommendations: [
-        {
-          name: stack.hosting,
-          description: `${stack.hosting} offers excellent deployment experience.`,
-          pros: ['Zero-config', 'Auto-scaling', 'CDN'],
-          cons: ['Pricing at scale'],
-          popularity: 'High',
-          recommended: true,
-        },
-      ],
-    },
+    frontend: [
+      {
+        name: stack.frontend,
+        description: `${stack.frontend} is a modern, production-ready framework.`,
+        pros: ['Fast development', 'Great DX', 'Large community'],
+        cons: ['Learning curve'],
+        popularity: 'High',
+      },
+    ],
+    backend: [
+      {
+        name: stack.backend,
+        description: `${stack.backend} provides a robust backend solution.`,
+        pros: ['Scalable', 'Well-documented', 'Ecosystem'],
+        cons: ['Setup complexity'],
+        popularity: 'High',
+      },
+    ],
+    database: [
+      {
+        name: stack.database,
+        description: `${stack.database} is a reliable database choice.`,
+        pros: ['ACID compliant', 'Mature', 'Performant'],
+        cons: ['Requires management'],
+        popularity: 'High',
+      },
+    ],
+    authentication: [
+      {
+        name: stack.auth,
+        description: `${stack.auth} simplifies authentication.`,
+        pros: ['Easy integration', 'Secure', 'Feature-rich'],
+        cons: ['Third-party dependency'],
+        popularity: 'High',
+      },
+    ],
+    hosting: [
+      {
+        name: stack.hosting,
+        description: `${stack.hosting} offers excellent deployment experience.`,
+        pros: ['Zero-config', 'Auto-scaling', 'CDN'],
+        cons: ['Pricing at scale'],
+        popularity: 'High',
+      },
+    ],
   }
 }

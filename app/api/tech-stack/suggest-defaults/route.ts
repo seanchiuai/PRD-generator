@@ -11,7 +11,7 @@ import { api } from '@/convex/_generated/api'
 import { getDefaultTechStack, generateMockResearchResults } from '@/lib/techStack/defaults'
 import { Id } from "@/convex/_generated/dataModel";
 import { withAuth } from "@/lib/middleware/withAuth";
-import { TechStack, ValidationResponse } from "@/types";
+import { TechStack, ValidationResponse, ExtractedContext, Question, ValidationIssue } from "@/types";
 
 export const POST = withAuth(async (request, { userId, token }) => {
   try {
@@ -97,7 +97,10 @@ export const POST = withAuth(async (request, { userId, token }) => {
   }
 });
 
-async function getAISuggestedStack(extractedContext: any, answers: any) {
+async function getAISuggestedStack(
+  extractedContext: Partial<ExtractedContext> | null,
+  answers: Question[] | null
+): Promise<TechStack> {
   const prompt = `
 Suggest an optimal tech stack for this product:
 
@@ -147,22 +150,96 @@ Return ONLY a JSON object:
   return safeParseAIResponse<TechStack>(textContent.text) || getDefaultTechStack(extractedContext, answers)
 }
 
-async function validateDefaultStack(_stack: any) {
-  // Basic validation - could be enhanced
-  return {
-    isValid: true,
-    errors: [],
-    warnings: [],
+async function validateDefaultStack(stack: TechStack): Promise<ValidationResponse> {
+  const errors: ValidationIssue[] = [];
+  const warnings: ValidationIssue[] = [];
+
+  // Validate required fields
+  if (!stack.frontend?.trim()) {
+    errors.push({
+      message: "Frontend framework is required",
+      affectedTechnologies: ["frontend"]
+    });
   }
+
+  if (!stack.backend?.trim()) {
+    errors.push({
+      message: "Backend framework is required",
+      affectedTechnologies: ["backend"]
+    });
+  }
+
+  if (!stack.database?.trim()) {
+    errors.push({
+      message: "Database selection is required",
+      affectedTechnologies: ["database"]
+    });
+  }
+
+  if (!stack.auth?.trim()) {
+    errors.push({
+      message: "Authentication solution is required",
+      affectedTechnologies: ["auth"]
+    });
+  }
+
+  if (!stack.hosting?.trim()) {
+    errors.push({
+      message: "Hosting platform is required",
+      affectedTechnologies: ["hosting"]
+    });
+  }
+
+  // Validate compatibility (basic checks)
+  if (stack.frontend === "Next.js" && stack.backend && !stack.backend.toLowerCase().includes("node")) {
+    warnings.push({
+      message: "Next.js works best with Node.js backend",
+      affectedTechnologies: ["frontend", "backend"],
+      suggestion: "Consider using Node.js with Express or Next.js API routes"
+    });
+  }
+
+  if (stack.hosting === "Vercel" && stack.frontend !== "Next.js" && stack.frontend !== "React") {
+    warnings.push({
+      message: "Vercel is optimized for Next.js and React applications",
+      affectedTechnologies: ["hosting", "frontend"],
+      suggestion: "Consider Netlify, AWS, or another platform for non-React frameworks"
+    });
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings,
+  };
 }
 
-async function fixStackErrors(_stack: any, _errors: any[]) {
-  // If there are compatibility errors, fall back to safest defaults
-  return {
-    frontend: 'Next.js',
-    backend: 'Node.js with Express',
-    database: 'PostgreSQL',
-    auth: 'Clerk',
-    hosting: 'Vercel',
-  }
+async function fixStackErrors(
+  stack: TechStack,
+  errors: ValidationIssue[]
+): Promise<TechStack> {
+  const fixedStack: TechStack = { ...stack };
+
+  // Fix missing fields based on error messages
+  errors.forEach(error => {
+    const affectedTech = error.affectedTechnologies[0];
+
+    if (affectedTech === "frontend" && !fixedStack.frontend?.trim()) {
+      fixedStack.frontend = "Next.js";
+    }
+    if (affectedTech === "backend" && !fixedStack.backend?.trim()) {
+      fixedStack.backend = "Node.js with Express";
+    }
+    if (affectedTech === "database" && !fixedStack.database?.trim()) {
+      fixedStack.database = "PostgreSQL";
+    }
+    if (affectedTech === "auth" && !fixedStack.auth?.trim()) {
+      fixedStack.auth = "Clerk";
+    }
+    if (affectedTech === "hosting" && !fixedStack.hosting?.trim()) {
+      fixedStack.hosting = "Vercel";
+    }
+  });
+
+  return fixedStack;
 }

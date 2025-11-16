@@ -3,7 +3,7 @@ import { perplexity, anthropic, AI_MODELS } from "@/lib/ai-clients";
 import { handleAPIError, handleValidationError } from "@/lib/api-error-handler";
 import { logger } from "@/lib/logger";
 import { withAuth } from "@/lib/middleware/withAuth";
-import { ResearchQuery } from "@/types";
+import { ResearchQuery, TechOption } from "@/types";
 
 interface ProductContext {
   productName: string;
@@ -162,7 +162,7 @@ Be smart about what's actually needed. For example:
 }
 
 // Parse Perplexity response into structured format
-function parseResponse(content: string, _category: string): any[] {
+function parseResponse(content: string, _category: string): TechOption[] {
   try {
     // Try to extract JSON if present
     const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/) || content.match(/\{[\s\S]*\}/);
@@ -171,7 +171,7 @@ function parseResponse(content: string, _category: string): any[] {
     }
 
     // Fallback: parse structured text
-    const options: any[] = [];
+    const options: TechOption[] = [];
     const sections = content.split(/\d+\.\s+\*\*/).filter(Boolean);
 
     sections.forEach((section) => {
@@ -207,7 +207,7 @@ function parseResponse(content: string, _category: string): any[] {
 
 async function executeResearchQuery(
   researchQuery: ResearchQuery
-): Promise<{ category: string; options: any[]; reasoning: string }> {
+): Promise<{ category: string; options: TechOption[]; reasoning: string }> {
   console.log(`Researching category: ${researchQuery.category}`);
 
   // Create AbortController for timeout

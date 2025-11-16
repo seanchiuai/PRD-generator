@@ -2,6 +2,8 @@
  * Analytics tracking for tech stack events
  */
 
+import { TechStack } from "@/types";
+
 export function trackTechStackSkip(data: {
   conversationId: string
   productType: string
@@ -72,8 +74,8 @@ export function trackTechStackSelection(data: {
 
 export function trackDefaultStackModified(data: {
   conversationId: string
-  originalStack: any
-  modifiedStack: any
+  originalStack: TechStack
+  modifiedStack: TechStack
   changedFields: string[]
 }) {
   if (typeof window !== 'undefined' && (window as any).analytics) {

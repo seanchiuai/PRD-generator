@@ -1,6 +1,7 @@
 import { pdf } from "@react-pdf/renderer";
+import { ReactElement } from "react";
 
-export async function exportJSON(data: any, filename: string) {
+export async function exportJSON(data: unknown, filename: string) {
   const jsonString = JSON.stringify(data, null, 2);
   const blob = new Blob([jsonString], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -15,7 +16,7 @@ export async function exportJSON(data: any, filename: string) {
   URL.revokeObjectURL(url);
 }
 
-export async function exportPDF(documentComponent: any, filename: string) {
+export async function exportPDF(documentComponent: ReactElement, filename: string) {
   // Generate PDF blob from React component
   const blob = await pdf(documentComponent).toBlob();
 
