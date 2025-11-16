@@ -272,11 +272,11 @@ export const POST = withAuth(async (request) => {
     const { productContext } = body as { productContext: ProductContext };
 
     if (!productContext) {
-      console.error("No product context provided");
+      logger.error("No product context provided");
       return handleValidationError("Product context required");
     }
 
-    console.log("Product context validated:", {
+    logger.info({
       productName: productContext.productName,
       description: productContext.description?.substring(0, 100),
       targetAudience: productContext.targetAudience,
