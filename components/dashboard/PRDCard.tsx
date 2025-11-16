@@ -16,6 +16,7 @@ import type { Id } from "@/convex/_generated/dataModel";
 interface PRDCardProps {
   prd: {
     _id: Id<"prds">;
+    conversationId: Id<"conversations">;
     productName: string;
     prdData: any;
     createdAt: number;
@@ -30,7 +31,12 @@ export function PRDCard({ prd, onDelete }: PRDCardProps) {
   const router = useRouter();
 
   const handleView = () => {
-    router.push(`/prd/${prd._id}`);
+    // If PRD is still generating, redirect to conversation
+    if (prd.status === "generating") {
+      router.push(`/chat/${prd.conversationId}`);
+    } else {
+      router.push(`/prd/${prd._id}`);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -65,12 +71,14 @@ export function PRDCard({ prd, onDelete }: PRDCardProps) {
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={handleView}>
                 <ExternalLink className="h-4 w-4 mr-2" />
-                View PRD
+                {prd.status === "generating" ? "Continue" : "View PRD"}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push(`/prd/${prd._id}`)}>
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </DropdownMenuItem>
+              {prd.status === "completed" && (
+                <DropdownMenuItem onClick={() => router.push(`/prd/${prd._id}`)}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 onClick={() => onDelete(prd._id)}
                 className="text-red-600 dark:text-red-400"
@@ -108,7 +116,7 @@ export function PRDCard({ prd, onDelete }: PRDCardProps) {
       </CardContent>
       <CardFooter>
         <Button onClick={handleView} className="w-full bg-gradient-to-r from-macaron-lavender to-macaron-mint text-secondary-foreground font-display font-semibold">
-          View Details
+          {prd.status === "generating" ? "Continue Workflow" : "View Details"}
         </Button>
       </CardFooter>
     </Card>

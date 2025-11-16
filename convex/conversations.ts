@@ -1,6 +1,19 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
+// Helper function to merge workflow steps without duplicates
+function mergeCompletedSteps(
+  existingSteps: string[] | undefined,
+  newSteps: string[]
+): string[] {
+  const allSteps = [...(existingSteps || []), ...newSteps];
+  // Define step order for proper sequencing
+  const stepOrder = ["setup", "discovery", "questions", "research", "selection", "generate"];
+  // Remove duplicates and sort by defined order
+  const uniqueSteps = Array.from(new Set(allSteps));
+  return uniqueSteps.sort((a, b) => stepOrder.indexOf(a) - stepOrder.indexOf(b));
+}
+
 export const create = mutation({
   args: {},
   handler: async (ctx): Promise<string> => {
@@ -12,7 +25,7 @@ export const create = mutation({
     const conversationId = await ctx.db.insert("conversations", {
       userId: identity.subject,
       messages: [],
-      currentStage: "discovery",
+      currentStage: "setup",
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
@@ -134,6 +147,7 @@ export const updateStage = mutation({
   args: {
     conversationId: v.id("conversations"),
     stage: v.union(
+      v.literal("setup"),
       v.literal("discovery"),
       v.literal("clarifying"),
       v.literal("researching"),
@@ -272,6 +286,11 @@ export const saveSelection = mutation({
     // Check if this is a full stack selection or individual category
     if ("frontend" in args.selection) {
       // Full stack selection
+      const completedSteps = mergeCompletedSteps(
+        conversation.workflowProgress?.completedSteps,
+        ["discovery", "questions", "research", "selection"]
+      );
+
       await ctx.db.patch(args.conversationId, {
         selection: {
           ...args.selection,
@@ -280,7 +299,7 @@ export const saveSelection = mutation({
         currentStage: "generating",
         workflowProgress: {
           currentStep: "generate",
-          completedSteps: ["discovery", "questions", "research", "selection"],
+          completedSteps,
           skippedSteps: args.autoSelected ? ["research", "selection"] : [],
           lastUpdated: Date.now(),
         },
@@ -363,12 +382,17 @@ export const saveExtractedContext = mutation({
     }
 
     // Update conversation with extracted context
+    const completedSteps = mergeCompletedSteps(
+      conversation.workflowProgress?.completedSteps,
+      ["discovery"]
+    );
+
     await ctx.db.patch(args.conversationId, {
       extractedContext: args.context,
       currentStage: "clarifying",
       workflowProgress: {
         currentStep: "questions",
-        completedSteps: ["discovery"],
+        completedSteps,
         skippedSteps: ["discovery"],
         lastUpdated: Date.now(),
       },
@@ -376,5 +400,57 @@ export const saveExtractedContext = mutation({
     });
 
     return { success: true };
+  },
+});
+
+export const saveProjectSetup = mutation({
+  args: {
+    conversationId: v.id("conversations"),
+    projectName: v.string(),
+    projectDescription: v.string(),
+  },
+  handler: async (ctx, args): Promise<{ success: boolean; prdId: string }> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    // Get conversation and verify ownership
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+    if (conversation.userId !== identity.subject) {
+      throw new Error("Unauthorized");
+    }
+
+    // Create PRD record with status "generating"
+    const prdId = await ctx.db.insert("prds", {
+      conversationId: args.conversationId,
+      userId: identity.subject,
+      productName: args.projectName,
+      prdData: null, // Will be populated later during generation
+      version: 1,
+      status: "generating",
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+
+    // Update conversation with project info and PRD link
+    await ctx.db.patch(args.conversationId, {
+      projectName: args.projectName,
+      projectDescription: args.projectDescription,
+      prdId: prdId,
+      currentStage: "discovery",
+      workflowProgress: {
+        currentStep: "discovery",
+        completedSteps: ["setup"],
+        skippedSteps: [],
+        lastUpdated: Date.now(),
+      },
+      updatedAt: Date.now(),
+    });
+
+    return { success: true, prdId };
   },
 });

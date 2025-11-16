@@ -8,7 +8,8 @@ import {
   Search,
   CheckSquare,
   FileText,
-  Check
+  Check,
+  Settings
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -20,6 +21,7 @@ export interface WorkflowStep {
 }
 
 const WORKFLOW_STEPS: WorkflowStep[] = [
+  { id: "setup", label: "Setup", path: "/chat/[id]", icon: Settings },
   { id: "discovery", label: "Discovery", path: "/chat/[id]", icon: MessageSquare },
   { id: "questions", label: "Questions", path: "/chat/[id]/questions", icon: HelpCircle },
   { id: "research", label: "Research", path: "/chat/[id]/research", icon: Search },

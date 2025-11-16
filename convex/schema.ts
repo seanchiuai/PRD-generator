@@ -20,6 +20,11 @@ export default defineSchema({
   }).index("by_clerk_id", ["clerkId"]),
   conversations: defineTable({
     userId: v.string(),
+    // Project info set during setup (before discovery)
+    projectName: v.optional(v.string()),
+    projectDescription: v.optional(v.string()),
+    // Link to PRD created during setup
+    prdId: v.optional(v.id("prds")),
     messages: v.array(
       v.object({
         role: v.union(v.literal("user"), v.literal("assistant")),
@@ -28,6 +33,7 @@ export default defineSchema({
       })
     ),
     currentStage: v.union(
+      v.literal("setup"),
       v.literal("discovery"),
       v.literal("clarifying"),
       v.literal("researching"),
