@@ -436,12 +436,30 @@ export const saveProjectSetup = mutation({
       updatedAt: Date.now(),
     });
 
-    // Update conversation with project info and PRD link
+    // Create initial assistant message with project context
+    const initialMessage = {
+      role: "assistant" as const,
+      content: `Great! I see you're working on **${args.projectName}**.
+
+${args.projectDescription}
+
+I'd love to learn more about your vision for this project. Let me ask you a few questions to better understand what you're building:
+
+- What inspired you to create this project?
+- Who do you envision as your primary users?
+- What key problems will this solve for them?
+
+Feel free to share as much or as little as you'd like, and I'll guide us through the discovery process!`,
+      timestamp: Date.now(),
+    };
+
+    // Update conversation with project info, PRD link, and initial message
     await ctx.db.patch(args.conversationId, {
       projectName: args.projectName,
       projectDescription: args.projectDescription,
       prdId: prdId,
       currentStage: "discovery",
+      messages: [initialMessage],
       workflowProgress: {
         currentStep: "discovery",
         completedSteps: ["setup"],

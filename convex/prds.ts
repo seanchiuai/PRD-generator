@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
 
 export const list = query({
   args: {
@@ -107,7 +108,7 @@ export const create = mutation({
     productName: v.string(),
     prdData: v.any(),
   },
-  handler: async (ctx, args): Promise<string> => {
+  handler: async (ctx, args): Promise<Id<"prds">> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error("Not authenticated");
@@ -119,7 +120,7 @@ export const create = mutation({
       throw new Error("Unauthorized");
     }
 
-    let prdId: string;
+    let prdId: Id<"prds">;
 
     // Check if PRD already exists (created during setup) and verify it still exists
     if (conversation.prdId) {
@@ -145,7 +146,7 @@ export const create = mutation({
           status: "completed",
           createdAt: Date.now(),
           updatedAt: Date.now(),
-        });
+        }) as Id<"prds">;
 
         // Update conversation with new PRD link
         await ctx.db.patch(args.conversationId, {
@@ -163,7 +164,7 @@ export const create = mutation({
         status: "completed",
         createdAt: Date.now(),
         updatedAt: Date.now(),
-      });
+      }) as Id<"prds">;
 
       // Link PRD to conversation
       await ctx.db.patch(args.conversationId, {
