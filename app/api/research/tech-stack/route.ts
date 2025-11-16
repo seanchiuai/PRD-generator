@@ -53,7 +53,7 @@ Be smart about what's actually needed. For example:
 - A data dashboard might need external API integrations instead of a custom backend`;
 
   try {
-    console.log("Calling Claude to generate research queries...");
+    logger.info("Calling Claude to generate research queries");
 
     // Create AbortController for timeout
     const abortController = new AbortController();
@@ -83,7 +83,7 @@ Be smart about what's actually needed. For example:
 
       // Extract JSON from Claude's response
       const text = content.text;
-      console.log("Claude response received, extracting queries...");
+      logger.info("Claude response received, extracting queries");
 
       // Try code block first, then find any valid JSON array
       let jsonMatch = text.match(/```json\n([\s\S]*?)\n```/);
@@ -98,8 +98,7 @@ Be smart about what's actually needed. For example:
       }
 
       if (!jsonMatch) {
-        console.error("Failed to extract JSON from Claude response:", text);
-        logger.error("Failed to extract JSON from Claude response", { text });
+        logger.error({ text }, "Failed to extract JSON from Claude response");
         throw new Error("Could not parse research queries from Claude");
       }
 
@@ -134,7 +133,7 @@ Be smart about what's actually needed. For example:
         return queries.slice(0, 20);
       }
 
-      console.log(`Successfully parsed ${queries.length} research queries`);
+      logger.info({ count: queries.length }, "Successfully parsed research queries");
 
       logger.info(
         "Generated research queries",
@@ -208,7 +207,7 @@ function parseResponse(content: string, _category: string): TechOption[] {
 async function executeResearchQuery(
   researchQuery: ResearchQuery
 ): Promise<{ category: string; options: TechOption[]; reasoning: string }> {
-  console.log(`Researching category: ${researchQuery.category}`);
+  logger.info({ category: researchQuery.category }, "Researching category");
 
   // Create AbortController for timeout
   const abortController = new AbortController();
@@ -234,9 +233,9 @@ async function executeResearchQuery(
     clearTimeout(timeoutId);
 
     const content = response.choices[0]?.message?.content || "";
-    console.log(`Perplexity response for ${researchQuery.category}: ${content.substring(0, 200)}...`);
+    logger.info({ category: researchQuery.category, preview: content.substring(0, 200) }, "Perplexity response received");
     const options = parseResponse(content, researchQuery.category);
-    console.log(`Parsed ${options.length} options for ${researchQuery.category}`);
+    logger.info({ category: researchQuery.category, count: options.length }, "Parsed options");
 
     return {
       category: researchQuery.category,
@@ -253,9 +252,7 @@ async function executeResearchQuery(
         `Timeout researching ${researchQuery.category}, returning empty results`,
         { category: researchQuery.category }
       );
-      console.warn(`Timeout researching ${researchQuery.category}, returning empty results`);
     } else {
-      console.error(`Error researching ${researchQuery.category}:`, error);
       logger.error(`Failed to research ${researchQuery.category}`, error, {
         category: researchQuery.category,
       });
@@ -285,7 +282,7 @@ export const POST = withAuth(async (request) => {
       targetAudience: productContext.targetAudience,
       coreFeatures: productContext.coreFeatures,
       answerCount: Object.keys(productContext.answers || {}).length
-    });
+    }, "Product context validated");
 
     logger.info(
       "Starting tech stack research",
@@ -348,16 +345,17 @@ export const POST = withAuth(async (request) => {
       }
     );
 
-    console.log("=== Research Complete ===");
-    console.log(`Categories researched: ${Object.keys(researchResults).join(", ")}`);
-    console.log(`Total queries generated: ${queriesGenerated.length}`);
+    logger.info({
+      categories: Object.keys(researchResults),
+      queriesGenerated: queriesGenerated.length
+    }, "Research complete");
 
     return NextResponse.json({
       researchResults,
       queriesGenerated,
     });
   } catch (error) {
-    console.error("=== Research API Error ===", error);
+    logger.error({ error }, "Research API error");
     return handleAPIError(error, "complete research");
   }
 });
