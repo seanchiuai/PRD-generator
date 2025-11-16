@@ -4,6 +4,9 @@ import { handleAPIError, handleValidationError } from "@/lib/api-error-handler";
 import { logger } from "@/lib/logger";
 import { withAuth } from "@/lib/middleware/withAuth";
 import { ResearchQuery, TechOption } from "@/types";
+import { createAbortController } from "@/lib/utils/timeout";
+import { API_TIMEOUTS, API_LIMITS } from "@/lib/constants/timeouts";
+import { extractAndParseJSON, safeJSONParse } from "@/lib/utils/json-parser";
 
 interface ProductContext {
   productName: string;
@@ -55,9 +58,10 @@ Be smart about what's actually needed. For example:
   try {
     logger.info("Research Query Generation", "Calling Claude to generate research queries");
 
-    // Create AbortController for timeout
-    const abortController = new AbortController();
-    const timeoutId = setTimeout(() => abortController.abort(), 30000); // 30 second timeout
+    // Create AbortController with timeout
+    const { signal, cleanup } = createAbortController({
+      timeoutMs: API_TIMEOUTS.RESEARCH_QUERY_GENERATION,
+    });
 
     try {
       const response = await anthropic.messages.create({
@@ -71,10 +75,10 @@ Be smart about what's actually needed. For example:
           },
         ],
       }, {
-        signal: abortController.signal,
+        signal,
       });
 
-      clearTimeout(timeoutId);
+      cleanup();
 
       const content = response.content[0];
       if (!content || content.type !== "text") {
@@ -85,31 +89,10 @@ Be smart about what's actually needed. For example:
       const text = content.text;
       logger.info("Research Query Generation", "Claude response received, extracting queries");
 
-      // Try code block first, then find any valid JSON array
-      let jsonMatch = text.match(/```json\n([\s\S]*?)\n```/);
-      if (!jsonMatch) {
-        // Find the first '[' and last ']' to capture the entire array
-        const firstBracket = text.indexOf('[');
-        const lastBracket = text.lastIndexOf(']');
-        if (firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket) {
-          const jsonStr = text.substring(firstBracket, lastBracket + 1);
-          jsonMatch = [jsonStr, jsonStr];
-        }
-      }
-
-      if (!jsonMatch) {
-        logger.error("Research Query Generation", new Error("Failed to extract JSON from Claude response"), { text });
-        throw new Error("Could not parse research queries from Claude");
-      }
-
-      const jsonStr = jsonMatch[1] || jsonMatch[0];
-
-      // Validate JSON string size to prevent DoS
-      if (jsonStr.length > 50000) {
-        throw new Error("Response too large to parse safely");
-      }
-
-      const queries = JSON.parse(jsonStr) as ResearchQuery[];
+      const queries = extractAndParseJSON<ResearchQuery[]>(text, {
+        maxSize: API_LIMITS.MAX_JSON_RESPONSE_SIZE,
+        context: "Research Query Generation",
+      });
 
       // Validate structure of parsed queries
       if (!Array.isArray(queries)) {
@@ -124,13 +107,13 @@ Be smart about what's actually needed. For example:
       });
 
       // Limit number of queries to prevent performance issues
-      if (queries.length > 20) {
+      if (queries.length > API_LIMITS.MAX_RESEARCH_QUERIES) {
         logger.warn(
           "Excessive queries generated",
-          `Limiting from ${queries.length} to 20 queries`,
+          `Limiting from ${queries.length} to ${API_LIMITS.MAX_RESEARCH_QUERIES} queries`,
           { originalCount: queries.length }
         );
-        return queries.slice(0, 20);
+        return queries.slice(0, API_LIMITS.MAX_RESEARCH_QUERIES);
       }
 
       logger.info("Research Query Generation", "Successfully parsed research queries", { count: queries.length });
@@ -147,7 +130,7 @@ Be smart about what's actually needed. For example:
 
       return queries;
     } finally {
-      clearTimeout(timeoutId);
+      cleanup();
     }
   } catch (error) {
     // Handle abort/timeout errors
@@ -161,12 +144,15 @@ Be smart about what's actually needed. For example:
 }
 
 // Parse Perplexity response into structured format
-function parseResponse(content: string, _category: string): TechOption[] {
+function parseResponse(content: string, category: string): TechOption[] {
   try {
-    // Try to extract JSON if present
+    // Try to extract and parse JSON if present
     const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/) || content.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      return JSON.parse(jsonMatch[1] || jsonMatch[0]);
+      return safeJSONParse<TechOption[]>(jsonMatch[1] || jsonMatch[0], {
+        context: `Perplexity Response (${category})`,
+        logErrors: false, // We handle errors in the catch block
+      });
     }
 
     // Fallback: parse structured text
@@ -209,9 +195,10 @@ async function executeResearchQuery(
 ): Promise<{ category: string; options: TechOption[]; reasoning: string }> {
   logger.info("Research Query Execution", `Researching category: ${researchQuery.category}`);
 
-  // Create AbortController for timeout
-  const abortController = new AbortController();
-  const timeoutId = setTimeout(() => abortController.abort(), 20000); // 20 second timeout
+  // Create AbortController with timeout
+  const { signal, cleanup } = createAbortController({
+    timeoutMs: API_TIMEOUTS.RESEARCH_QUERY_EXECUTION,
+  });
 
   try {
     const response = await perplexity.chat.completions.create({
@@ -227,10 +214,10 @@ async function executeResearchQuery(
     }, {
       // NOTE: Perplexity SDK does not officially support AbortController per-request.
       // This is a workaround to enable request cancellation. Monitor SDK updates for official support.
-      signal: abortController.signal,
+      signal,
     } as any);
 
-    clearTimeout(timeoutId);
+    cleanup();
 
     const content = response.choices[0]?.message?.content || "";
     logger.info("Research Query Execution", "Perplexity response received", { category: researchQuery.category, preview: content.substring(0, 200) });
@@ -243,7 +230,7 @@ async function executeResearchQuery(
       reasoning: researchQuery.reasoning,
     };
   } catch (error) {
-    clearTimeout(timeoutId);
+    cleanup();
 
     // Handle timeout specifically
     if (error instanceof Error && error.name === 'AbortError') {
