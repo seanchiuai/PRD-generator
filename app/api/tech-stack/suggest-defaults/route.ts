@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
 import {
   handleAPIError,
@@ -42,8 +42,8 @@ export const POST = withAuth(async (request, { userId, token }) => {
       return handleUnauthorizedError();
     }
 
-    const extractedContext = conversation.extractedContext
-    const clarifyingQuestions = conversation.clarifyingQuestions
+    const extractedContext = conversation.extractedContext ?? null
+    const clarifyingQuestions = conversation.clarifyingQuestions ?? null
 
     let techStack
 

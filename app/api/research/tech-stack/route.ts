@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { perplexity, anthropic, AI_MODELS } from "@/lib/ai-clients";
 import { handleAPIError, handleValidationError } from "@/lib/api-error-handler";
 import { logger } from "@/lib/logger";
@@ -53,7 +53,7 @@ Be smart about what's actually needed. For example:
 - A data dashboard might need external API integrations instead of a custom backend`;
 
   try {
-    logger.info("Calling Claude to generate research queries");
+    logger.info("Research Query Generation", "Calling Claude to generate research queries");
 
     // Create AbortController for timeout
     const abortController = new AbortController();
@@ -83,7 +83,7 @@ Be smart about what's actually needed. For example:
 
       // Extract JSON from Claude's response
       const text = content.text;
-      logger.info("Claude response received, extracting queries");
+      logger.info("Research Query Generation", "Claude response received, extracting queries");
 
       // Try code block first, then find any valid JSON array
       let jsonMatch = text.match(/```json\n([\s\S]*?)\n```/);
@@ -98,7 +98,7 @@ Be smart about what's actually needed. For example:
       }
 
       if (!jsonMatch) {
-        logger.error({ text }, "Failed to extract JSON from Claude response");
+        logger.error("Research Query Generation", new Error("Failed to extract JSON from Claude response"), { text });
         throw new Error("Could not parse research queries from Claude");
       }
 
@@ -133,7 +133,7 @@ Be smart about what's actually needed. For example:
         return queries.slice(0, 20);
       }
 
-      logger.info({ count: queries.length }, "Successfully parsed research queries");
+      logger.info("Research Query Generation", "Successfully parsed research queries", { count: queries.length });
 
       logger.info(
         "Generated research queries",
@@ -207,7 +207,7 @@ function parseResponse(content: string, _category: string): TechOption[] {
 async function executeResearchQuery(
   researchQuery: ResearchQuery
 ): Promise<{ category: string; options: TechOption[]; reasoning: string }> {
-  logger.info({ category: researchQuery.category }, "Researching category");
+  logger.info("Research Query Execution", `Researching category: ${researchQuery.category}`);
 
   // Create AbortController for timeout
   const abortController = new AbortController();
@@ -233,9 +233,9 @@ async function executeResearchQuery(
     clearTimeout(timeoutId);
 
     const content = response.choices[0]?.message?.content || "";
-    logger.info({ category: researchQuery.category, preview: content.substring(0, 200) }, "Perplexity response received");
+    logger.info("Research Query Execution", "Perplexity response received", { category: researchQuery.category, preview: content.substring(0, 200) });
     const options = parseResponse(content, researchQuery.category);
-    logger.info({ category: researchQuery.category, count: options.length }, "Parsed options");
+    logger.info("Research Query Execution", "Parsed options", { category: researchQuery.category, count: options.length });
 
     return {
       category: researchQuery.category,
@@ -272,17 +272,17 @@ export const POST = withAuth(async (request) => {
     const { productContext } = body as { productContext: ProductContext };
 
     if (!productContext) {
-      logger.error("No product context provided");
+      logger.error("Research API", new Error("No product context provided"));
       return handleValidationError("Product context required");
     }
 
-    logger.info({
+    logger.info("Research API", "Product context validated", {
       productName: productContext.productName,
       description: productContext.description?.substring(0, 100),
       targetAudience: productContext.targetAudience,
       coreFeatures: productContext.coreFeatures,
       answerCount: Object.keys(productContext.answers || {}).length
-    }, "Product context validated");
+    });
 
     logger.info(
       "Starting tech stack research",
@@ -345,17 +345,17 @@ export const POST = withAuth(async (request) => {
       }
     );
 
-    logger.info({
+    logger.info("Research API", "Research complete", {
       categories: Object.keys(researchResults),
       queriesGenerated: queriesGenerated.length
-    }, "Research complete");
+    });
 
     return NextResponse.json({
       researchResults,
       queriesGenerated,
     });
   } catch (error) {
-    logger.error({ error }, "Research API error");
+    logger.error("Research API", error);
     return handleAPIError(error, "complete research");
   }
 });

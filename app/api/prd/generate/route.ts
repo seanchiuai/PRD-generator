@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
 import { handleAPIError, handleValidationError, handleUnauthorizedError } from "@/lib/api-error-handler";
 import { parseAIResponse } from "@/lib/parse-ai-json";

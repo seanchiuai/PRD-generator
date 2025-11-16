@@ -1,4 +1,4 @@
-import { ExtractedContext, Question, ResearchResults, TechOption } from "@/types";
+import { ExtractedContext, Question, ResearchResults } from "@/types";
 
 export interface TechStackSelection {
   frontend: string

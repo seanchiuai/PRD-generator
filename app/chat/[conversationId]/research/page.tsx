@@ -132,8 +132,8 @@ export default function ResearchPage() {
       if (success) {
         // Track analytics
         const productType = detectProductType(
-          conversation?.extractedContext,
-          conversation?.clarifyingQuestions
+          conversation?.extractedContext ?? null,
+          conversation?.clarifyingQuestions ?? null
         );
         trackTechStackSkip({
           conversationId,
