@@ -57,7 +57,7 @@ function LandingPage() {
                 <span className="font-display text-xl font-semibold">VIBED</span>
               </div>
               <SignInButton mode="modal">
-                <button className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                <button type="button" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                   Sign In
                 </button>
               </SignInButton>
@@ -87,7 +87,7 @@ function LandingPage() {
             {/* CTA */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 [animation-delay:300ms] animate-fade-in-up">
               <SignUpButton mode="modal">
-                <button className="px-8 py-4 bg-primary text-primary-foreground rounded-lg font-semibold text-base hover:bg-primary/90 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm">
+                <button type="button" className="px-8 py-4 bg-primary text-primary-foreground rounded-lg font-semibold text-base hover:bg-primary/90 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm">
                   Start Building Free
                 </button>
               </SignUpButton>
@@ -239,7 +239,7 @@ function LandingPage() {
               Join product teams using VIBED to ship faster with better documentation.
             </p>
             <SignUpButton mode="modal">
-              <button className="px-10 py-5 bg-primary text-primary-foreground rounded-lg font-semibold text-lg hover:bg-primary/90 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm">
+              <button type="button" className="px-10 py-5 bg-primary text-primary-foreground rounded-lg font-semibold text-lg hover:bg-primary/90 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm">
                 Get Started Free
               </button>
             </SignUpButton>
