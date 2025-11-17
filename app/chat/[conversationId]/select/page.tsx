@@ -15,13 +15,7 @@ import { WorkflowLayout } from "@/components/workflow/WorkflowLayout";
 import { AutoAdvance } from "@/components/workflow/AutoAdvance";
 import { Sparkles } from "lucide-react";
 import { logger } from "@/lib/logger";
-
-interface ValidationWarning {
-  level: "warning" | "error";
-  message: string;
-  affectedTechnologies: string[];
-  suggestion?: string;
-}
+import type { ValidationWarning, TechOption } from "@/types";
 
 export default function SelectionPage() {
   const params = useParams();
@@ -145,16 +139,16 @@ export default function SelectionPage() {
     setSelections(newSelections);
 
     // Save to Convex
-    const categoryData = (conversation?.researchResults as any)?.[category];
+    const categoryData = conversation?.researchResults?.[category as keyof typeof conversation.researchResults];
     // Handle both old format (array) and new format ({ options, reasoning })
-    const options = Array.isArray(categoryData) ? categoryData : (categoryData?.options || []);
+    const options = (Array.isArray(categoryData) ? categoryData : (categoryData?.options || [])) as TechOption[];
     await saveSelection({
       conversationId,
       category,
       selection: {
         name: optionName,
         reasoning: `Selected from ${options.length} options`,
-        selectedFrom: options.map((o: any) => o.name),
+        selectedFrom: options.map((o) => o.name),
       },
     });
 

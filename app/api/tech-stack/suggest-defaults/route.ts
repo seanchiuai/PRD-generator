@@ -11,6 +11,7 @@ import { api } from '@/convex/_generated/api'
 import { getDefaultTechStack, generateMockResearchResults } from '@/lib/techStack/defaults'
 import { Id } from "@/convex/_generated/dataModel";
 import { withAuth } from "@/lib/middleware/withAuth";
+import type { ExtractedContext, Question, SimpleTechStack, ValidationResult } from "@/types";
 
 export const POST = withAuth(async (request, { userId, token }) => {
   try {
@@ -98,7 +99,7 @@ export const POST = withAuth(async (request, { userId, token }) => {
   }
 });
 
-async function getAISuggestedStack(extractedContext: any, answers: any) {
+async function getAISuggestedStack(extractedContext: ExtractedContext, answers: Question[] | null) {
   const prompt = `
 Suggest an optimal tech stack for this product:
 
@@ -145,32 +146,10 @@ Return ONLY a JSON object:
     throw new Error('Unexpected response type from Claude')
   }
 
-  interface TechStack {
-    frontend: string;
-    backend: string;
-    database: string;
-    auth: string;
-    hosting: string;
-  }
-
-  return safeParseAIResponse<TechStack>(textContent.text) || getDefaultTechStack(extractedContext, answers)
+  return safeParseAIResponse<SimpleTechStack>(textContent.text) || getDefaultTechStack(extractedContext, answers)
 }
 
-interface TechStack {
-  frontend?: string;
-  backend?: string;
-  database?: string;
-  auth?: string;
-  hosting?: string;
-}
-
-interface ValidationResult {
-  isValid: boolean;
-  errors: string[];
-  warnings: string[];
-}
-
-function validateDefaultStack(stack: TechStack): ValidationResult {
+function validateDefaultStack(stack: SimpleTechStack): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -226,9 +205,9 @@ function validateDefaultStack(stack: TechStack): ValidationResult {
 }
 
 async function fixStackErrors(
-  stack: TechStack,
+  stack: SimpleTechStack,
   errors: string[]
-): Promise<TechStack> {
+): Promise<SimpleTechStack> {
   // Create a copy to fix
   const fixedStack = { ...stack };
 
