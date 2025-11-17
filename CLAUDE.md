@@ -50,5 +50,5 @@ Auth: `ConvexProviderWithClerk` | Schema: `convex/schema.ts` | Protection: `midd
 
 ## Important Notes
 - Never add backwards compatibility
-- Always sacrifise grammar for the sake of conciseness in your responses
+- Always sacrifice grammar for the sake of conciseness in your responses
 - Always constantly commit changes when the user confirms task is completed. Always ask user for confirmation to commit after task it complete.

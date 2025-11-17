@@ -9,9 +9,11 @@ import {
   CheckSquare,
   FileText,
   Check,
-  Settings
+  Settings,
+  ArrowLeft
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 
 export interface WorkflowStep {
   id: string
@@ -59,8 +61,19 @@ export function WorkflowProgress({
   return (
     <div className="w-full bg-white dark:bg-gray-900 border-b">
       {/* Desktop view - horizontal */}
-      <div className="hidden md:flex items-center justify-center py-6 px-4">
-        <div className="flex items-center gap-2 max-w-5xl w-full">
+      <div className="hidden md:flex items-center justify-between py-6 px-4">
+        {/* Back to Dashboard Button */}
+        <div className="flex-shrink-0">
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/dashboard">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Dashboard
+            </Link>
+          </Button>
+        </div>
+
+        {/* Workflow Steps */}
+        <div className="flex items-center gap-2 max-w-5xl flex-1 justify-center">
           {WORKFLOW_STEPS.map((step, index) => {
             const status = getStepStatus(step.id)
             const Icon = step.icon
@@ -148,10 +161,24 @@ export function WorkflowProgress({
             )
           })}
         </div>
+
+        {/* Placeholder for visual balance */}
+        <div className="flex-shrink-0 w-[100px]" />
       </div>
 
       {/* Mobile view - vertical scrollable */}
-      <div className="md:hidden py-4 px-4 overflow-x-auto">
+      <div className="md:hidden">
+        {/* Mobile Back Button */}
+        <div className="px-4 pt-3 pb-2">
+          <Button variant="ghost" size="sm" asChild className="w-full justify-start">
+            <Link href="/dashboard">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Link>
+          </Button>
+        </div>
+
+        <div className="py-4 px-4 overflow-x-auto">
         <div className="flex gap-3 min-w-max">
           {WORKFLOW_STEPS.map((step, index) => {
             const status = getStepStatus(step.id)
@@ -237,6 +264,7 @@ export function WorkflowProgress({
               </div>
             )
           })}
+        </div>
         </div>
       </div>
     </div>

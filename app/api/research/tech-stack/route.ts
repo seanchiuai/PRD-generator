@@ -345,6 +345,8 @@ export const POST = withAuth(async (request) => {
 
     for (let i = 0; i < researchQueries.length; i++) {
       const query = researchQueries[i];
+      if (!query) continue;
+
       console.log(`[${i + 1}/${researchQueries.length}] Processing: ${query.category}`);
 
       try {
