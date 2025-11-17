@@ -37,7 +37,7 @@ export default function GeneratePage() {
   // Load existing PRD if available
   useEffect(() => {
     if (existingPRD?.prdData) {
-      setPrd(existingPRD.prdData);
+      setPrd(existingPRD.prdData as PRDData);
     }
   }, [existingPRD]);
 

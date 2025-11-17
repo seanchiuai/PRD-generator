@@ -8,7 +8,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed - 2025-01-17
 
-#### Code Review Group-6 Issues (Latest commit)
+#### Code Review Group-11 Issues (Latest commit)
+
+**Critical Logic Fixes:**
+- setup/page.tsx: Fix inverted redirect logic (!=setup instead of ==setup) - users can now access setup page
+- conversations.ts: Research progress now properly transitions to completed status based on category count
+
+**UI/UX Improvements:**
+- chart-area-interactive.tsx: Fix duplicate colors - mobile series now uses chart-2 for visual distinction
+- chart-area-interactive.tsx: Time range now resets to 90d when switching from mobile to desktop view
+
+**Code Quality:**
+- progress.ts: Replace hardcoded totalSteps=5 with dynamic getAllSteps().length, add division-by-zero guard
+- progress.ts: Extract all hardcoded steps arrays to use single getAllSteps() function
+- prds.ts: Reduce PRD creation duplication by extracting shared createPrdData object
+
+**Platform Compatibility:**
+- sidebar.tsx: Add SSR guard for document.cookie access with try/catch for non-browser contexts
+
+**AI Models:**
+- ai-clients.ts: Update to latest Claude model versions (sonnet-4-5, haiku-4-5)
+
+**Type Safety:**
+- toggle-group.tsx: Fix fallback logic using nullish coalescing (??) instead of OR operator
+- questionsEvents.ts: Add global Window interface declaration for proper analytics typing
+
+**Documentation:**
+- workflowConfig.ts: Add precedence comment explaining status resolution order (completed > current > future)
+
+#### Code Review Group-6 Issues
 
 **React Best Practices:**
 - ValidationWarnings.tsx: Replace index-based keys with stable content-derived keys (message::technologies) to prevent React reconciliation issues
