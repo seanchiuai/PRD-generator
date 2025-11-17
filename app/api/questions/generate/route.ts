@@ -88,11 +88,15 @@ Use this context to generate highly relevant questions.
           categoryGroup.questions.map((q: any) => ({
             ...q,
             category: categoryGroup.category, // Add category field from parent
+            required: q.required ?? true, // Default to true if not specified
           }))
         );
       } else {
-        // Already flat structure
-        questions = parsedResponse.questions;
+        // Already flat structure - ensure required field exists
+        questions = parsedResponse.questions.map((q: any) => ({
+          ...q,
+          required: q.required ?? true, // Default to true if not specified
+        }));
       }
     } else {
       throw new Error("Invalid AI response structure: missing questions array");
