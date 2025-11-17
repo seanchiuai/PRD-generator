@@ -277,11 +277,19 @@ export const updateResearchProgress = mutation({
         ? [...currentCompleted, args.category]
         : currentCompleted;
 
+    // Determine overall status
+    const allCategories = conversation.researchMetadata?.totalCategories || 0;
+    const overallStatus =
+      newCompleted.length === allCategories ? "completed" :
+      newCompleted.length > 0 ? "in_progress" :
+      "pending";
+
     await ctx.db.patch(args.conversationId, {
       researchMetadata: {
         startedAt: conversation.researchMetadata?.startedAt || Date.now(),
         categoriesCompleted: newCompleted,
-        status: "in_progress",
+        status: overallStatus,
+        ...(overallStatus === "completed" && { completedAt: Date.now() }),
       },
       updatedAt: Date.now(),
     });

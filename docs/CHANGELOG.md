@@ -8,6 +8,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed - 2025-01-17
 
+#### Code Review Group-6 Issues (Latest commit)
+
+**React Best Practices:**
+- ValidationWarnings.tsx: Replace index-based keys with stable content-derived keys (message::technologies) to prevent React reconciliation issues
+
+**Type Safety:**
+- PRDCard.tsx: Replace `any` type with proper `PRDData` type from @/types for prdData prop
+- types/index.ts: Add QuestionSemanticKey type and semanticKey optional field to Question interface
+
+**Documentation & Clarity:**
+- researching-features/SKILL.md: Fix grammar ("Build page and UI elements before backend functions")
+- skill-creating/SKILL.md: Improve description clarity and fix folder structure instructions
+- api-routes-guide.md: Add language specifier (text) to file structure code block
+
+**Navigation:**
+- nav-main.tsx: Implement proper navigation using Next.js Link component with asChild pattern
+
+**Security & Input Validation:**
+- extract-context/route.ts: Add message content sanitization (per-message 2K limit, total 10K limit, remove control chars, escape backticks)
+- users.ts: Make email field optional in schema and use undefined instead of empty string fallback
+- schema.ts: Change users.email from v.string() to v.optional(v.string())
+
+**Code Organization & Maintainability:**
+- suggest-defaults/route.ts: Extract DEFAULT_STACK constant to consolidate duplicate default values
+- suggest-defaults/route.ts: Refactor fixStackErrors to use structured errors with direct field mapping
+- suggest-defaults/route.ts: Normalize and trim stack values during validation to prevent whitespace-only entries
+- lib/prompts/techStack.ts: Extract inline AI prompt to dedicated file (TECH_STACK_SUGGESTION_PROMPT)
+- fill-defaults/route.ts: Add semanticKey-based mapping with fallback to keyword heuristics for robust question-to-context matching
+
+**Impact:** All 15 code review issues from docs/errors/group-6.md resolved. Build passing with type-safe code and improved maintainability.
+
+### Fixed - 2025-01-17
+
 #### Code Review Group-2 Issues (827b116 - included in group-8 commit)
 
 **Documentation Improvements:**

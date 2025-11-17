@@ -4,6 +4,14 @@
 
 import { logger } from '@/lib/logger'
 
+declare global {
+  interface Window {
+    analytics?: {
+      track: (event: string, props?: Record<string, unknown>) => void;
+    };
+  }
+}
+
 interface QuestionsSkipData {
   conversationId: string;
   answeredCount: number;
@@ -16,7 +24,7 @@ interface QuestionsSkipData {
  * Track when users skip the questions phase
  */
 export function trackQuestionsSkip(data: QuestionsSkipData) {
-  if (typeof window !== "undefined" && (window as any).analytics) {
+  if (typeof window !== "undefined" && window.analytics) {
     const completionRate = data.totalCount > 0
       ? (data.answeredCount / data.totalCount) * 100
       : 0;
@@ -33,7 +41,7 @@ export function trackQuestionsSkip(data: QuestionsSkipData) {
     });
 
     // Track with analytics service
-    (window as any).analytics.track('Questions Skipped', {
+    window.analytics.track('Questions Skipped', {
       conversation_id: data.conversationId,
       answered_count: data.answeredCount,
       total_count: data.totalCount,
@@ -55,7 +63,7 @@ interface QuestionsCompletedData {
  * Track when users complete the questions phase
  */
 export function trackQuestionsCompleted(data: QuestionsCompletedData) {
-  if (typeof window !== "undefined" && (window as any).analytics) {
+  if (typeof window !== "undefined" && window.analytics) {
     logger.debug("Analytics: Questions Completed", "", {
       conversation_id: data.conversationId,
       answered_count: data.answeredCount,
@@ -65,7 +73,7 @@ export function trackQuestionsCompleted(data: QuestionsCompletedData) {
     });
 
     // Track with analytics service
-    (window as any).analytics.track('Questions Completed', {
+    window.analytics.track('Questions Completed', {
       conversation_id: data.conversationId,
       answered_count: data.answeredCount,
       total_count: data.totalCount,

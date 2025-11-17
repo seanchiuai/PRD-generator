@@ -3,8 +3,8 @@ import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
 import {
   handleAPIError,
   handleValidationError,
-  handleUnauthorizedError,
 } from "@/lib/api-error-handler";
+import { UnauthorizedError } from "@/lib/errors";
 import { safeParseAIResponse } from "@/lib/parse-ai-json";
 import { getAuthenticatedConvexClient } from "@/lib/convex-client";
 import { api } from "@/convex/_generated/api";
@@ -68,7 +68,7 @@ export const POST = withAuth(async (request, { userId, token }) => {
 
     // Verify ownership
     if (conversation.userId !== userId) {
-      return handleUnauthorizedError();
+      throw new UnauthorizedError("conversation");
     }
 
     // Build message history for Claude with sanitization

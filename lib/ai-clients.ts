@@ -40,8 +40,8 @@ export const perplexity = new OpenAI({
  * AI Model Configuration
  */
 export const AI_MODELS = {
-  CLAUDE_SONNET: "claude-sonnet-4-20250514",
-  CLAUDE_HAIKU: "claude-3-5-haiku-20241022",
+  CLAUDE_SONNET: "claude-sonnet-4-5",
+  CLAUDE_HAIKU: "claude-haiku-4-5",
   PERPLEXITY_SONAR: "sonar-pro",
 } as const;
 

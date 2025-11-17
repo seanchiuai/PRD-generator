@@ -54,14 +54,24 @@ export const POST = withAuth(async (request, { userId, token }) => {
     const extractedContext = conversation.extractedContext
     const clarifyingQuestions = conversation.clarifyingQuestions
 
+    // Convert questions to answers Record for tech stack functions
+    const userAnswers: Record<string, string> | null = clarifyingQuestions
+      ? clarifyingQuestions.reduce((acc: Record<string, string>, q: { id: string; answer?: string }) => {
+          if (q.answer) {
+            acc[q.id] = q.answer
+          }
+          return acc
+        }, {})
+      : null
+
     let techStack
 
     if (useAI && extractedContext) {
       // Use Claude for smarter suggestions
-      techStack = await getAISuggestedStack(extractedContext, clarifyingQuestions)
+      techStack = await getAISuggestedStack(extractedContext, userAnswers)
     } else {
       // Use rule-based defaults
-      techStack = getDefaultTechStack(extractedContext, clarifyingQuestions)
+      techStack = getDefaultTechStack(extractedContext, userAnswers)
     }
 
     // Validate the stack before saving
@@ -79,7 +89,8 @@ export const POST = withAuth(async (request, { userId, token }) => {
     }
 
     // Generate mock research results (using completeStack with all required fields)
-    const researchResults = generateMockResearchResults(completeStack)
+    // Type assertion safe because we merged with DEFAULT_STACK which has all fields
+    const researchResults = generateMockResearchResults(completeStack as Required<SimpleTechStack>)
 
     // Save research results to Convex
     await convexClient.mutation(api.conversations.saveResearchResults, {
@@ -91,7 +102,13 @@ export const POST = withAuth(async (request, { userId, token }) => {
     // Save validated/fixed selection once
     await convexClient.mutation(api.conversations.saveSelection, {
       conversationId,
-      selection: completeStack,
+      selection: {
+        frontend: completeStack.frontend!,
+        backend: completeStack.backend!,
+        database: completeStack.database!,
+        auth: completeStack.auth!,
+        hosting: completeStack.hosting!,
+      },
       autoSelected: true,
     })
 
@@ -116,10 +133,11 @@ async function getAISuggestedStack(extractedContext: ExtractedContext, answers: 
     }],
   })
 
-  const textContent = response.content.find((block): block is { type: 'text'; text: string } => block.type === 'text')
-  if (!textContent) {
+  const firstBlock = response.content[0]
+  if (!firstBlock || firstBlock.type !== 'text') {
     throw new Error('Unexpected response type from Claude')
   }
+  const textContent = firstBlock
 
   return safeParseAIResponse<SimpleTechStack>(textContent.text) || getDefaultTechStack(extractedContext, answers)
 }

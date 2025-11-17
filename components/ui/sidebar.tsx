@@ -83,7 +83,14 @@ function SidebarProvider({
       }
 
       // This sets the cookie to keep the sidebar state.
-      document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+      if (typeof document !== "undefined") {
+        try {
+          document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+        } catch (error) {
+          // Silently handle cookie errors
+          console.error("Failed to set sidebar cookie:", error)
+        }
+      }
     },
     [setOpenProp, open]
   )

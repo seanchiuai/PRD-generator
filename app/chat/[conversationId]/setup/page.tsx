@@ -23,8 +23,8 @@ export default function SetupPage() {
     );
   }
 
-  // If still in setup stage, redirect to main chat page
-  if (conversation.currentStage === "setup") {
+  // If not yet past setup stage, redirect to main chat page
+  if (conversation.currentStage !== "setup") {
     router.push(`/chat/${conversationId}`);
     return null;
   }

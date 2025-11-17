@@ -136,7 +136,7 @@ const chartConfig = {
   },
   mobile: {
     label: "Mobile",
-    color: "var(--primary)",
+    color: "hsl(var(--chart-2))",
   },
 } satisfies ChartConfig
 
@@ -147,6 +147,8 @@ export function ChartAreaInteractive() {
   React.useEffect(() => {
     if (isMobile) {
       setTimeRange("7d")
+    } else {
+      setTimeRange("90d")
     }
   }, [isMobile])
 

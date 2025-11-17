@@ -6,6 +6,7 @@
 
 import { NextResponse } from "next/server";
 import { APIError } from "@/types";
+import { logger } from "@/lib/logger";
 
 /**
  * Handles API errors with consistent format and logging
@@ -21,7 +22,7 @@ export function handleAPIError(
   statusCode: number = 500
 ): NextResponse<APIError> {
   // Log the full error for debugging
-  console.error(`${context} Error:`, error);
+  logger.error(`${context} Error`, context, error);
 
   // Extract error message
   const errorMessage = error instanceof Error ? error.message : "Unknown error";
@@ -33,7 +34,7 @@ export function handleAPIError(
   };
 
   // Add error code if available
-  if (error instanceof Error && "code" in error) {
+  if (error instanceof Error && "code" in error && typeof (error as Error & { code?: string }).code === "string") {
     apiError.code = (error as Error & { code: string }).code;
   }
 
@@ -57,7 +58,7 @@ export function handleValidationError(
     code: "VALIDATION_ERROR",
   };
 
-  console.error("Validation Error:", apiError);
+  logger.error("Validation Error", "validation", apiError);
   return NextResponse.json(apiError, { status: 400 });
 }
 

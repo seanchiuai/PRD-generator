@@ -65,18 +65,44 @@ export const DEFAULT_STACKS: Record<string, TechStackSelection> = {
   },
 }
 
+/**
+ * Expected shape of extracted context from user input
+ */
+export interface ExtractedContext {
+  description?: string;
+  productName?: string;
+  keyFeatures?: string[];
+  technicalPreferences?: string[];
+}
+
+/**
+ * Expected shape of user answers
+ */
+export interface UserAnswers {
+  [key: string]: string | string[] | undefined;
+}
+
+/**
+ * Detects the product type based on extracted context and user answers.
+ * Priority order: mobile_app → ecommerce → ai_app → dashboard → api_service → saas_platform → web_app (default)
+ *
+ * @param extractedContext - Context extracted from user input
+ * @param answers - User's answers to questions
+ * @returns Product type key for DEFAULT_STACKS
+ */
 export function detectProductType(
-  extractedContext: any,
-  answers: any
+  extractedContext: ExtractedContext | null | undefined,
+  answers: UserAnswers | null | undefined
 ): keyof typeof DEFAULT_STACKS {
+  // Normalize inputs - return 'general' only when both are null/undefined/empty
   if (!extractedContext && !answers) return 'general'
 
   // Check for mobile keywords
   const mobileKeywords = ['mobile', 'ios', 'android', 'app store', 'react native']
-  const description = extractedContext?.description?.toLowerCase() || ''
-  const productName = extractedContext?.productName?.toLowerCase() || ''
-  const features = extractedContext?.keyFeatures?.join(' ').toLowerCase() || ''
-  const techPrefs = extractedContext?.technicalPreferences?.join(' ').toLowerCase() || ''
+  const description = extractedContext?.description?.toLowerCase() ?? ''
+  const productName = extractedContext?.productName?.toLowerCase() ?? ''
+  const features = (extractedContext?.keyFeatures ?? []).join(' ').toLowerCase()
+  const techPrefs = (extractedContext?.technicalPreferences ?? []).join(' ').toLowerCase()
 
   const allText = `${description} ${productName} ${features} ${techPrefs}`
 
@@ -119,16 +145,30 @@ export function detectProductType(
 }
 
 export function getDefaultTechStack(
-  extractedContext: any,
-  answers: any
+  extractedContext: ExtractedContext | null | undefined,
+  answers: UserAnswers | null | undefined
 ): TechStackSelection {
   const productType = detectProductType(extractedContext, answers)
   return DEFAULT_STACKS[productType] as TechStackSelection
 }
 
+interface TechRecommendation {
+  name: string;
+  description: string;
+  pros: string[];
+  cons: string[];
+  popularity: string;
+  recommended: boolean;
+}
+
+interface TechCategoryResult {
+  category: string;
+  recommendations: TechRecommendation[];
+}
+
 export function generateMockResearchResults(
   stack: TechStackSelection
-): Record<string, any> {
+): Record<string, TechCategoryResult> {
   return {
     frontend: {
       category: 'frontend',

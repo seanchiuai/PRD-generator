@@ -22,6 +22,11 @@ export const WORKFLOW_STEPS: WorkflowStep[] = [
   { id: "generate", label: "Generate", path: "/chat/[id]/generate", icon: FileText },
 ];
 
+/**
+ * Determines the status of a workflow step.
+ * Precedence: completed > current > future
+ * (A step marked as completed takes precedence over being the current step)
+ */
 export const getStepStatus = (stepId: string, currentStep: string, completedSteps: string[]) => {
   if (completedSteps.includes(stepId)) return "completed";
   if (stepId === currentStep) return "current";

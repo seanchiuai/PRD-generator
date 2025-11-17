@@ -25,7 +25,7 @@ export function getCompletedSteps(stage: string): WorkflowStep[] {
  * Get the next step in the workflow
  */
 export function getNextStep(currentStep: WorkflowStep): WorkflowStep | null {
-  const steps: WorkflowStep[] = ['discovery', 'questions', 'research', 'selection', 'generate']
+  const steps = getAllSteps()
   const currentIndex = steps.indexOf(currentStep)
   const nextStep = steps[currentIndex + 1]
   return nextStep !== undefined ? nextStep : null
@@ -35,7 +35,7 @@ export function getNextStep(currentStep: WorkflowStep): WorkflowStep | null {
  * Get the previous step in the workflow
  */
 export function getPreviousStep(currentStep: WorkflowStep): WorkflowStep | null {
-  const steps: WorkflowStep[] = ['discovery', 'questions', 'research', 'selection', 'generate']
+  const steps = getAllSteps()
   const currentIndex = steps.indexOf(currentStep)
   const prevStep = steps[currentIndex - 1]
   return prevStep !== undefined ? prevStep : null
@@ -51,7 +51,7 @@ export function canNavigateToStep(
   targetStep: WorkflowStep,
   completedSteps: WorkflowStep[]
 ): boolean {
-  const steps: WorkflowStep[] = ['discovery', 'questions', 'research', 'selection', 'generate']
+  const steps = getAllSteps()
 
   // Can always navigate to completed steps
   if (completedSteps.includes(targetStep)) return true
@@ -104,7 +104,8 @@ export function getStepPath(step: WorkflowStep, conversationId: string): string 
  * Calculate progress percentage
  */
 export function getProgressPercentage(completedSteps: WorkflowStep[]): number {
-  const totalSteps = 5
+  const totalSteps = getAllSteps().length
+  if (totalSteps === 0) return 0
   return Math.round((completedSteps.length / totalSteps) * 100)
 }
 
