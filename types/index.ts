@@ -22,10 +22,12 @@ export interface Message {
 // ============================================================================
 
 export type ConversationStage =
+  | "setup"
   | "discovery"
   | "clarifying"
-  | "researching"
-  | "selecting"
+  | "researching" // deprecated - migrate to tech-stack
+  | "selecting" // deprecated - migrate to tech-stack
+  | "tech-stack"
   | "generating"
   | "completed";
 

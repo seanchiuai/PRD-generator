@@ -36,6 +36,8 @@ export default defineSchema({
       v.literal("setup"),
       v.literal("discovery"),
       v.literal("clarifying"),
+      v.literal("researching"), // deprecated - migrate to tech-stack
+      v.literal("selecting"), // deprecated - migrate to tech-stack
       v.literal("tech-stack"),
       v.literal("generating"),
       v.literal("completed")

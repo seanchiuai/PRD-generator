@@ -8,7 +8,12 @@ import { v } from "convex/values"
 export const updateProgress = mutation({
   args: {
     conversationId: v.id("conversations"),
-    currentStep: v.string(),
+    currentStep: v.union(
+      v.literal("discovery"),
+      v.literal("questions"),
+      v.literal("tech-stack"),
+      v.literal("generate")
+    ),
     completedSteps: v.array(v.string()),
     skippedSteps: v.optional(v.array(v.string())),
   },
