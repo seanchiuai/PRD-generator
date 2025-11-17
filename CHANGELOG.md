@@ -2,7 +2,12 @@
 
 ## 2025-11-17
 
+### Added
+- **Skip Button Protection**: Skip button now disabled during message processing to prevent race conditions.
+- **Merge Plan**: Created plan to merge research/selection phases for streamlined workflow.
+
 ### Fixed
+- **PRD Generation**: Fixed API payload structure - removed incorrect `researchData` wrapper causing generation failures.
 - **Question Generation**: AI response flattening logic added to handle nested category structure. Questions now save to Convex without schema validation errors.
 - **Question Required Field**: Added default `required=true` fallback when AI omits this field from question responses, preventing Convex schema validation errors.
 - **Question Type Field**: Added intelligent default for missing `type` field - defaults to "select" if suggestedOptions exist, otherwise "textarea". Prevents Convex validation errors.
