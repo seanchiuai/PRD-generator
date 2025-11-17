@@ -1383,7 +1383,7 @@ PERPLEXITY_API_KEY=<perplexity-api-key>
 **End of User Workflow Guide**
 
 For technical implementation details, see:
-- `/docs/scratchpad.md` - Implementation log
+- `/docs/CHANGELOG.md` - Implementation log
 - `/docs/prd-generation-implementation.md` - PRD generation details
 - `/docs/authentication-security.md` - Security implementation
 - `CLAUDE.md` - Project conventions and guidelines
