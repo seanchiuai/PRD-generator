@@ -176,14 +176,14 @@ export default defineSchema({
             selectedFrom: v.array(v.string()),
           })
         ),
-        "real-time-communication": v.optional(
+        real_time_communication: v.optional(
           v.object({
             name: v.string(),
             reasoning: v.string(),
             selectedFrom: v.array(v.string()),
           })
         ),
-        "file-storage": v.optional(
+        file_storage: v.optional(
           v.object({
             name: v.string(),
             reasoning: v.string(),
