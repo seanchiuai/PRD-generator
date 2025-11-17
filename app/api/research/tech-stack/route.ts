@@ -195,7 +195,13 @@ function parseResponse(content: string, _category: string): any[] {
       // Extract all bold text segments
       const boldMatches = content.match(/\*\*([^*]+)\*\*/g);
       if (boldMatches && boldMatches.length > 1) {
-        sections = boldMatches.map(m => m.replace(/\*\*/g, ''));
+        sections = boldMatches.map(m => {
+          // Remove ** and extract only the tech name (before /, :, or other delimiters)
+          const cleaned = m.replace(/\*\*/g, '');
+          // Extract name before common delimiters
+          const nameMatch = cleaned.match(/^([^/:(\n]+)/);
+          return nameMatch ? nameMatch[1].trim() : cleaned.trim();
+        });
       }
     }
 

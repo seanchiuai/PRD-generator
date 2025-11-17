@@ -11,11 +11,12 @@
 - **Research Parsing**: Significantly improved parser to handle multiple Perplexity response formats:
   - Pattern 1: Numbered lists with bold (`1. **React**`)
   - Pattern 2: Markdown headers (`## React`)
-  - Pattern 3: Comma-separated inline bold (`**React**, **Vue**, **Angular**`)
+  - Pattern 3: Comma-separated inline bold (`**React**, **Vue**, **Angular**`) - extracts tech name before delimiters like `/`, `:`, `(`
   - Pattern 4: Standalone bold text
   - Intelligent preamble detection skips intro text
   - Increased name length limit to 80 chars
   - Added prefix cleanup and simple name handling
+  - Fixed Pattern 3 to extract only tech names, not trailing metadata (e.g., "React" not "React /Adoption Rate:**")
 
 ## 2025-11-16
 
