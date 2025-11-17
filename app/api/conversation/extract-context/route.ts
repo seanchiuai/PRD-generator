@@ -26,8 +26,14 @@ const FALLBACK_CONTEXT = {
 /**
  * Helper to ensure a value is an array of strings
  */
-const ensureArray = (value: unknown): string[] =>
-  Array.isArray(value) ? value : [];
+const ensureArray = (value: unknown): string[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value
+    .filter((el) => typeof el === "string")
+    .map((el) => String(el));
+};
 
 export const POST = withAuth(async (request, { userId, token }) => {
   try {

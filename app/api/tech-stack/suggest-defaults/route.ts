@@ -58,11 +58,20 @@ export const POST = withAuth(async (request, { userId, token }) => {
     const researchResults = generateMockResearchResults(techStack)
 
     // Validate the stack before saving
-    const validation = await validateDefaultStack(techStack)
+    const validation = validateDefaultStack(techStack)
 
     // If there are errors, fix them before saving
     if (validation.errors.length > 0) {
       techStack = await fixStackErrors(techStack, validation.errors)
+    }
+
+    // Ensure all required fields are present for Convex mutation
+    const completeStack = {
+      frontend: techStack.frontend || "Next.js",
+      backend: techStack.backend || "Node.js with Express",
+      database: techStack.database || "PostgreSQL",
+      auth: techStack.auth || "Clerk",
+      hosting: techStack.hosting || "Vercel",
     }
 
     // Save research results to Convex
@@ -75,7 +84,7 @@ export const POST = withAuth(async (request, { userId, token }) => {
     // Save validated/fixed selection once
     await convexClient.mutation(api.conversations.saveSelection, {
       conversationId,
-      selection: techStack,
+      selection: completeStack,
       autoSelected: true,
     })
 
@@ -161,7 +170,7 @@ interface ValidationResult {
   warnings: string[];
 }
 
-async function validateDefaultStack(stack: TechStack): Promise<ValidationResult> {
+function validateDefaultStack(stack: TechStack): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
 
