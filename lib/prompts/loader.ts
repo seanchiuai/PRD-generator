@@ -15,5 +15,9 @@ import path from "path";
  */
 export function loadPrompt(filename: string): string {
   const promptPath = path.join(process.cwd(), "lib", "prompts", "markdowns", `${filename}.md`);
-  return fs.readFileSync(promptPath, "utf-8");
+  try {
+    return fs.readFileSync(promptPath, "utf-8");
+  } catch (error) {
+    throw new Error(`Failed to load prompt "${filename}" from ${promptPath}: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }

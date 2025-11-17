@@ -9,7 +9,7 @@ interface SelectionProgressProps {
 }
 
 export function SelectionProgress({ total, selected }: SelectionProgressProps) {
-  const percentage = (selected / total) * 100;
+  const percentage = total > 0 ? (selected / total) * 100 : 0;
 
   return (
     <div className="bg-muted p-4 rounded-lg">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -46,7 +46,7 @@ export default function GeneratePage() {
     );
   };
 
-  const generatePRD = async () => {
+  const generatePRD = useCallback(async () => {
     if (!conversation) return;
 
     setIsGenerating(true);
@@ -114,14 +114,14 @@ export default function GeneratePage() {
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, [conversation, conversationId, createPRD, toast]);
 
   // Auto-start generation if no existing PRD
   useEffect(() => {
     if (conversation && !existingPRD && !isGenerating && !prd) {
       generatePRD();
     }
-  }, [conversation, existingPRD]);
+  }, [conversation, existingPRD, isGenerating, prd, generatePRD]);
 
   if (!conversation) {
     return (

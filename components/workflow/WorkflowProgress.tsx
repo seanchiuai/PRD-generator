@@ -23,7 +23,7 @@ export interface WorkflowStep {
 }
 
 const WORKFLOW_STEPS: WorkflowStep[] = [
-  { id: "setup", label: "Setup", path: "/chat/[id]", icon: Settings },
+  { id: "setup", label: "Setup", path: "/chat/[id]/setup", icon: Settings },
   { id: "discovery", label: "Discovery", path: "/chat/[id]", icon: MessageSquare },
   { id: "questions", label: "Questions", path: "/chat/[id]/questions", icon: HelpCircle },
   { id: "research", label: "Research", path: "/chat/[id]/research", icon: Search },

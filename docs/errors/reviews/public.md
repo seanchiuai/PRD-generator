@@ -1,12 +1,13 @@
 # Code Review: Public
 
-This file contains 2 review issues for public files.
+This file contains 2 review issues for public files (1 HIGH resolved, 1 LOW pending).
 
 ============================================================================
 
 File: public/fonts/mona-sans.css
 Line: 23 to 40
 Type: potential_issue
+Status: ✅ RESOLVED
 
 Comment:
 Add generic font-family fallback for resilience.
@@ -61,6 +62,7 @@ In public/fonts/mona-sans.css around lines 23 to 40, each utility class sets fon
 File: public/fonts/mona-sans.css
 Line: 2 to 10
 Type: nitpick
+Status: ⏳ PENDING (LOW priority - requires font download and license check)
 
 Comment:
 Consider self-hosting fonts instead of using CDN.

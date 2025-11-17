@@ -48,12 +48,25 @@ export default function ChatPage() {
   const handleSendMessage = async (content: string) => {
     if (!conversation) return;
 
+    // Validate content
+    if (!content.trim()) {
+      toast({
+        title: "Empty message",
+        description: "Please enter a message before sending.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Use trimmed content
+    const trimmedContent = content.trim();
+
     try {
       // Add user message to Convex
       await addMessage({
         conversationId,
         role: "user",
-        content,
+        content: trimmedContent,
       });
 
       setIsTyping(true);
@@ -65,7 +78,7 @@ export default function ChatPage() {
         body: JSON.stringify({
           messages: [
             ...conversation.messages,
-            { role: "user", content, timestamp: Date.now() },
+            { role: "user", content: trimmedContent, timestamp: Date.now() },
           ],
         }),
       });

@@ -54,7 +54,11 @@ export function SkipButton({
 
   const handleConfirmedSkip = async () => {
     setShowConfirmDialog(false)
-    await onSkip()
+    try {
+      await onSkip()
+    } catch (error) {
+      console.error('Error during skip:', error)
+    }
   }
 
   const buttonContent = (

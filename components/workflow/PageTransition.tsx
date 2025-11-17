@@ -6,12 +6,14 @@ import { ReactNode } from 'react'
 interface PageTransitionProps {
   children: ReactNode
   className?: string
+  pageKey?: string
 }
 
-export function PageTransition({ children, className }: PageTransitionProps) {
+export function PageTransition({ children, className, pageKey }: PageTransitionProps) {
   return (
     <AnimatePresence mode="wait">
       <motion.div
+        key={pageKey}
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -20 }}

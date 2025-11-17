@@ -20,7 +20,7 @@ export const POST = withAuth(async (request, { userId }) => {
     }
 
     // Create a user message that provides the project context
-    const contextMessage = `My app will be called "${projectName}". Here's their initial description: ${projectDescription}`;
+    const contextMessage = `My app will be called "${projectName}". Here's the initial description: ${projectDescription}`;
 
     // Call Claude API to generate the initial discovery message
     const response = await anthropic.messages.create({

@@ -20,21 +20,21 @@
 }
 
 /* Mona Sans Utility Classes for Different Variations */
-.font-mona-extralight { font-family: 'Mona Sans'; font-variation-settings: 'wght' 200, 'wdth' 100; }
-.font-mona-light { font-family: 'Mona Sans'; font-variation-settings: 'wght' 300, 'wdth' 100; }
-.font-mona-regular { font-family: 'Mona Sans'; font-variation-settings: 'wght' 400, 'wdth' 100; }
-.font-mona-medium { font-family: 'Mona Sans'; font-variation-settings: 'wght' 500, 'wdth' 100; }
-.font-mona-semibold { font-family: 'Mona Sans'; font-variation-settings: 'wght' 600, 'wdth' 100; }
-.font-mona-bold { font-family: 'Mona Sans'; font-variation-settings: 'wght' 700, 'wdth' 100; }
-.font-mona-extrabold { font-family: 'Mona Sans'; font-variation-settings: 'wght' 800, 'wdth' 100; }
-.font-mona-black { font-family: 'Mona Sans'; font-variation-settings: 'wght' 900, 'wdth' 100; }
+.font-mona-extralight { font-family: 'Mona Sans', sans-serif; font-variation-settings: 'wght' 200, 'wdth' 100; }
+.font-mona-light { font-family: 'Mona Sans', sans-serif; font-variation-settings: 'wght' 300, 'wdth' 100; }
+.font-mona-regular { font-family: 'Mona Sans', sans-serif; font-variation-settings: 'wght' 400, 'wdth' 100; }
+.font-mona-medium { font-family: 'Mona Sans', sans-serif; font-variation-settings: 'wght' 500, 'wdth' 100; }
+.font-mona-semibold { font-family: 'Mona Sans', sans-serif; font-variation-settings: 'wght' 600, 'wdth' 100; }
+.font-mona-bold { font-family: 'Mona Sans', sans-serif; font-variation-settings: 'wght' 700, 'wdth' 100; }
+.font-mona-extrabold { font-family: 'Mona Sans', sans-serif; font-variation-settings: 'wght' 800, 'wdth' 100; }
+.font-mona-black { font-family: 'Mona Sans', sans-serif; font-variation-settings: 'wght' 900, 'wdth' 100; }
 
 /* Width variations */
-.font-mona-narrow { font-family: 'Mona Sans'; font-variation-settings: 'wght' 400, 'wdth' 75; }
-.font-mona-wide { font-family: 'Mona Sans'; font-variation-settings: 'wght' 400, 'wdth' 125; }
+.font-mona-narrow { font-family: 'Mona Sans', sans-serif; font-variation-settings: 'wght' 400, 'wdth' 75; }
+.font-mona-wide { font-family: 'Mona Sans', sans-serif; font-variation-settings: 'wght' 400, 'wdth' 125; }
 
 /* Combined variations for specific use cases */
-.font-mona-heading { font-family: 'Mona Sans'; font-variation-settings: 'wght' 700, 'wdth' 105; }
-.font-mona-subheading { font-family: 'Mona Sans'; font-variation-settings: 'wght' 600, 'wdth' 102; }
-.font-mona-caption { font-family: 'Mona Sans'; font-variation-settings: 'wght' 500, 'wdth' 95; }
-.font-mona-display { font-family: 'Mona Sans'; font-variation-settings: 'wght' 800, 'wdth' 110; }
+.font-mona-heading { font-family: 'Mona Sans', sans-serif; font-variation-settings: 'wght' 700, 'wdth' 105; }
+.font-mona-subheading { font-family: 'Mona Sans', sans-serif; font-variation-settings: 'wght' 600, 'wdth' 102; }
+.font-mona-caption { font-family: 'Mona Sans', sans-serif; font-variation-settings: 'wght' 500, 'wdth' 95; }
+.font-mona-display { font-family: 'Mona Sans', sans-serif; font-variation-settings: 'wght' 800, 'wdth' 110; }

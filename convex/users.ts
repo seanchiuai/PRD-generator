@@ -1,6 +1,7 @@
 import { v } from "convex/values";
-import { mutation, query, QueryCtx } from "./_generated/server";
-import { Id } from "./_generated/dataModel";
+import { mutation, query } from "./_generated/server";
+import type { QueryCtx } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 
 /**
  * Store or update user in database when they sign in
@@ -25,7 +26,7 @@ export const store = mutation({
       await ctx.db.patch(existing._id, {
         lastSeenAt: Date.now(),
         name: identity.name,
-        email: identity.email || existing.email,
+        email: identity.email ?? existing.email,
         imageUrl: identity.pictureUrl || existing.imageUrl,
       });
       return existing._id;
@@ -34,7 +35,7 @@ export const store = mutation({
     // Create new user
     return await ctx.db.insert("users", {
       clerkId: identity.subject,
-      email: identity.email || "",
+      email: identity.email ?? "",
       name: identity.name,
       imageUrl: identity.pictureUrl,
       createdAt: Date.now(),
@@ -62,7 +63,11 @@ export const getByClerkId = query({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return null;
 
-    // Only allow users to query their own data or this specific user
+    // Only allow users to query their own data
+    if (identity.subject !== args.clerkId) {
+      return null;
+    }
+
     return await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))

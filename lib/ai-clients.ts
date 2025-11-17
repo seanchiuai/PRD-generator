@@ -9,6 +9,17 @@ import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 
 /**
+ * Validate required environment variables
+ */
+if (!process.env.ANTHROPIC_API_KEY) {
+  throw new Error("ANTHROPIC_API_KEY environment variable is required");
+}
+
+if (!process.env.PERPLEXITY_API_KEY) {
+  throw new Error("PERPLEXITY_API_KEY environment variable is required");
+}
+
+/**
  * Anthropic Claude client
  * Used for: Conversations, PRD generation, question generation, validation
  */
@@ -29,8 +40,8 @@ export const perplexity = new OpenAI({
  * AI Model Configuration
  */
 export const AI_MODELS = {
-  CLAUDE_SONNET: "claude-sonnet-4-5-20250929",
-  CLAUDE_HAIKU: "claude-haiku-4-5",
+  CLAUDE_SONNET: "claude-sonnet-4-20250514",
+  CLAUDE_HAIKU: "claude-3-5-haiku-20241022",
   PERPLEXITY_SONAR: "sonar-pro",
 } as const;
 

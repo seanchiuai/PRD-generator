@@ -40,11 +40,21 @@ export interface ProductContext {
   coreFeatures?: string[];
 }
 
+export interface ExtractedContext {
+  productName: string;
+  description: string;
+  targetAudience: string;
+  keyFeatures: string[];
+  problemStatement: string;
+  technicalPreferences: string[];
+  extractedAt?: number;
+}
+
 // ============================================================================
 // QUESTION TYPES
 // ============================================================================
 
-export type QuestionType = "text" | "textarea" | "select";
+export type QuestionType = "text" | "textarea" | "select" | "radio";
 
 export interface Question {
   id: string;

@@ -9,17 +9,11 @@ allowed-tools: ["file_write"]
 # Create Skill
 
 ## Instructions
-When requested to create a new skill
-
-
-# Create Skill
-
-## Instructions
 
 When requested to create a new skill, follow these steps:
 1. Create a new folder in `.claude/skills` with the skill name `xyz.md` (make name gerund form)
 2. Take the requested input to turn into a re-usable skill
-3. Be sure to have the description field be very clear on what it does and how to use it - 2-4 sentences max
+3. Be sure to have the description field be precise and explain what it does and how to use it - 2-4 sentences max
 4. Store documentation and sample inputs/outputs in a new sub-folder there `resources/` if they exceed several lines or will be referenced for depth.
 5. Generate minimal, clear, actionable Markdown instructions as the primary workflow guide.
 6. If code or scripts are needed, place them in the skill folder and reference their purpose in this file.

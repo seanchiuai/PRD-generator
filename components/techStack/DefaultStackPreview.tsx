@@ -25,7 +25,7 @@ export function DefaultStackPreview({ stack, productType }: DefaultStackPreviewP
 
       {productType && (
         <p className="text-sm text-muted-foreground mb-4">
-          Optimized for {productType.replace('_', ' ')} applications
+          Optimized for {productType.replaceAll('_', ' ')} applications
         </p>
       )}
 

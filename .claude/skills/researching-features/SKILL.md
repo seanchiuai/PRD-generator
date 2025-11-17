@@ -12,8 +12,8 @@ allowed-tools: ["context7", "mcp", "file_write"]
 When requested to research a feature:
 
 
-1. **User Interview**  
-   - If the user's requirements are unclear, politely ask for more details (deatails on feature, free/paid API options, constraints).
+1. **User Interview**
+   - If the user's requirements are unclear, politely ask for more details (details on feature, free/paid API options, constraints).
    - If details are provided, proceed directly.
 
 1. **Service & API Discovery**  
@@ -28,16 +28,16 @@ When requested to research a feature:
    - After selecting the best API/service, briefly summarize your choice and reasons.
    - Ask the user to confirm before proceeding with implementation research.
 
-4. **Implementation Notes Gathering**  
+4. **Implementation Notes Gathering**
    - VERY IMPORTANT: Before you start, look at the `spec-sheet.md` for the specs for this projects and `claude.md` to understand the context - this way you know the tech stack to a build a plan for.
    - Once confirmed, use `Context7` to retrieve official docs, key endpoints, authentication steps, usage patterns, and constraints for the selected API/service.
    - Structure your notes clearly around:
-      - Have page and UI elements to be built first before backend functions etc
-     - Authentication  
-     - Setup and Initialization  
-     - Core Endpoints/Methods  
-     - Example Requests/Responses  d
-     - Error Handling  
+      - Have page and UI elements to be built first before backend functions etc.
+     - Authentication
+     - Setup and Initialization
+     - Core Endpoints/Methods
+     - Example Requests/Responses
+     - Error Handling
      - Rate Limits or Pricing
 
 5. **Save Implementation Plan**  

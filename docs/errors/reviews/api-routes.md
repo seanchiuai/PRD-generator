@@ -2,11 +2,18 @@
 
 This file contains 15 review issues for api-routes files.
 
+**Summary:**
+- Total: 15 issues
+- CRITICAL: 5 (✅ 5 resolved)
+- HIGH: 5 (✅ 5 resolved)
+- MEDIUM: 5 (⏳ 5 pending)
+
 ============================================================================
 
 File: app/api/prd/generate/route.ts
 Line: 62 to 83
 Type: potential_issue
+**Status: ✅ RESOLVED**
 
 Comment:
 Add proper types for mapped items to avoid any type.
@@ -40,13 +47,14 @@ Alternatively, if these types are already defined in your Convex schema or types
 Prompt for AI Agent:
 In app/api/prd/generate/route.ts around lines 62 to 83, the prompt construction uses map callbacks with implicit any for items (m and q) which disables TypeScript checks; update by importing or declaring proper interfaces (e.g., ConversationMessage and ClarifyingQuestion or the existing Convex types), annotate conversationData and the map callbacks with those types, and replace m: any and q: any with the correct type names so the compiler enforces role/content and question/answer shape when building the prompt.
 
-
+**Resolution:** Imported Message and Question types from @/types and added proper type annotations to map callbacks.
 
 ============================================================================
 
 File: app/api/conversation/initial-message/route.ts
 Line: 22 to 23
 Type: potential_issue
+**Status: ✅ RESOLVED**
 
 Comment:
 Fix grammatical inconsistency in the context message.
@@ -63,13 +71,14 @@ Apply this diff:
 Prompt for AI Agent:
 In app/api/conversation/initial-message/route.ts around lines 22-23, the template string uses the plural pronoun "their" which is grammatically inconsistent with "My app"; change the pronoun to "its" (or "the user's" if you prefer) so the contextMessage becomes: My app will be called "{projectName}". Here's its initial description: {projectDescription} — update the string accordingly.
 
-
+**Resolution:** Changed "their" to "the" for grammatical consistency.
 
 ============================================================================
 
 File: app/api/questions/fill-defaults/route.ts
 Line: 120 to 178
 Type: nitpick
+**Status: ⏳ PENDING (MEDIUM priority)**
 
 Comment:
 Fragile string matching for question types.
@@ -109,13 +118,14 @@ function getTextDefault(question: Question, extractedContext: ExtractedContext |
 Prompt for AI Agent:
 In app/api/questions/fill-defaults/route.ts around lines 120-178, the getTextDefault function uses brittle lowercase string includes checks to pick a context field; change it to first look for a new question.contextKey (add an optional contextKey union type to the Question interface), and if present map it directly to the corresponding extractedContext property, returning arrays as comma-joined strings or an empty string if undefined; only if contextKey is absent fall back to the existing keyword/includes logic. Ensure the function handles null extractedContext early and update types/usages where Questions are created so contextKey can be set during question generation.
 
-
+**Note:** Deferred to MEDIUM priority - current implementation works but could be improved with contextKey field.
 
 ============================================================================
 
 File: app/api/research/tech-stack/route.ts
 Line: 177 to 205
 Type: nitpick
+**Status: ⏳ PENDING (MEDIUM priority)**
 
 Comment:
 Fragile text parsing with regex.
@@ -132,13 +142,14 @@ Consider:
 Prompt for AI Agent:
 In app/api/research/tech-stack/route.ts around lines 177 to 205, the current regex-based fallback parsing is fragile and can silently return an empty array if Perplexity changes formats; update it to (1) emit a debug/info log whenever the code falls back to text parsing and also log when JSON extraction succeeds so you can monitor which path runs, (2) add a short in-code comment or top-level docstring describing the exact text structure the regex expects (numbered sections, bolded names, headings like Pros/Cons/Popularity) for future maintenance, and (3) validate each parsed option before returning (e.g., ensure name is non-empty and pros/cons are arrays), filter out invalid entries, and log a warning if validation removes items or yields zero results so failures are observable instead of silent.
 
-
+**Note:** Deferred to MEDIUM priority - would improve observability but not critical.
 
 ============================================================================
 
 File: app/api/conversation/extract-context/route.ts
 Line: 84 to 91
 Type: nitpick
+**Status: ✅ RESOLVED**
 
 Comment:
 Consider moving ContextData to a shared types module.
@@ -167,13 +178,14 @@ import { ContextData } from "@/types"
 Prompt for AI Agent:
 In app/api/conversation/extract-context/route.ts around lines 84 to 91, the ContextData interface is defined locally but should be moved to a shared types module; create or update types/index.ts with the exported ContextData interface (same shape as shown in the comment), remove the local interface from this file, and replace it with an import: import { ContextData } from "@/types"; ensure any references still compile and update any tsconfig/paths if necessary.
 
-
+**Resolution:** Created ExtractedContext interface in types/index.ts, imported it in extract-context/route.ts and fill-defaults/route.ts. Removed local interface definitions.
 
 ============================================================================
 
 File: app/api/tech-stack/suggest-defaults/route.ts
 Line: 74 to 87
 Type: nitpick
+**Status: ✅ RESOLVED**
 
 Comment:
 Consider transaction support for multi-step validation flow.
@@ -205,13 +217,14 @@ await convexClient.mutation(api.conversations.saveSelection, {
 Prompt for AI Agent:
 In app/api/tech-stack/suggest-defaults/route.ts around lines 74 to 87, the code saves the selection, then validates and potentially modifies it, causing a window where the DB can hold an inconsistent value if the second save fails or concurrent readers observe the intermediate state; change the flow to perform validation (and fix errors if any) before making a single save, or alternatively wrap both write operations in a single DB transaction or use optimistic locking to ensure atomicity; implement by moving validateDefaultStack and fixStackErrors to run before calling convexClient.mutation, or replace the two-point save with a transactional mutation that commits the final selection only when validation/fixes succeed.
 
-
+**Resolution:** Refactored validation flow to validate and fix errors BEFORE saving to database, eliminating intermediate inconsistent state.
 
 ============================================================================
 
 File: app/api/tech-stack/suggest-defaults/route.ts
 Line: 157 to 164
 Type: potential_issue
+**Status: ✅ RESOLVED**
 
 Comment:
 Implement actual validation or remove the stub.
@@ -229,13 +242,14 @@ Would you like me to generate a validation implementation that checks:
 Prompt for AI Agent:
 In app/api/tech-stack/suggest-defaults/route.ts around lines 157 to 164, the validateDefaultStack stub always returns isValid: true; replace it with real validation or remove its usage: implement checks that required fields (name, components array, language/runtime, database, frontend/backend flags) exist and are non-empty; validate formats (strings, enums, version patterns using simple regex), enforce basic compatibility rules (e.g., if frontend is React then ensure language/runtime supports it, disallow incompatible DB/ORM combinations), and collect errors/warnings into the returned shape { isValid: boolean, errors: string[], warnings: string[] } where isValid is false if errors array is non-empty; ensure the function accepts the same input type and does not throw, only returns structured validation results so callers can handle failures, or remove calls to this validator if you opt to drop validation entirely.
 
-
+**Resolution:** Implemented comprehensive validation checking required fields, basic compatibility rules, and returning structured errors/warnings.
 
 ============================================================================
 
 File: app/api/conversation/extract-context/route.ts
 Line: 96 to 108
 Type: nitpick
+**Status: ✅ RESOLVED**
 
 Comment:
 Consider a helper for array field validation.
@@ -262,39 +276,33 @@ const validatedContext = {
 Prompt for AI Agent:
 In app/api/conversation/extract-context/route.ts around lines 96 to 108, the Array.isArray checks for keyFeatures and technicalPreferences are duplicated; create a small helper (e.g., ensureArray) that takes an unknown and returns a string[] (returning [] when not an array) and replace both inline Array.isArray branches with calls to that helper so the validatedContext construction is shorter and DRY.
 
-
+**Resolution:** Created ensureArray helper function and used it to validate array fields, eliminating duplication.
 
 ============================================================================
 
 File: app/api/tech-stack/suggest-defaults/route.ts
 Line: 166 to 175
 Type: potential_issue
+**Status: ✅ RESOLVED**
 
 Comment:
 fixStackErrors doesn't actually fix errors.
 
 The function ignores its parameters and returns a hardcoded default stack regardless of the specific errors encountered. This means validation errors aren't being addressed meaningfully.
 
-
-
-
-Do you want me to implement error-specific fix logic, or should this function simply return the default stack directly without validation?
-
-
-
+**Resolution:** Implemented error-specific fix logic that analyzes error messages and fills in missing required fields with appropriate defaults.
 
 ============================================================================
 
 File: app/api/conversation/extract-context/route.ts
 Line: 25 to 123
 Type: nitpick
+**Status: ⏳ PENDING (MEDIUM priority)**
 
 Comment:
 Consider adding rate limiting for AI operations.
 
 This route invokes Claude's API, which incurs costs per call. Without rate limiting, authenticated users could abuse the endpoint and generate unexpected bills.
-
-
 
 Consider implementing:
 - Per-user rate limits (e.g., X context extractions per hour)
@@ -304,21 +312,21 @@ Consider implementing:
 Example middleware integration:
 import { rateLimit } from "@/lib/middleware/rate-limit"
 
-export const POST = rateLimit({ 
-  max: 10, 
-  window: "1h" 
+export const POST = rateLimit({
+  max: 10,
+  window: "1h"
 })(withAuth(async (request, { userId, token }) => {
   // ... existing logic
 }))
 
-
-
+**Note:** Deferred to MEDIUM priority - would require implementing rate limiting middleware.
 
 ============================================================================
 
 File: app/api/questions/fill-defaults/route.ts
 Line: 59 to 76
 Type: potential_issue
+**Status: ✅ RESOLVED**
 
 Comment:
 All questions marked as autoCompleted regardless of success.
@@ -352,13 +360,14 @@ Apply this diff to only mark questions with actual default values:
 Prompt for AI Agent:
 In app/api/questions/fill-defaults/route.ts around lines 59 to 76, the code currently sets autoCompleted: true even when getDefaultAnswer returns an empty string; change the mapping so you only set answer and autoCompleted: true when defaultAnswer is non-empty (truthy after trimming). If defaultAnswer is empty, return the original question (or return { ...question, autoCompleted: false } to be explicit) so you do not overwrite the answer with an empty string or mark it as autoCompleted.
 
-
+**Resolution:** Added check to only mark autoCompleted when defaultAnswer is non-empty after trimming.
 
 ============================================================================
 
 File: app/api/research/tech-stack/route.ts
 Line: 258 to 278
 Type: refactor_suggestion
+**Status: ⏳ PENDING (MEDIUM priority)**
 
 Comment:
 Duplicate logging during retry.
@@ -375,13 +384,14 @@ Apply this diff to remove the duplicate:
 Prompt for AI Agent:
 In app/api/research/tech-stack/route.ts around lines 258 to 278, there are duplicate logger.warn calls logging the same retry and max-retries messages (one generic call and a near-identical "researchCategory" call); remove the redundant logger.warn lines (the secondary "researchCategory" variants) so each event is logged once, keeping the primary logger.warn that includes the message and metadata.
 
-
+**Note:** Deferred to MEDIUM priority - minor code cleanup.
 
 ============================================================================
 
 File: app/api/research/tech-stack/route.ts
 Line: 169
 Type: nitpick
+**Status: ⏳ PENDING (MEDIUM priority)**
 
 Comment:
 Remove unused parameter.
@@ -404,13 +414,14 @@ And update the call site at line 246:
 Prompt for AI Agent:
 In app/api/research/tech-stack/route.ts around line 169, the parseResponse function declares an unused second parameter named _category; remove this parameter from the function signature and adjust any JSDoc/types accordingly, then update the call site at line 246 to call parseResponse with only the content argument (remove the second argument passed there). Ensure TypeScript signatures and any references are updated so there are no leftover unused-parameter warnings.
 
-
+**Note:** Deferred to MEDIUM priority - minor code cleanup.
 
 ============================================================================
 
 File: app/api/questions/generate/route.ts
 Line: 56 to 59
 Type: potential_issue
+**Status: ✅ RESOLVED**
 
 Comment:
 Add bounds checking for response content array.
@@ -430,13 +441,14 @@ Apply this diff to add bounds checking:
 Prompt for AI Agent:
 In app/api/questions/generate/route.ts around lines 56 to 59, the code reads response.content[0] without verifying the content array exists or has elements; add a guard that ensures response.content is an array and has length > 0 before accessing index 0, and if not, throw a clear Error (or handle the empty case) indicating the response content was empty or malformed; then only access content[0] and validate its .type === "text" as before.
 
-
+**Resolution:** Added validation to check response.content array exists and has length before accessing index 0.
 
 ============================================================================
 
 File: app/api/questions/generate/route.ts
 Line: 22
 Type: potential_issue
+**Status: ✅ RESOLVED**
 
 Comment:
 Add input validation for request body.
@@ -461,5 +473,5 @@ Apply this diff to add basic validation:
 Prompt for AI Agent:
 In app/api/questions/generate/route.ts around line 22, the code destructures productContext and extractedContext straight from request.json() without validating them; add basic input validation by first safely parsing the JSON (wrap in try/catch or check request.json() result), verify that productContext and extractedContext are present and of the expected types (e.g., objects or strings as your API expects), and if validation fails return a 400 response with a clear error message; if valid, proceed to use the validated values (optionally narrow types/interfaces) so downstream logic cannot receive undefined or malformed data.
 
-
+**Resolution:** Added input validation to ensure at least one of productContext or extractedContext is provided before proceeding.
 

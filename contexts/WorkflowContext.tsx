@@ -55,12 +55,22 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
   // Sync state with Convex
   useEffect(() => {
     if (progress) {
-      setState(prev => ({
-        ...prev,
-        currentStep: progress.currentStep as WorkflowStep,
-        completedSteps: progress.completedSteps as WorkflowStep[],
-        skippedSteps: progress.skippedSteps as WorkflowStep[],
-      }))
+      setState(prev => {
+        // Only update if values have changed
+        if (
+          prev.currentStep === progress.currentStep &&
+          JSON.stringify(prev.completedSteps) === JSON.stringify(progress.completedSteps) &&
+          JSON.stringify(prev.skippedSteps) === JSON.stringify(progress.skippedSteps)
+        ) {
+          return prev
+        }
+        return {
+          ...prev,
+          currentStep: progress.currentStep as WorkflowStep,
+          completedSteps: progress.completedSteps as WorkflowStep[],
+          skippedSteps: progress.skippedSteps as WorkflowStep[],
+        }
+      })
     }
   }, [progress])
 
@@ -105,19 +115,24 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
         : [...state.skippedSteps, step]
       : state.skippedSteps
 
-    setState(prev => ({
-      ...prev,
-      completedSteps: newCompletedSteps,
-      skippedSteps: newSkippedSteps,
-    }))
+    try {
+      // Update Convex
+      await updateProgress({
+        conversationId,
+        currentStep: state.currentStep,
+        completedSteps: newCompletedSteps,
+        skippedSteps: newSkippedSteps,
+      })
 
-    // Update Convex
-    await updateProgress({
-      conversationId,
-      currentStep: state.currentStep,
-      completedSteps: newCompletedSteps,
-      skippedSteps: newSkippedSteps,
-    })
+      // Only update local state after successful remote update
+      setState(prev => ({
+        ...prev,
+        completedSteps: newCompletedSteps,
+        skippedSteps: newSkippedSteps,
+      }))
+    } catch (error) {
+      logger.error('WorkflowContext.markStepComplete', error, { conversationId, step })
+    }
   }
 
   const advanceToNextStep = async () => {
@@ -132,24 +147,28 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
 
       setIsTransitioning(true)
 
-      // Update state
-      setState(prev => ({
-        ...prev,
-        currentStep: nextStep as WorkflowStep,
-        completedSteps: newCompletedSteps,
-      }))
+      try {
+        // Single Convex update
+        if (conversationId) {
+          await updateProgress({
+            conversationId,
+            currentStep: nextStep as WorkflowStep,
+            completedSteps: newCompletedSteps,
+            skippedSteps: state.skippedSteps,
+          })
+        }
 
-      // Single Convex update
-      if (conversationId) {
-        await updateProgress({
-          conversationId,
+        // Only update local state after successful remote update
+        setState(prev => ({
+          ...prev,
           currentStep: nextStep as WorkflowStep,
           completedSteps: newCompletedSteps,
-          skippedSteps: state.skippedSteps,
-        })
+        }))
+      } catch (error) {
+        logger.error('WorkflowContext.advanceToNextStep', error, { conversationId })
+      } finally {
+        setIsTransitioning(false)
       }
-
-      setIsTransitioning(false)
     }
   }
 

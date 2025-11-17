@@ -7,17 +7,8 @@ import {
   handleUnauthorizedError,
 } from "@/lib/api-error-handler";
 import { Id } from "@/convex/_generated/dataModel";
-import { Question } from "@/types";
+import { Question, ExtractedContext } from "@/types";
 import { withAuth } from "@/lib/middleware/withAuth";
-
-interface ExtractedContext {
-  productName: string;
-  description: string;
-  targetAudience: string;
-  keyFeatures: string[];
-  problemStatement: string;
-  technicalPreferences: string[];
-}
 
 export const POST = withAuth(async (request, { userId, token }) => {
   try {
@@ -68,10 +59,13 @@ export const POST = withAuth(async (request, { userId, token }) => {
       // Determine default based on question type
       const defaultAnswer = getDefaultAnswer(question, extractedContext);
 
+      // Only mark as autoCompleted if we actually got a non-empty default answer
+      const hasDefaultAnswer = defaultAnswer.trim() !== "";
+
       return {
         ...question,
-        answer: defaultAnswer,
-        autoCompleted: true,
+        answer: hasDefaultAnswer ? defaultAnswer : question.answer,
+        autoCompleted: hasDefaultAnswer,
       };
     });
 

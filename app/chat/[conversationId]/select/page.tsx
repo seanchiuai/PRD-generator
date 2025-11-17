@@ -40,6 +40,7 @@ export default function SelectionPage() {
   const [isSkipping, setIsSkipping] = useState(false);
   const [countdown, setCountdown] = useState(5);
   const [showCountdown, setShowCountdown] = useState(false);
+  const [validationAbortController, setValidationAbortController] = useState<AbortController | null>(null);
 
   // Detect if the stack was auto-selected
   const isAutoSelected = conversation?.selection?.autoSelected || false;
@@ -53,8 +54,10 @@ export default function SelectionPage() {
     name: key.charAt(0).toUpperCase() + key.slice(1).replace(/-/g, ' '),
   })) || [];
 
-  // Load existing selections
+  // Load existing selections - only once per conversation
   useEffect(() => {
+    if (!conversation) return;
+
     if (conversation?.selectedTechStack) {
       const loaded: Record<string, string> = {};
       Object.entries(conversation.selectedTechStack).forEach(([key, value]: [string, any]) => {
@@ -68,7 +71,8 @@ export default function SelectionPage() {
     if (conversation?.validationWarnings) {
       setValidationWarnings(conversation.validationWarnings as ValidationWarning[]);
     }
-  }, [conversation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationId]); // Only re-run when conversation ID changes
 
   // Auto-advance countdown for auto-selected stacks
   useEffect(() => {
@@ -92,6 +96,15 @@ export default function SelectionPage() {
   const validateSelections = useCallback(async (currentSelections: Record<string, string>) => {
     if (Object.keys(currentSelections).length < 2) return;
 
+    // Abort previous validation request
+    if (validationAbortController) {
+      validationAbortController.abort();
+    }
+
+    // Create new abort controller for this request
+    const controller = new AbortController();
+    setValidationAbortController(controller);
+
     setIsValidating(true);
 
     try {
@@ -99,6 +112,7 @@ export default function SelectionPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ selections: currentSelections }),
+        signal: controller.signal,
       });
 
       if (!response.ok) throw new Error("Validation failed");
@@ -111,11 +125,16 @@ export default function SelectionPage() {
         warnings: data.warnings || [],
       });
     } catch (error) {
+      // Don't log abort errors - they're expected
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
       logger.error("SelectionPage.validateTechStack", error, { conversationId });
     } finally {
       setIsValidating(false);
+      setValidationAbortController(null);
     }
-  }, [conversationId, saveWarnings]);
+  }, [conversationId, saveWarnings, validationAbortController]);
 
   const handleSelection = async (category: string, optionName: string) => {
     // Update local state

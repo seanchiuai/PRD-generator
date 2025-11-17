@@ -6,20 +6,14 @@ dependencies: ["context7", "mcp-api", "python>=3.8"]
 allowed-tools: ["file_write"]
 ---
 
-# Create Skill
-
-## Instructions
-When requested to create a new agent
-
-
-# Create Skill
+# Create Agent
 
 ## Instructions
 
-When requested to create a new skill, follow these steps:
+When requested to create a new agent, follow these steps:
 1. Create a new file in `.claude/agents` with the agent name `xyz.md` (ex: "stripe-implementor" or "code-reviewer")
 2. Take the requested input given to you to turn into a re-usable agent.
-3. Be sure to have the description field be very clear on what it does and how to use it - 2-4 sentences max
+3. Be sure to have the description field be precise and explain what it does and how to use it - 2-4 sentences max
 5. Make sure it has a clear persona and goal
 6. Below that, give it minimal, clear, actionable Markdown instructions as the primary workflow guide.
 7. Be sure it knows the `convexGuidelines.md`

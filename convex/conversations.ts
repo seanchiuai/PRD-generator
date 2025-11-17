@@ -200,8 +200,28 @@ export const saveResearchResults = mutation({
 
     // Support both parameter names for compatibility
     const results = args.researchResults || args.results;
-    if (!results || (typeof results === 'object' && results !== null && !Array.isArray(results) && Object.keys(results).length === 0)) {
-      throw new Error("Research results are required and must contain data");
+
+    // Validate results are present and not empty
+    if (!results) {
+      throw new Error("Research results are required");
+    }
+
+    if (typeof results === 'object' && !Array.isArray(results)) {
+      const keys = Object.keys(results);
+      if (keys.length === 0) {
+        throw new Error("Research results must contain at least one category");
+      }
+      // Validate that at least one category has non-empty data
+      const hasData = keys.some(key => {
+        const value = results[key];
+        if (value === null || value === undefined) return false;
+        if (Array.isArray(value)) return value.length > 0;
+        if (typeof value === 'object') return Object.keys(value).length > 0;
+        return true;
+      });
+      if (!hasData) {
+        throw new Error("Research results are required and must contain data");
+      }
     }
 
     await ctx.db.patch(args.conversationId, {
@@ -281,6 +301,9 @@ export const saveSelection = mutation({
     ),
     autoSelected: v.optional(v.boolean()),
   },
+  // Note: Convex serializes mutations, so concurrent saveSelection calls
+  // for different categories will be applied sequentially. The final state
+  // will contain all selections. Each mutation is atomic and isolated.
   handler: async (ctx, args): Promise<{ success: boolean }> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {

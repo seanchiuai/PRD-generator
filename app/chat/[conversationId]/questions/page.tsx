@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -27,19 +27,10 @@ export default function QuestionsPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isSkipping, setIsSkipping] = useState(false);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hasGeneratedRef = useRef(false);
 
-  // Generate questions on mount if not already generated
-  useEffect(() => {
-    if (!conversation) return;
-
-    if (conversation.clarifyingQuestions) {
-      setQuestions(conversation.clarifyingQuestions as Question[]);
-    } else {
-      generateQuestions();
-    }
-  }, [conversation]);
-
-  const generateQuestions = async () => {
+  const generateQuestions = useCallback(async () => {
     if (!conversation) return;
 
     setIsGenerating(true);
@@ -75,7 +66,26 @@ export default function QuestionsPage() {
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, [conversation, conversationId, saveQuestions, toast]);
+
+  // Generate questions on mount if not already generated
+  useEffect(() => {
+    if (!conversation) return;
+
+    if (conversation.clarifyingQuestions) {
+      setQuestions(conversation.clarifyingQuestions as Question[]);
+    } else if (!hasGeneratedRef.current) {
+      hasGeneratedRef.current = true;
+      generateQuestions();
+    }
+
+    // Cleanup: clear timeout on unmount
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [conversation, generateQuestions]);
 
   const handleAnswerChange = async (questionId: string, answer: string) => {
     const updatedQuestions = questions.map((q) =>
@@ -83,15 +93,22 @@ export default function QuestionsPage() {
     );
     setQuestions(updatedQuestions);
 
-    // Auto-save with debouncing
-    try {
-      await saveQuestions({
-        conversationId,
-        questions: updatedQuestions,
-      });
-    } catch (error) {
-      logger.error("QuestionsPage.handleAnswerChange.autoSave", error, { conversationId });
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
     }
+
+    // Debounce auto-save by 500ms
+    saveTimeoutRef.current = setTimeout(async () => {
+      try {
+        await saveQuestions({
+          conversationId,
+          questions: updatedQuestions,
+        });
+      } catch (error) {
+        logger.error("QuestionsPage.handleAnswerChange.autoSave", error, { conversationId });
+      }
+    }, 500);
   };
 
   const handleContinue = async () => {

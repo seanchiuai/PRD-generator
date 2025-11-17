@@ -15,7 +15,7 @@ interface GenerationProgressProps {
 
 export function GenerationProgress({ steps }: GenerationProgressProps) {
   const completedSteps = steps.filter((s) => s.status === "completed").length;
-  const progress = (completedSteps / steps.length) * 100;
+  const progress = steps.length > 0 ? (completedSteps / steps.length) * 100 : 0;
 
   return (
     <Card>

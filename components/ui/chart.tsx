@@ -70,8 +70,11 @@ function ChartContainer({
 }
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
+  const isValidColor = (color: string) => /^(#[0-9A-Fa-f]{3,8}|rgb|hsl|var\()/.test(color)
+  const isSafeKey = (key: string) => /^[a-zA-Z][\w-]*$/.test(key)
+
   const colorConfig = Object.entries(config).filter(
-    ([, config]) => config.theme || config.color
+    ([key, config]) => isSafeKey(key) && (config.theme || config.color)
   )
 
   if (!colorConfig.length) {
@@ -90,7 +93,7 @@ ${colorConfig
     const color =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
       itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
+    return color && isValidColor(color) ? `  --color-${key}: ${color};` : null
   })
   .join("\n")}
 }

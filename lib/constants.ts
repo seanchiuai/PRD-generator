@@ -59,7 +59,7 @@ export const QUESTION_COUNT_RANGE = {
  * Question categories and their target counts
  */
 export const QUESTION_CATEGORIES = {
-  "Core Features": { min: 3, max: 4 },
+  "Core Features": { min: 3, max: 3 },
   "User Types & Personas": { min: 2, max: 3 },
   "Data Requirements": { min: 2, max: 3 },
   "Scalability & Performance": { min: 2, max: 2 },
@@ -154,11 +154,11 @@ export const VALIDATION_RULES = {
 export const EXPORT_PATTERNS = {
   /** JSON file name pattern: {productName}_PRD_{timestamp}.json */
   JSON_FILENAME: (productName: string) =>
-    `${productName.replace(/\s+/g, "_")}_PRD_${Date.now()}.json`,
+    `${(productName || "unnamed_product").trim().replace(/[^a-zA-Z0-9_-]/g, "_").replace(/_+/g, "_").replace(/^_|_$/g, "")}_PRD_${Date.now()}.json`,
 
   /** PDF file name pattern: {productName}_PRD_{timestamp}.pdf */
   PDF_FILENAME: (productName: string) =>
-    `${productName.replace(/\s+/g, "_")}_PRD_${Date.now()}.pdf`,
+    `${(productName || "unnamed_product").trim().replace(/[^a-zA-Z0-9_-]/g, "_").replace(/_+/g, "_").replace(/^_|_$/g, "")}_PRD_${Date.now()}.pdf`,
 } as const;
 
 // ============================================================================

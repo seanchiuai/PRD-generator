@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -25,6 +25,7 @@ export default function ResearchPage() {
   const [isResearching, setIsResearching] = useState(false);
   const [isSkipping, setIsSkipping] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hasStartedResearchRef = useRef(false);
   // Dynamically build categories from queriesGenerated or researchResults
   const categories = useMemo(() => {
     return conversation?.queriesGenerated?.map(q => ({
@@ -173,15 +174,16 @@ export default function ResearchPage() {
     logger.debug("ResearchPage.useEffect", "Research useEffect triggered", {
       hasConversation: !!conversation,
       hasExistingResults,
-      shouldStart: conversation && !hasExistingResults,
+      shouldStart: conversation && !hasExistingResults && !hasStartedResearchRef.current,
       conversationId
     });
 
-    if (conversation && !hasExistingResults) {
+    if (conversation && !hasExistingResults && !hasStartedResearchRef.current) {
+      hasStartedResearchRef.current = true;
       logger.debug("ResearchPage.useEffect", "Auto-starting research", { conversationId });
       startResearch();
     }
-  }, [conversation, hasExistingResults, startResearch]);
+  }, [conversation, hasExistingResults, startResearch, conversationId]);
 
   if (!conversation) {
     return <div>Loading...</div>;
@@ -223,7 +225,10 @@ export default function ResearchPage() {
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
+                  role="img"
+                  aria-labelledby="error-icon-title"
                 >
+                  <title id="error-icon-title">Error</title>
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -241,12 +246,14 @@ export default function ResearchPage() {
                 </p>
                 <div className="flex gap-3">
                   <button
+                    type="button"
                     onClick={startResearch}
                     className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium"
                   >
                     Retry Research
                   </button>
                   <button
+                    type="button"
                     onClick={handleSkip}
                     disabled={isSkipping}
                     className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors font-medium"

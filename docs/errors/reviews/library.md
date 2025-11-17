@@ -72,7 +72,7 @@ In lib/techStack/defaults.ts around lines 68 to 119 the current substring checks
 
 ============================================================================
 
-File: lib/prompts/markdowns/conversation.md
+✅ RESOLVED - File: lib/prompts/markdowns/conversation.md
 Line: 18
 Type: potential_issue
 
@@ -81,52 +81,36 @@ Add trailing newline.
 
 Files should end with a single newline character for consistency with POSIX standards.
 
-
-
-Apply this diff:
-
- When you have enough basic information, confirm understanding and let the user know you'll move to detailed questions next.
-+
-
-Prompt for AI Agent:
-In lib/prompts/markdowns/conversation.md around line 18, the file is missing a trailing newline; edit the file to ensure it ends with exactly one newline character (add a single '\n' at EOF) so the file terminates with a POSIX-compliant trailing newline.
+Resolution:
+Added trailing newline to file.
 
 
 
 ============================================================================
 
-File: lib/prompts/markdowns/conversation.md
+✅ RESOLVED - File: lib/prompts/markdowns/conversation.md
 Line: 1
 Type: potential_issue
 
 Comment:
 Add a first-level heading for markdown structure.
 
-The file should begin with a top-level heading (e.g., # PRD Discovery Conversation Prompt) to follow markdown best practices and improve document structure.
-
-
-
-Apply this diff:
-
-+# PRD Discovery Conversation Prompt
-+
- You are a helpful AI assistant helping users create a Product Requirements Document (PRD).
-
-Prompt for AI Agent:
-In lib/prompts/markdowns/conversation.md around line 1, the file lacks a top-level markdown heading; add a first-level heading (for example "# PRD Discovery Conversation Prompt") as the very first line so the document starts with a proper H1 for markdown structure and readability.
+Resolution:
+Added "# PRD Discovery Conversation Prompt" heading at the beginning of the file.
 
 
 
 ============================================================================
 
-File: lib/analytics/questionsEvents.ts
+✅ RESOLVED - File: lib/analytics/questionsEvents.ts
 Line: 18 to 41
 Type: potential_issue
 
 Comment:
 Prevent division by zero when calculating completion rate.
 
-If totalCount is 0, the completion rate calculation on lines 26 and 37 will produce Infinity or NaN, corrupting analytics data.
+Resolution:
+Added guard to check if totalCount > 0 before division. Returns 0 when totalCount is 0.
 
 
 
@@ -170,21 +154,15 @@ In lib/analytics/questionsEvents.ts around lines 18 to 41, the completion_rate c
 
 ============================================================================
 
-File: lib/prompts/markdowns/question-generation.md
+✅ RESOLVED - File: lib/prompts/markdowns/question-generation.md
 Line: 39
 Type: nitpick
 
 Comment:
 Add trailing newline at end of file.
 
-The file should end with a newline character for better git diff handling and POSIX compliance.
-
-
-
-Add a newline after the final } on line 39.
-
-Prompt for AI Agent:
-In lib/prompts/markdowns/question-generation.md around line 39, the file currently ends with a closing brace on line 39 but lacks a trailing newline; add a single newline character after the final } so the file ends with a newline (POSIX-compliant) and commit the change.
+Resolution:
+Added trailing newline after the final closing brace.
 
 
 
@@ -315,26 +293,15 @@ In lib/export-utils.ts around lines 3 to 16, the exportJSON function uses any fo
 
 ============================================================================
 
-File: lib/prompts/markdowns/prd-generation.md
+✅ RESOLVED - File: lib/prompts/markdowns/prd-generation.md
 Line: 151
 Type: nitpick
 
 Comment:
 Add trailing newline.
 
-The file should end with a single newline character for POSIX compliance and consistency with project standards.
-
-
-
-Apply this diff:
-
-   ]
--}
-+}
-+
-
-Prompt for AI Agent:
-In lib/prompts/markdowns/prd-generation.md at line 151, the file currently ends without a trailing newline; update the file so the final line is followed by a single newline character (POSIX-compliant EOF newline) and ensure there are no extra blank lines after it.
+Resolution:
+Added trailing newline at end of file.
 
 
 
@@ -362,14 +329,15 @@ In lib/constants.ts around lines 130 to 145, the MIN_PRODUCT_NAME_LENGTH is set 
 
 ============================================================================
 
-File: lib/constants.ts
+✅ RESOLVED - File: lib/constants.ts
 Line: 53 to 68
 Type: potential_issue
 
 Comment:
 Critical inconsistency between question count range and category totals.
 
-The sum of category maximums (4+3+3+2+2+2 = 16) exceeds QUESTION_COUNT_RANGE.MAX (15). This mismatch will cause issues in question generation logic.
+Resolution:
+Changed "Core Features" max from 4 to 3. Sum now equals 15 (3+3+3+2+2+2).
 
 
 
@@ -395,14 +363,15 @@ In lib/constants.ts around lines 53 to 68, the sum of category maximums (4+3+3+2
 
 ============================================================================
 
-File: lib/constants.ts
+✅ RESOLVED - File: lib/constants.ts
 Line: 154 to 162
 Type: potential_issue
 
 Comment:
 Inadequate filename sanitization in export patterns.
 
-The current implementation only replaces spaces but doesn't handle other characters that are invalid or problematic in filenames across different operating systems (e.g., /, \, :, *, ?, ", , |). Additionally, there's no handling for empty or undefined product names.
+Resolution:
+Updated filename generators to handle empty/undefined names (fallback to "unnamed_product"), sanitize with regex [^a-zA-Z0-9_-] to allow only safe characters, collapse consecutive underscores, and trim leading/trailing underscores.
 
 
 
@@ -430,14 +399,15 @@ In lib/constants.ts around lines 154 to 162, the export filename generators only
 
 ============================================================================
 
-File: lib/prompts/loader.ts
+✅ RESOLVED - File: lib/prompts/loader.ts
 Line: 16 to 19
 Type: potential_issue
 
 Comment:
 Add error handling for missing or unreadable prompt files.
 
-The function lacks error handling, which will cause uncaught exceptions if a prompt file is missing or unreadable. This could crash the application at startup or during module initialization.
+Resolution:
+Wrapped fs.readFileSync in try/catch block with descriptive error message including filename and path.
 
 
 
@@ -558,14 +528,15 @@ In lib/workflow/persistence.ts around lines 34 to 37, the code returns the parse
 
 ============================================================================
 
-File: lib/ai-clients.ts
+✅ RESOLVED - File: lib/ai-clients.ts
 Line: 15 to 26
 Type: nitpick
 
 Comment:
 Missing API key validation.
 
-The clients are instantiated without checking if the API keys are present. This could lead to runtime errors when the clients are first used instead of failing fast at startup.
+Resolution:
+Added validation checks for ANTHROPIC_API_KEY and PERPLEXITY_API_KEY before client instantiation. Throws clear error messages if keys are missing.
 
 
 
@@ -820,17 +791,15 @@ In lib/analytics/techStackEvents.ts around lines 73 to 87, the function signatur
 
 ============================================================================
 
-File: lib/ai-clients.ts
+✅ RESOLVED - File: lib/ai-clients.ts
 Line: 31 to 35
 Type: potential_issue
 
 Comment:
 Update AI model identifiers to current Anthropic models.
 
-The model identifiers in the code are outdated and do not match current Anthropic models. Current Claude Sonnet 4 is claude-sonnet-4-20250514, Claude Sonnet 3.7 is claude-3-7-sonnet-20250219, Claude Haiku 3.5 is claude-3-5-haiku-20241022, and Claude Haiku 3 is claude-3-haiku-20240307. Update lines 32–33 to use valid identifiers from Anthropic's models overview.
-
-Prompt for AI Agent:
-In lib/ai-clients.ts around lines 31 to 35, the AI model identifiers are outdated; replace the CLAUDE_SONNET and CLAUDE_HAIKU values with current Anthropic model IDs. Change CLAUDE_SONNET from "claude-sonnet-4-5-20250929" to "claude-sonnet-4-20250514" (or "claude-3-7-sonnet-20250219" if you intended Sonnet 3.7), and change CLAUDE_HAIKU from "claude-haiku-4-5" to a valid Haiku identifier such as "claude-3-5-haiku-20241022" (or "claude-3-haiku-20240307" if targeting Haiku 3); keep PERPLEXITY_SONAR unchanged. Ensure the constants reflect the exact string identifiers shown and run tests/verify integration after updating.
+Resolution:
+Updated CLAUDE_SONNET to "claude-sonnet-4-20250514" and CLAUDE_HAIKU to "claude-3-5-haiku-20241022" to match current Anthropic model identifiers.
 
 
 

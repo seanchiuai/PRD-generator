@@ -19,7 +19,16 @@ import { QUESTION_GENERATION_PROMPT } from "@/lib/prompts/questions";
  */
 export const POST = withAuth(async (request) => {
   try {
-    const { productContext, extractedContext } = await request.json();
+    const body = await request.json();
+    const { productContext, extractedContext } = body;
+
+    // Validate that at least one context is provided
+    if (!productContext && !extractedContext) {
+      return NextResponse.json(
+        { error: "Either productContext or extractedContext is required" },
+        { status: 400 }
+      );
+    }
 
     // Build context-aware prompt
     let contextSection = "";
@@ -52,6 +61,11 @@ Use this context to generate highly relevant questions.
         },
       ],
     });
+
+    // Validate response content array has elements
+    if (!response.content || !response.content.length) {
+      throw new Error("Empty response content from AI");
+    }
 
     const content = response.content[0];
     if (!content || content.type !== "text") {

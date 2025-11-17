@@ -11,6 +11,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { withAuth } from "@/lib/middleware/withAuth";
 import { CONTEXT_EXTRACTION_PROMPT } from "@/lib/prompts/conversation";
+import { ExtractedContext } from "@/types";
 
 const FALLBACK_CONTEXT = {
   productName: "New Product",
@@ -21,6 +22,12 @@ const FALLBACK_CONTEXT = {
   technicalPreferences: [],
   extractedAt: Date.now(),
 };
+
+/**
+ * Helper to ensure a value is an array of strings
+ */
+const ensureArray = (value: unknown): string[] =>
+  Array.isArray(value) ? value : [];
 
 export const POST = withAuth(async (request, { userId, token }) => {
   try {
@@ -81,29 +88,16 @@ export const POST = withAuth(async (request, { userId, token }) => {
     const extractedText = content.text;
 
     // Use safe parser with fallback
-    interface ContextData {
-      productName?: string;
-      description?: string;
-      targetAudience?: string;
-      keyFeatures?: string[];
-      problemStatement?: string;
-      technicalPreferences?: string[];
-    }
+    const contextData = safeParseAIResponse<Partial<ExtractedContext>>(extractedText) || FALLBACK_CONTEXT;
 
-    const contextData = safeParseAIResponse<ContextData>(extractedText) || FALLBACK_CONTEXT;
-
-    // Validate extracted context
+    // Validate extracted context using helper
     const validatedContext = {
       productName: contextData.productName || "Untitled Product",
       description: contextData.description || "",
       targetAudience: contextData.targetAudience || "General users",
-      keyFeatures: Array.isArray(contextData.keyFeatures)
-        ? contextData.keyFeatures
-        : [],
+      keyFeatures: ensureArray(contextData.keyFeatures),
       problemStatement: contextData.problemStatement || "",
-      technicalPreferences: Array.isArray(contextData.technicalPreferences)
-        ? contextData.technicalPreferences
-        : [],
+      technicalPreferences: ensureArray(contextData.technicalPreferences),
       extractedAt: Date.now(),
     };
 

@@ -17,13 +17,17 @@ interface QuestionsSkipData {
  */
 export function trackQuestionsSkip(data: QuestionsSkipData) {
   if (typeof window !== "undefined" && (window as any).analytics) {
+    const completionRate = data.totalCount > 0
+      ? (data.answeredCount / data.totalCount) * 100
+      : 0;
+
     // Track for debugging (can be replaced with actual analytics service)
     logger.debug("Analytics: Questions Skipped", "", {
       conversation_id: data.conversationId,
       answered_count: data.answeredCount,
       total_count: data.totalCount,
       auto_filled_count: data.autoFilledCount,
-      completion_rate: (data.answeredCount / data.totalCount) * 100,
+      completion_rate: completionRate,
       had_context: data.hasExtractedContext,
       timestamp: new Date().toISOString(),
     });
@@ -34,7 +38,7 @@ export function trackQuestionsSkip(data: QuestionsSkipData) {
       answered_count: data.answeredCount,
       total_count: data.totalCount,
       auto_filled_count: data.autoFilledCount,
-      completion_rate: (data.answeredCount / data.totalCount) * 100,
+      completion_rate: completionRate,
       had_context: data.hasExtractedContext,
     });
   }
