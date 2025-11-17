@@ -186,8 +186,32 @@ function parseResponse(content: string, _category: string): any[] {
       const popularityMatch = section.match(/Popularity:?\s*(.+?)(?=\n|$)/);
 
       if (nameMatch && nameMatch[1]) {
+        const name = nameMatch[1].trim();
+
+        // Filter out preamble text / reasoning paragraphs
+        // Valid tech names are typically short (< 50 chars)
+        // Preamble text is usually long paragraphs (> 50 chars)
+        if (name.length > 50) {
+          logger.debug("parseResponse", `Skipping invalid option name (too long): ${name.substring(0, 50)}...`, {});
+          return;
+        }
+
+        // Skip if name contains common preamble phrases
+        const preamblePhrases = [
+          "top three",
+          "top 3",
+          "the following",
+          "here are",
+          "these are",
+          "based on",
+        ];
+        if (preamblePhrases.some(phrase => name.toLowerCase().includes(phrase))) {
+          logger.debug("parseResponse", `Skipping preamble text: ${name.substring(0, 50)}...`, {});
+          return;
+        }
+
         options.push({
-          name: nameMatch[1].trim(),
+          name,
           description: descMatch?.[1]?.trim() || "",
           pros: prosMatch?.[1]
             ?.split(/\n/)
