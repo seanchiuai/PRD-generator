@@ -89,6 +89,7 @@ Use this context to generate highly relevant questions.
             ...q,
             category: categoryGroup.category, // Add category field from parent
             required: q.required ?? true, // Default to true if not specified
+            type: q.type ?? (q.suggestedOptions && q.suggestedOptions.length > 0 ? "select" : "textarea"), // Default based on options
           }))
         );
       } else {
@@ -96,6 +97,7 @@ Use this context to generate highly relevant questions.
         questions = parsedResponse.questions.map((q: any) => ({
           ...q,
           required: q.required ?? true, // Default to true if not specified
+          type: q.type ?? (q.suggestedOptions && q.suggestedOptions.length > 0 ? "select" : "textarea"), // Default based on options
         }));
       }
     } else {
