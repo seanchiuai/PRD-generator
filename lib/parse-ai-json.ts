@@ -15,8 +15,7 @@ function extractJSON(text: string): string | null {
   const trimmed = text.trim();
 
   // Find the start of JSON (either { or [)
-  const startChar = trimmed[0] === '{' ? '{' : trimmed[0] === '[' ? '[' : null;
-  if (!startChar) {
+  if (trimmed[0] !== '{' && trimmed[0] !== '[') {
     // Look for { or [ in the text
     const objectStart = trimmed.indexOf('{');
     const arrayStart = trimmed.indexOf('[');

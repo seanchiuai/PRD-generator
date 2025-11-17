@@ -3,16 +3,18 @@ import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
 import {
   handleAPIError,
   handleValidationError,
+  handleUnauthorizedError,
 } from "@/lib/api-error-handler";
 import { safeParseAIResponse } from "@/lib/parse-ai-json";
 import { getAuthenticatedConvexClient } from "@/lib/convex-client";
 import { api } from '@/convex/_generated/api'
 import { getDefaultTechStack, generateMockResearchResults } from '@/lib/techStack/defaults'
+import { TECH_STACK_SUGGESTION_PROMPT } from '@/lib/prompts/techStack'
 import type { Id } from "@/convex/_generated/dataModel";
 import { withAuth } from "@/lib/middleware/withAuth";
 import type { ExtractedContext, Question, SimpleTechStack, ValidationResult } from "@/types";
 
-const _DEFAULT_STACK: SimpleTechStack = {
+const DEFAULT_STACK: SimpleTechStack = {
   frontend: "Next.js",
   backend: "Node.js with Express",
   database: "PostgreSQL",
@@ -104,45 +106,14 @@ export const POST = withAuth(async (request, { userId, token }) => {
 });
 
 async function getAISuggestedStack(extractedContext: ExtractedContext, answers: Question[] | null) {
-  const prompt = `
-Suggest an optimal tech stack for this product:
-
-PRODUCT CONTEXT:
-${JSON.stringify(extractedContext, null, 2)}
-
-ANSWERS:
-${JSON.stringify(answers, null, 2)}
-
-Based on this information, suggest:
-1. Frontend framework/library
-2. Backend framework/language
-3. Database
-4. Authentication solution
-5. Hosting platform
-
-Consider:
-- Product type and scale
-- Target audience
-- Technical preferences mentioned
-- Industry best practices
-- Developer experience
-- Cost-effectiveness
-
-Return ONLY a JSON object:
-{
-  "frontend": "technology name",
-  "backend": "technology name",
-  "database": "technology name",
-  "auth": "technology name",
-  "hosting": "technology name"
-}
-`
-
   const response = await anthropic.messages.create({
     model: AI_MODELS.CLAUDE_SONNET,
     max_tokens: TOKEN_LIMITS.TECH_STACK,
     temperature: 0.3,
-    messages: [{ role: 'user', content: prompt }],
+    messages: [{
+      role: 'user',
+      content: TECH_STACK_SUGGESTION_PROMPT(extractedContext, answers)
+    }],
   })
 
   const textContent = response.content.find((block): block is { type: 'text'; text: string } => block.type === 'text')
@@ -211,7 +182,7 @@ async function fixStackErrors(
 ): Promise<SimpleTechStack> {
   // Merge with defaults to fix missing fields
   return {
-    ..._DEFAULT_STACK,
+    ...DEFAULT_STACK,
     ...stack,
   };
 }

@@ -34,7 +34,6 @@ export default function SelectRedirectPage() {
     });
     router.replace(`/chat/${validConversationId}/tech-stack`);
   }, [conversationId, router]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
 
   // Early return if no conversationId
   if (!conversationId) {

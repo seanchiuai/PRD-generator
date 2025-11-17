@@ -111,6 +111,24 @@ function getTextDefault(
   // Try to use extracted context for specific questions
   if (!extractedContext) return "";
 
+  // Use semantic key if present for direct, type-safe mapping
+  if (question.semanticKey) {
+    const value = extractedContext[question.semanticKey];
+
+    // Handle array values
+    if (Array.isArray(value)) {
+      return value.join(", ");
+    }
+
+    // Handle string values
+    if (typeof value === "string") {
+      return value;
+    }
+
+    return "";
+  }
+
+  // Fallback to keyword-based heuristic matching for backwards compatibility
   const questionLower = question.question.toLowerCase();
 
   // Product name questions

@@ -218,18 +218,35 @@ export function QuestionCard({ question, onAnswerChange }: QuestionCardProps) {
       {question.type === "multiselect" ? (
         // Multiselect: Show checkboxes for all options
         <div className="space-y-2">
-          {question.suggestedOptions.map((option) => (
-            <div key={option} className="flex items-start gap-3 p-3 rounded border hover:bg-accent/50 cursor-pointer" onClick={() => handleMultiselectToggle(option)}>
-              <Checkbox
-                checked={state.selectedOptions.includes(option)}
-                onCheckedChange={() => handleMultiselectToggle(option)}
-                className="mt-0.5"
-              />
-              <label className="text-sm flex-1 cursor-pointer">
-                {option}
-              </label>
-            </div>
-          ))}
+          {question.suggestedOptions.map((option) => {
+            const checkboxId = `${question.id}-${option.replace(/\s+/g, '-')}`;
+
+            return (
+              <div
+                key={option}
+                className="flex items-start gap-3 p-3 rounded border hover:bg-accent/50 cursor-pointer"
+                onClick={() => handleMultiselectToggle(option)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleMultiselectToggle(option);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+              >
+                <Checkbox
+                  id={checkboxId}
+                  checked={state.selectedOptions.includes(option)}
+                  onCheckedChange={() => handleMultiselectToggle(option)}
+                  className="mt-0.5"
+                />
+                <label htmlFor={checkboxId} className="text-sm flex-1 cursor-pointer">
+                  {option}
+                </label>
+              </div>
+            );
+          })}
         </div>
       ) : (
         // Single select: Show buttons

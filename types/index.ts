@@ -59,6 +59,14 @@ export interface ExtractedContext {
 
 export type QuestionType = "text" | "textarea" | "select" | "multiselect" | "radio";
 
+export type QuestionSemanticKey =
+  | "productName"
+  | "targetAudience"
+  | "description"
+  | "problemStatement"
+  | "keyFeatures"
+  | "technicalPreferences";
+
 export interface Question {
   id: string;
   category: string;
@@ -69,6 +77,7 @@ export interface Question {
   type: QuestionType;
   suggestedOptions?: string[];
   autoCompleted?: boolean;
+  semanticKey?: QuestionSemanticKey;
 }
 
 export interface QuestionGenerationResponse {

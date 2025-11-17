@@ -17,7 +17,7 @@ export function FeaturesPage({ prd, pageNumber = 3 }: FeaturesPageProps) {
       <View style={pdfStyles.section}>
         <Text style={pdfStyles.sectionTitle}>MVP Features</Text>
         {prd.features.mvpFeatures.map((feature, i) => (
-          <View key={i} style={{ marginBottom: 15 }}>
+          <View key={`mvp-feature-${feature.name}-${i}`} style={{ marginBottom: 15 }}>
             <Text style={pdfStyles.subsectionTitle}>
               {i + 1}. {feature.name}
             </Text>
@@ -30,7 +30,7 @@ export function FeaturesPage({ prd, pageNumber = 3 }: FeaturesPageProps) {
               Acceptance Criteria:
             </Text>
             {feature.acceptanceCriteria.map((criteria, j) => (
-              <Text key={j} style={pdfStyles.bulletPoint}>
+              <Text key={`${feature.name}-criteria-${j}`} style={pdfStyles.bulletPoint}>
                 • {criteria}
               </Text>
             ))}

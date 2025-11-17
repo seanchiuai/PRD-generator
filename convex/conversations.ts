@@ -432,7 +432,7 @@ export const saveExtractedContext = mutation({
       workflowProgress: {
         currentStep: "questions",
         completedSteps,
-        skippedSteps: ["discovery"],
+        skippedSteps: [],
         lastUpdated: Date.now(),
       },
       updatedAt: Date.now(),

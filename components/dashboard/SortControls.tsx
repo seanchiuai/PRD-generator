@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/select";
 import { ArrowUpDown } from "lucide-react";
 
-type SortOption = "newest" | "oldest" | "name-asc" | "name-desc";
+export type SortOption = "newest" | "oldest" | "name-asc" | "name-desc";
 
 interface SortControlsProps {
   value: SortOption;
