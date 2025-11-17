@@ -30,7 +30,17 @@ export function parseAIResponse<T>(text: string): T {
     }
 
     // Fallback to parsing the raw text (trim whitespace)
-    return JSON.parse(text.trim());
+    const trimmedText = text.trim();
+
+    // If text doesn't start with {, try to find JSON object in the text
+    if (!trimmedText.startsWith('{')) {
+      const jsonObjectMatch = trimmedText.match(/\{[\s\S]*\}/);
+      if (jsonObjectMatch) {
+        return JSON.parse(jsonObjectMatch[0]);
+      }
+    }
+
+    return JSON.parse(trimmedText);
   } catch (error) {
     // Provide helpful error message
     const preview = text.substring(0, 100);

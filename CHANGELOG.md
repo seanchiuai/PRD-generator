@@ -8,6 +8,7 @@
 
 ### Fixed
 - **PRD Generation**: Fixed API payload structure - removed incorrect `researchData` wrapper causing generation failures.
+- **PRD JSON Parsing**: Strengthened prompt with explicit JSON-only instructions. Added fallback JSON extraction to handle AI responses with conversational preambles.
 - **Question Generation**: AI response flattening logic added to handle nested category structure. Questions now save to Convex without schema validation errors.
 - **Question Required Field**: Added default `required=true` fallback when AI omits this field from question responses, preventing Convex schema validation errors.
 - **Question Type Field**: Added intelligent default for missing `type` field - defaults to "select" if suggestedOptions exist, otherwise "textarea". Prevents Convex validation errors.
