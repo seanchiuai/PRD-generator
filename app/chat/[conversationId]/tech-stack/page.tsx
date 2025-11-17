@@ -564,7 +564,7 @@ export default function TechStackPage() {
 
         {/* Auto-advance Countdown */}
         <AutoAdvance
-          enabled={showCountdown && isAutoSelected && hasExistingResults}
+          enabled={Boolean(showCountdown && isAutoSelected && hasExistingResults)}
           delaySeconds={5}
           nextStepName="PRD Generation"
           onAdvance={() => router.push(`/chat/${conversationId}/generate`)}

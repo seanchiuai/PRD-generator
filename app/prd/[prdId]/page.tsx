@@ -25,7 +25,7 @@ export default function PRDViewPage({ params }: { params: Promise<{ prdId: strin
 
     try {
       const filename = sanitizeFilename(prd.productName);
-      await exportJSON(prd.prdData, `${filename}-prd`);
+      exportJSON(prd.prdData as import("@/types").PRDData, `${filename}-prd`);
 
       toast({
         title: "Exported Successfully",

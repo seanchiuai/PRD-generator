@@ -35,15 +35,18 @@ export default function DashboardPage() {
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [deleteConfirmId, setDeleteConfirmId] = useState<Id<"prds"> | null>(null);
 
-  const prds = useQuery(api.prds.list, { search: searchQuery });
+  const prds = useQuery(api.prds.list, {
+    search: searchQuery,
+    paginationOpts: { numItems: 50, cursor: null }
+  });
   const stats = useQuery(api.prds.getStats);
   const deletePRD = useMutation(api.prds.deletePRD);
 
   // Sort PRDs
   const sortedPRDs = useMemo(() => {
-    if (!prds) return [];
+    if (!prds?.page || !Array.isArray(prds.page)) return [];
 
-    const sorted = [...prds];
+    const sorted = [...prds.page];
 
     switch (sortBy) {
       case "newest":
@@ -135,7 +138,7 @@ export default function DashboardPage() {
         </div>
 
       {/* Search and Sort */}
-      {prds.length > 0 && (
+      {prds?.page && prds.page.length > 0 && (
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <SearchBar value={searchQuery} onChange={setSearchQuery} />
@@ -150,7 +153,15 @@ export default function DashboardPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sortedPRDs.map((prd) => (
-            <PRDCard key={prd._id} prd={prd} onDelete={handleDelete} />
+            <PRDCard
+              key={prd._id}
+              prd={{
+                ...prd,
+                // Cast prdData from Record<string, any> to PRDData for component compatibility
+                prdData: prd.prdData as unknown as import("@/types").PRDData,
+              }}
+              onDelete={handleDelete}
+            />
           ))}
         </div>
       )}
