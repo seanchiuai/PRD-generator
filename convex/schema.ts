@@ -83,7 +83,16 @@ export default defineSchema({
       v.record(
         v.string(), // category key
         v.object({
-          options: v.array(v.any()),
+          options: v.array(
+            v.object({
+              name: v.string(),
+              description: v.string(),
+              pros: v.array(v.string()),
+              cons: v.array(v.string()),
+              popularity: v.optional(v.string()),
+              learnMore: v.optional(v.string()),
+            })
+          ),
           reasoning: v.optional(v.string()),
         })
       )
