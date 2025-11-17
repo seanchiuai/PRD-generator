@@ -2,6 +2,9 @@
 
 ## 2025-11-17
 
+### Pushed (301061d)
+- **Schema Fix**: Fixed workflow.ts currentStep type from string to proper union. Added deprecated stages for backwards compatibility. Created migration utility. Dev server now starts without validation errors.
+
 ### Pulled (5ed9060)
 - **PRD JSON Parsing**: Balanced brace matching implementation merged. Improved extraction of JSON from conversational responses.
 
