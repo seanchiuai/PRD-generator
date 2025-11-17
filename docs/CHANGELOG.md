@@ -8,6 +8,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed - 2025-01-17
 
+#### Code Review Group-5 Issues (Latest commit)
+
+**UI/UX Fixes:**
+- ClientBody.tsx: Use classList.add/remove instead of className assignment to preserve existing body classes
+- ChatContainer.tsx: Only auto-scroll when user is near bottom (within 100px) to avoid disrupting scroll history review
+- WorkflowStepLabel.tsx: Removed redundant font-weight declarations (font-medium now only on completed/future states)
+
+**Type Safety & Code Quality:**
+- ChatInput.tsx: Extract submission logic to avoid FormEvent/KeyboardEvent type mismatch
+- ExportButtons.tsx: Removed unused prd and productName props
+- export-utils.ts: Fixed const vs let for bytes variable
+
+**Security & Validation:**
+- initial-message/route.ts: Added input sanitization (control chars, whitespace collapse) and length validation (100 chars name, 2000 chars desc)
+- ArchitecturePage.tsx: Added defensive checks for nested data structures (technicalArchitecture, dataModels, fields)
+
+**Race Conditions:**
+- page.tsx + message/route.ts: Fixed race condition by having API fetch authoritative message list from Convex instead of client passing stale messages
+
+**Constants & Maintainability:**
+- tech-stack/page.tsx + constants.ts: Extracted hardcoded 1500ms delay to TIMEOUTS.TOAST_BEFORE_NAVIGATION constant
+
+**Filename Sanitization:**
+- export-utils.ts: Improved sanitization with Unicode support (\\p{L}\\p{N}), Windows reserved names detection (CON, PRN, etc), and UTF-8 byte length limit (200 bytes)
+
+**Documentation:**
+- researching-features/SKILL.md: Fixed typos (explitly→explicitly, itnerviews→interviews, teh→the)
+- skill-creating/SKILL.md: Fixed filename convention example (skill.md→SKILL.md)
+
+**Impact:** All 12 code review issues from docs/errors/group-5.md resolved (skipped CLAUDE.md policy updates per agent instructions)
+
 #### Code Review Group-1 Issues (bba3083)
 
 **Environment & Configuration:**
