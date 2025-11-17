@@ -36,8 +36,7 @@ export default defineSchema({
       v.literal("setup"),
       v.literal("discovery"),
       v.literal("clarifying"),
-      v.literal("researching"),
-      v.literal("selecting"),
+      v.literal("tech-stack"),
       v.literal("generating"),
       v.literal("completed")
     ),
@@ -222,7 +221,12 @@ export default defineSchema({
     ),
     workflowProgress: v.optional(
       v.object({
-        currentStep: v.string(), // 'discovery' | 'questions' | 'research' | 'selection' | 'generate'
+        currentStep: v.union(
+          v.literal("discovery"),
+          v.literal("questions"),
+          v.literal("tech-stack"),
+          v.literal("generate")
+        ),
         completedSteps: v.array(v.string()),
         skippedSteps: v.array(v.string()),
         lastUpdated: v.number(),

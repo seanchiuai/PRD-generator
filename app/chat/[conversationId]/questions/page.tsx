@@ -116,9 +116,9 @@ export default function QuestionsPage() {
     try {
       await updateStage({
         conversationId,
-        stage: "researching",
+        stage: "tech-stack",
       });
-      router.push(`/chat/${conversationId}/research`);
+      router.push(`/chat/${conversationId}/tech-stack`);
     } catch (error) {
       logger.error("QuestionsPage.handleContinue", error, { conversationId });
       toast({
@@ -173,7 +173,7 @@ export default function QuestionsPage() {
       // Update stage and navigate to research
       await updateStage({
         conversationId,
-        stage: "researching",
+        stage: "tech-stack",
       });
 
       toast({
@@ -181,7 +181,7 @@ export default function QuestionsPage() {
         description: "Unanswered questions have been filled with recommended defaults.",
       });
 
-      router.push(`/chat/${conversationId}/research`);
+      router.push(`/chat/${conversationId}/tech-stack`);
     } catch (error) {
       logger.error("QuestionsPage.handleSkip", error, { conversationId });
       toast({

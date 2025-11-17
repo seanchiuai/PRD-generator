@@ -20,10 +20,12 @@
       page.tsx                      # Discovery chat interface
       /questions
         page.tsx                    # Clarifying questions form
+      /tech-stack
+        page.tsx                    # Tech stack research & selection
       /research
-        page.tsx                    # Tech stack research
+        page.tsx                    # Redirect to tech-stack (deprecated)
       /select
-        page.tsx                    # Tech stack selection
+        page.tsx                    # Redirect to tech-stack (deprecated)
       /generate
         page.tsx                    # PRD generation & display
 
@@ -63,8 +65,7 @@
 **Workflow Progression:**
 ```
 / → /dashboard → /chat/new → /chat/[id] → /chat/[id]/questions
-  → /chat/[id]/research → /chat/[id]/select → /chat/[id]/generate
-  → /prd/[prdId]
+  → /chat/[id]/tech-stack → /chat/[id]/generate → /prd/[prdId]
 ```
 
 ## Component Organization
@@ -84,16 +85,13 @@
     QuestionCard.tsx
     ProgressIndicator.tsx
 
-  /research               # Research phase UI
-    ResearchProgress.tsx
-    ResearchResults.tsx
-    LoadingSkeleton.tsx
-
-  /selection              # Selection phase UI
+  /tech-stack             # Tech stack research & selection UI
     CategorySection.tsx
     TechStackCard.tsx
-    ValidationWarnings.tsx
-    SelectionProgress.tsx
+    SelectionStatus.tsx
+
+  /research               # Deprecated (redirects to tech-stack)
+  /selection              # Deprecated (redirects to tech-stack)
 
   /prd                    # PRD display & generation
     GenerationProgress.tsx
@@ -223,14 +221,10 @@ export async function POST(req: Request) {
 - `/api/questions/generate` - Generate tailored questions (Claude)
 - `/api/questions/fill-defaults` - Fill default answers
 
-**Research APIs:**
-- `/api/research/tech-stack` - Research technologies (Perplexity)
-
-**Validation APIs:**
-- `/api/validate/tech-stack` - Validate selections (Claude)
-
 **Tech Stack APIs:**
-- `/api/tech-stack/suggest-defaults` - Suggest defaults
+- `/api/research/tech-stack` - Research technologies (Perplexity)
+- `/api/validate/tech-stack` - Validate tech stack compatibility (Claude)
+- `/api/tech-stack/suggest-defaults` - Suggest default stack
 
 **PRD APIs:**
 - `/api/prd/generate` - Generate comprehensive PRD (Claude)

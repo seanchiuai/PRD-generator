@@ -127,15 +127,15 @@ export default function GeneratePage() {
   return (
     <WorkflowLayout
       currentStep="generate"
-      completedSteps={["discovery", "questions", "research", "selection"]}
+      completedSteps={["discovery", "questions", "tech-stack"]}
       conversationId={conversationId}
       showSkipButton={false}
       showFooter={true}
-      onBack={() => router.push(`/chat/${conversationId}/select`)}
+      onBack={() => router.push(`/chat/${conversationId}/tech-stack`)}
       onNext={prd ? () => router.push("/dashboard") : undefined}
       nextButtonText="View All PRDs"
       nextButtonDisabled={isGenerating || !prd}
-      backButtonText="Back to Selection"
+      backButtonText="Back to Tech Stack"
     >
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
