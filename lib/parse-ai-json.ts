@@ -5,12 +5,122 @@
  */
 
 /**
+ * Extracts a complete JSON object or array from text, handling nested structures.
+ * Finds the first { or [ and matches it with its corresponding closing brace.
+ *
+ * @param text - Text containing JSON
+ * @returns Extracted JSON string or null if not found
+ */
+function extractJSON(text: string): string | null {
+  const trimmed = text.trim();
+
+  // Find the start of JSON (either { or [)
+  const startChar = trimmed[0] === '{' ? '{' : trimmed[0] === '[' ? '[' : null;
+  if (!startChar) {
+    // Look for { or [ in the text
+    const objectStart = trimmed.indexOf('{');
+    const arrayStart = trimmed.indexOf('[');
+
+    let startIndex = -1;
+    let endChar = '';
+
+    if (objectStart !== -1 && (arrayStart === -1 || objectStart < arrayStart)) {
+      startIndex = objectStart;
+      startChar as '{';
+      endChar = '}';
+    } else if (arrayStart !== -1) {
+      startIndex = arrayStart;
+      startChar as '[';
+      endChar = ']';
+    } else {
+      return null;
+    }
+
+    // Count braces to find the matching closing brace
+    let depth = 0;
+    let inString = false;
+    let escapeNext = false;
+
+    for (let i = startIndex; i < trimmed.length; i++) {
+      const char = trimmed[i];
+
+      if (escapeNext) {
+        escapeNext = false;
+        continue;
+      }
+
+      if (char === '\\') {
+        escapeNext = true;
+        continue;
+      }
+
+      if (char === '"') {
+        inString = !inString;
+        continue;
+      }
+
+      if (inString) continue;
+
+      if (char === '{' || char === '[') {
+        depth++;
+      } else if (char === '}' || char === ']') {
+        depth--;
+        if (depth === 0) {
+          return trimmed.substring(startIndex, i + 1);
+        }
+      }
+    }
+
+    return null;
+  }
+
+  // JSON starts at the beginning
+  const endChar = startChar === '{' ? '}' : ']';
+  let depth = 0;
+  let inString = false;
+  let escapeNext = false;
+
+  for (let i = 0; i < trimmed.length; i++) {
+    const char = trimmed[i];
+
+    if (escapeNext) {
+      escapeNext = false;
+      continue;
+    }
+
+    if (char === '\\') {
+      escapeNext = true;
+      continue;
+    }
+
+    if (char === '"') {
+      inString = !inString;
+      continue;
+    }
+
+    if (inString) continue;
+
+    if (char === '{' || char === '[') {
+      depth++;
+    } else if (char === '}' || char === ']') {
+      depth--;
+      if (depth === 0) {
+        return trimmed.substring(0, i + 1);
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
  * Parses JSON from AI response text
  *
  * AI models often wrap JSON in markdown code blocks (```json ... ```).
  * This function handles both formats:
  * 1. JSON wrapped in markdown code blocks
  * 2. Raw JSON text
+ * 3. JSON embedded in conversational text
  *
  * @param text - Raw text response from AI
  * @returns Parsed JSON object
@@ -32,11 +142,11 @@ export function parseAIResponse<T>(text: string): T {
     // Fallback to parsing the raw text (trim whitespace)
     const trimmedText = text.trim();
 
-    // If text doesn't start with {, try to find JSON object in the text
-    if (!trimmedText.startsWith('{')) {
-      const jsonObjectMatch = trimmedText.match(/\{[\s\S]*\}/);
-      if (jsonObjectMatch) {
-        return JSON.parse(jsonObjectMatch[0]);
+    // If text doesn't start with { or [, try to extract JSON from within the text
+    if (!trimmedText.startsWith('{') && !trimmedText.startsWith('[')) {
+      const extracted = extractJSON(trimmedText);
+      if (extracted) {
+        return JSON.parse(extracted);
       }
     }
 
