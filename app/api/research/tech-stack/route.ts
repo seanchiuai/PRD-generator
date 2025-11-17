@@ -176,43 +176,77 @@ function parseResponse(content: string, _category: string): any[] {
 
     // Fallback: parse structured text
     const options: any[] = [];
-    const sections = content.split(/\d+\.\s+\*\*/).filter(Boolean);
 
-    sections.forEach((section) => {
-      const nameMatch = section.match(/^([^*]+)\*\*/);
-      const descMatch = section.match(/\*\*\s*[-:]?\s*([\s\S]+?)(?=\n\n|Pros:|$)/);
+    // Try multiple splitting patterns to handle different response formats
+    let sections: string[] = [];
+
+    // Pattern 1: Numbered lists with bold: "1. **React**"
+    if (content.includes('**')) {
+      sections = content.split(/\d+\.\s+\*\*/).filter(Boolean);
+    }
+
+    // Pattern 2: Markdown headers: "## React" or "### React"
+    if (sections.length <= 1 && content.match(/^#{2,3}\s+/m)) {
+      sections = content.split(/^#{2,3}\s+/m).filter(Boolean);
+    }
+
+    // Pattern 3: Bold text without numbers: "**React**"
+    if (sections.length <= 1 && content.match(/\*\*[A-Z]/)) {
+      // Split by standalone bold text at start of line or after newline
+      sections = content.split(/(?:^|\n\n)\*\*/).filter(Boolean);
+    }
+
+    sections.forEach((section, idx) => {
+      // Skip first section if it looks like preamble (no tech name extracted yet)
+      if (idx === 0 && sections.length > 1) {
+        const hasPreamblePhrase = /(?:top three|top 3|the following|here are|these are)/i.test(section.substring(0, 100));
+        if (hasPreamblePhrase && !section.match(/^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\*\*/)) {
+          logger.debug("parseResponse", `Skipping first section (preamble detected)`, {});
+          return;
+        }
+      }
+
+      const nameMatch = section.match(/^([^*\n:]+?)(?:\*\*|:|\n)/);
+      const descMatch = section.match(/(?:\*\*|:)\s*[-:]?\s*([\s\S]+?)(?=\n\n|Pros:|$)/);
       const prosMatch = section.match(/Pros:?\s*\n([\s\S]*?)(?=Cons:|$)/);
-      const consMatch = section.match(/Cons:?\s*\n([\s\S]*?)(?=Popularity:|$|Learn More:|###)/);
+      const consMatch = section.match(/Cons:?\s*\n([\s\S]*?)(?=Popularity:|$|Learn More:|###|##)/);
       const popularityMatch = section.match(/Popularity:?\s*(.+?)(?=\n|$)/);
 
       if (nameMatch && nameMatch[1]) {
-        const name = nameMatch[1].trim();
+        let name = nameMatch[1].trim();
 
-        // Filter out preamble text / reasoning paragraphs
-        // Valid tech names are typically short (< 50 chars)
-        // Preamble text is usually long paragraphs (> 50 chars)
-        if (name.length > 50) {
+        // Clean up common prefixes that might slip through
+        name = name.replace(/^(?:The\s+)?(?:top\s+)?(?:three|3)\s+/i, '');
+        name = name.replace(/^\d+\.\s*/, ''); // Remove leading numbers
+
+        // Skip if name is still too long (likely preamble)
+        if (name.length > 80) {
           logger.debug("parseResponse", `Skipping invalid option name (too long): ${name.substring(0, 50)}...`, {});
           return;
         }
 
         // Skip if name contains common preamble phrases
         const preamblePhrases = [
-          "top three",
-          "top 3",
-          "the following",
-          "here are",
-          "these are",
-          "based on",
+          "following are",
+          "here are the",
+          "these are the",
+          "based on your",
+          "for your",
+          "best options",
         ];
         if (preamblePhrases.some(phrase => name.toLowerCase().includes(phrase))) {
           logger.debug("parseResponse", `Skipping preamble text: ${name.substring(0, 50)}...`, {});
           return;
         }
 
+        // Extract description, clean it up
+        let description = descMatch?.[1]?.trim() || "";
+        // Remove markdown formatting from description
+        description = description.replace(/\*\*/g, '').replace(/#{1,6}\s+/g, '');
+
         options.push({
           name,
-          description: descMatch?.[1]?.trim() || "",
+          description,
           pros: prosMatch?.[1]
             ?.split(/\n/)
             .map((p) => p.replace(/^[-*•]\s*/, "").trim())
