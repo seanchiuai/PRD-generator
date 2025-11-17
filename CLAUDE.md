@@ -52,3 +52,4 @@ Auth: `ConvexProviderWithClerk` | Schema: `convex/schema.ts` | Protection: `midd
 - Never add backwards compatibility
 - Always sacrifice grammar for the sake of conciseness in your responses
 - Always constantly commit changes after finishing the smallest fix.
+- Always constantly update CHANGELOG.md after pulling in new commits or making new commits. Keep logs concise. Only log information critical information my engineers need to know.
