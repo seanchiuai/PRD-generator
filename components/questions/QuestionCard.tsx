@@ -24,9 +24,18 @@ interface QuestionCardProps {
 }
 
 export function QuestionCard({ question, onAnswerChange }: QuestionCardProps) {
+  // For multiselect, parse comma-separated answer into array
+  const [selectedOptions, setSelectedOptions] = useState<string[]>(() => {
+    if (question.type === "multiselect" && question.answer) {
+      return question.answer.split(", ").filter(Boolean);
+    }
+    return [];
+  });
+
   // Determine initial state based on existing answer
   const [selectedOption, setSelectedOption] = useState<string | null>(() => {
     if (
+      question.type !== "multiselect" &&
       question.answer &&
       question.suggestedOptions?.includes(question.answer)
     ) {
@@ -52,7 +61,16 @@ export function QuestionCard({ question, onAnswerChange }: QuestionCardProps) {
     return "";
   });
 
-  // Handle option button click
+  // Handle multiselect option toggle
+  const handleMultiselectToggle = (option: string) => {
+    const newSelected = selectedOptions.includes(option)
+      ? selectedOptions.filter((o) => o !== option)
+      : [...selectedOptions, option];
+    setSelectedOptions(newSelected);
+    onAnswerChange(newSelected.join(", "));
+  };
+
+  // Handle option button click (for single select)
   const handleOptionClick = (option: string) => {
     setSelectedOption(option);
     setIsOtherSelected(false);
@@ -147,21 +165,40 @@ export function QuestionCard({ question, onAnswerChange }: QuestionCardProps) {
       </div>
 
       {/* Suggested Options */}
-      <div className="flex flex-col sm:flex-row gap-2">
-        {question.suggestedOptions.map((option) => (
-          <Button
-            key={option}
-            variant={selectedOption === option ? "default" : "outline"}
-            onClick={() => handleOptionClick(option)}
-            className="flex-1 h-auto py-3 px-4 text-left justify-start whitespace-normal"
-          >
-            {selectedOption === option && (
-              <Check className="h-4 w-4 mr-2 flex-shrink-0" />
-            )}
-            <span className="text-sm">{option}</span>
-          </Button>
-        ))}
-      </div>
+      {question.type === "multiselect" ? (
+        // Multiselect: Show checkboxes for all options
+        <div className="space-y-2">
+          {question.suggestedOptions.map((option) => (
+            <div key={option} className="flex items-start gap-3 p-3 rounded border hover:bg-accent/50 cursor-pointer" onClick={() => handleMultiselectToggle(option)}>
+              <Checkbox
+                checked={selectedOptions.includes(option)}
+                onCheckedChange={() => handleMultiselectToggle(option)}
+                className="mt-0.5"
+              />
+              <label className="text-sm flex-1 cursor-pointer">
+                {option}
+              </label>
+            </div>
+          ))}
+        </div>
+      ) : (
+        // Single select: Show buttons
+        <div className="flex flex-col sm:flex-row gap-2">
+          {question.suggestedOptions.map((option) => (
+            <Button
+              key={option}
+              variant={selectedOption === option ? "default" : "outline"}
+              onClick={() => handleOptionClick(option)}
+              className="flex-1 h-auto py-3 px-4 text-left justify-start whitespace-normal"
+            >
+              {selectedOption === option && (
+                <Check className="h-4 w-4 mr-2 flex-shrink-0" />
+              )}
+              <span className="text-sm">{option}</span>
+            </Button>
+          ))}
+        </div>
+      )}
 
       {/* Other Option */}
       <div className="space-y-2 pt-1">

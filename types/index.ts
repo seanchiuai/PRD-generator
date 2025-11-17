@@ -54,7 +54,7 @@ export interface ExtractedContext {
 // QUESTION TYPES
 // ============================================================================
 
-export type QuestionType = "text" | "textarea" | "select" | "radio";
+export type QuestionType = "text" | "textarea" | "select" | "multiselect" | "radio";
 
 export interface Question {
   id: string;
