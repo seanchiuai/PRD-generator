@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { WorkflowLayout } from "@/components/workflow/WorkflowLayout";
 import { trackTechStackSkip } from "@/lib/analytics/techStackEvents";
 import { detectProductType } from "@/lib/techStack/defaults";
+import { logger } from "@/lib/logger";
 
 export default function ResearchPage() {
   const params = useParams();
@@ -43,13 +44,14 @@ export default function ResearchPage() {
 
   const startResearch = useCallback(async () => {
     if (!conversation) {
-      console.log("No conversation, skipping research");
+      logger.debug("ResearchPage.startResearch", "No conversation, skipping research", {});
       return;
     }
 
-    console.log("Starting research...", {
+    logger.debug("ResearchPage.startResearch", "Starting research", {
       hasProductContext: !!conversation.productContext,
-      hasClarifyingQuestions: !!conversation.clarifyingQuestions
+      hasClarifyingQuestions: !!conversation.clarifyingQuestions,
+      conversationId
     });
 
     setIsResearching(true);
@@ -70,7 +72,7 @@ export default function ResearchPage() {
         }, {} as Record<string, string>) || {},
       };
 
-      console.log("Product context for research:", productContext);
+      logger.debug("ResearchPage.startResearch", "Product context for research", { productContext, conversationId });
 
       // Call research API
       const response = await fetch("/api/research/tech-stack", {
@@ -99,7 +101,7 @@ export default function ResearchPage() {
         description: `${categoriesCount} tech stack categories researched successfully!`,
       });
     } catch (error) {
-      console.error("Research error:", error);
+      logger.error("ResearchPage.startResearch", error, { conversationId });
       const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
       setError(errorMessage);
       toast({
@@ -155,7 +157,7 @@ export default function ResearchPage() {
         router.push(`/chat/${conversationId}/generate`);
       }
     } catch (error) {
-      console.error("Skip research failed:", error);
+      logger.error("ResearchPage.handleSkipToGenerate", error, { conversationId });
       toast({
         title: "Skip failed",
         description: "Failed to skip. Please try again.",
@@ -168,14 +170,15 @@ export default function ResearchPage() {
 
   // Auto-start research if no existing results
   useEffect(() => {
-    console.log("Research useEffect triggered", {
+    logger.debug("ResearchPage.useEffect", "Research useEffect triggered", {
       hasConversation: !!conversation,
       hasExistingResults,
-      shouldStart: conversation && !hasExistingResults
+      shouldStart: conversation && !hasExistingResults,
+      conversationId
     });
 
     if (conversation && !hasExistingResults) {
-      console.log("Auto-starting research...");
+      logger.debug("ResearchPage.useEffect", "Auto-starting research", { conversationId });
       startResearch();
     }
   }, [conversation, hasExistingResults, startResearch]);

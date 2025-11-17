@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { logger } from "@/lib/logger";
 
 export default function ChatPage() {
   const params = useParams();
@@ -80,7 +81,7 @@ export default function ChatPage() {
         content: data.message,
       });
     } catch (error) {
-      console.error("Error sending message:", error);
+      logger.error("ChatPage.handleSendMessage", error, { conversationId });
       toast({
         title: "Error",
         description: "Failed to send message. Please try again.",
@@ -146,7 +147,7 @@ export default function ChatPage() {
       // The mutation updates the stage to "discovery", so the page will re-render
       // showing the discovery chat with the generated initial message
     } catch (error) {
-      console.error("Failed to save project setup:", error);
+      logger.error("ChatPage.handleSetupSubmit", error, { conversationId });
       toast({
         title: "Error",
         description: "Failed to save project setup. Please try again.",
@@ -170,7 +171,7 @@ export default function ChatPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-        console.error("Context extraction failed:", errorData);
+        logger.error("ChatPage.handleSkip.extractContext", errorData, { conversationId });
         throw new Error(errorData.error || "Failed to extract context");
       }
 
@@ -183,7 +184,7 @@ export default function ChatPage() {
         throw new Error("Context extraction was not successful");
       }
     } catch (error) {
-      console.error("Skip failed:", error);
+      logger.error("ChatPage.handleSkip", error, { conversationId });
       toast({
         title: "Skip failed",
         description: error instanceof Error ? error.message : "Failed to skip. Please try again.",

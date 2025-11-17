@@ -23,6 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { logger } from "@/lib/logger";
 
 type SortOption = "newest" | "oldest" | "name-asc" | "name-desc";
 
@@ -72,7 +73,7 @@ export default function DashboardPage() {
         description: "The PRD has been permanently deleted.",
       });
     } catch (error) {
-      console.error("Delete error:", error);
+      logger.error("DashboardPage.confirmDelete", error, { prdId: deleteConfirmId });
       toast({
         title: "Delete Failed",
         description: "Could not delete the PRD. Please try again.",

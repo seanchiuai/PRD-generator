@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { WorkflowLayout } from "@/components/workflow/WorkflowLayout";
 import { trackQuestionsSkip } from "@/lib/analytics/questionsEvents";
 import { Question } from "@/types";
+import { logger } from "@/lib/logger";
 
 export default function QuestionsPage() {
   const params = useParams();
@@ -65,7 +66,7 @@ export default function QuestionsPage() {
         questions: data.questions,
       });
     } catch (error) {
-      console.error("Question generation error:", error);
+      logger.error("QuestionsPage.generateQuestions", error, { conversationId });
       toast({
         title: "Error",
         description: "Failed to generate questions",
@@ -89,7 +90,7 @@ export default function QuestionsPage() {
         questions: updatedQuestions,
       });
     } catch (error) {
-      console.error("Auto-save failed:", error);
+      logger.error("QuestionsPage.handleAnswerChange.autoSave", error, { conversationId });
     }
   };
 
@@ -102,7 +103,7 @@ export default function QuestionsPage() {
       });
       router.push(`/chat/${conversationId}/research`);
     } catch (error) {
-      console.error("Error proceeding:", error);
+      logger.error("QuestionsPage.handleContinue", error, { conversationId });
       toast({
         title: "Error",
         description: "Failed to proceed",
@@ -165,7 +166,7 @@ export default function QuestionsPage() {
 
       router.push(`/chat/${conversationId}/research`);
     } catch (error) {
-      console.error("Error skipping:", error);
+      logger.error("QuestionsPage.handleSkip", error, { conversationId });
       toast({
         title: "Skip failed",
         description: "Failed to skip to research. Please try again.",

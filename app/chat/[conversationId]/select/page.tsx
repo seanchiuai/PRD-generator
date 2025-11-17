@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { WorkflowLayout } from "@/components/workflow/WorkflowLayout";
 import { AutoAdvance } from "@/components/workflow/AutoAdvance";
 import { Sparkles } from "lucide-react";
+import { logger } from "@/lib/logger";
 
 interface ValidationWarning {
   level: "warning" | "error";
@@ -110,7 +111,7 @@ export default function SelectionPage() {
         warnings: data.warnings || [],
       });
     } catch (error) {
-      console.error("Validation error:", error);
+      logger.error("SelectionPage.validateTechStack", error, { conversationId });
     } finally {
       setIsValidating(false);
     }
@@ -180,7 +181,7 @@ export default function SelectionPage() {
       });
       router.push(`/chat/${conversationId}/generate`);
     } catch (error) {
-      console.error("Error skipping:", error);
+      logger.error("SelectionPage.handleSkip", error, { conversationId });
       toast({
         title: "Skip failed",
         description: "Failed to skip to generation. Please try again.",

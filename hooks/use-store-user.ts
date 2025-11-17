@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { logger } from "@/lib/logger";
 
 /**
  * Hook that automatically stores/updates user in Convex database when they authenticate
@@ -18,7 +19,7 @@ export function useStoreUser() {
 
     // Store/update user in Convex
     storeUser().catch((error) => {
-      console.error("Failed to store user:", error);
+      logger.error("useStoreUser", error, { userId: user.id });
     });
   }, [user, isLoaded, storeUser]);
 }

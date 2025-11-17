@@ -11,6 +11,7 @@ import { PRDDisplay } from "@/components/prd/PRDDisplay";
 import { useToast } from "@/hooks/use-toast";
 import { WorkflowLayout } from "@/components/workflow/WorkflowLayout";
 import { Download } from "lucide-react";
+import { logger } from "@/lib/logger";
 
 export default function GeneratePage() {
   const params = useParams();
@@ -103,7 +104,7 @@ export default function GeneratePage() {
         description: "Your Product Requirements Document is ready.",
       });
     } catch (error) {
-      console.error("Generation error:", error);
+      logger.error("GeneratePage.generatePRD", error, { conversationId });
       toast({
         title: "Generation Failed",
         description: error instanceof Error ? error.message : "Please try again or contact support.",

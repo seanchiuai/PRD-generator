@@ -1,4 +1,5 @@
 import { WorkflowStep } from '@/contexts/WorkflowContext'
+import { logger } from '@/lib/logger'
 
 interface WorkflowSnapshot {
   conversationId: string
@@ -16,7 +17,7 @@ export function saveWorkflowSnapshot(snapshot: WorkflowSnapshot): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot))
   } catch (error) {
-    console.error('Failed to save workflow snapshot:', error)
+    logger.error('saveWorkflowSnapshot', error, { conversationId: snapshot.conversationId })
   }
 }
 
@@ -35,7 +36,7 @@ export function loadWorkflowSnapshot(conversationId: string): WorkflowSnapshot |
 
     return isRecent && isSameConversation ? snapshot : null
   } catch (error) {
-    console.error('Failed to load workflow snapshot:', error)
+    logger.error('loadWorkflowSnapshot', error, { conversationId })
     return null
   }
 }
@@ -46,6 +47,6 @@ export function clearWorkflowSnapshot(): void {
   try {
     localStorage.removeItem(STORAGE_KEY)
   } catch (error) {
-    console.error('Failed to clear workflow snapshot:', error)
+    logger.error('clearWorkflowSnapshot', error)
   }
 }

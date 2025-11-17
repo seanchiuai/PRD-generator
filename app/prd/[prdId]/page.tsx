@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { use } from "react";
+import { logger } from "@/lib/logger";
 
 export default function PRDViewPage({ params }: { params: Promise<{ prdId: string }> }) {
   const router = useRouter();
@@ -31,7 +32,7 @@ export default function PRDViewPage({ params }: { params: Promise<{ prdId: strin
         description: "PRD downloaded as JSON file.",
       });
     } catch (error) {
-      console.error("Export error:", error);
+      logger.error("PRDViewPage.handleExportJSON", error, { prdId, productName: prd.productName });
       toast({
         title: "Export Failed",
         description: "Could not export JSON file.",
@@ -53,7 +54,7 @@ export default function PRDViewPage({ params }: { params: Promise<{ prdId: strin
         description: "PRD downloaded as PDF file.",
       });
     } catch (error) {
-      console.error("Export error:", error);
+      logger.error("PRDViewPage.handleExportPDF", error, { prdId, productName: prd.productName });
       toast({
         title: "Export Failed",
         description: "Could not export PDF file.",

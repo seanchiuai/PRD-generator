@@ -5,6 +5,7 @@ import { useQuery, useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { Id } from '@/convex/_generated/dataModel'
 import { saveWorkflowSnapshot, loadWorkflowSnapshot } from '@/lib/workflow/persistence'
+import { logger } from '@/lib/logger'
 
 export type WorkflowStep = 'discovery' | 'questions' | 'research' | 'selection' | 'generate'
 
@@ -166,7 +167,7 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
             skippedSteps: state.skippedSteps,
           })
         } catch (error) {
-          console.error('Failed to update workflow progress:', error)
+          logger.error('WorkflowContext.goToStep', error, { conversationId, step })
         }
       }
     }

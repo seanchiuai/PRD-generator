@@ -58,7 +58,7 @@ Be smart about what's actually needed. For example:
 - A data dashboard might need external API integrations instead of a custom backend`;
 
   try {
-    console.log("Calling Claude to generate research queries...");
+    logger.debug("generateResearchQueries", "Calling Claude to generate research queries", { productName });
 
     // Create AbortController for timeout
     const abortController = new AbortController();
@@ -88,7 +88,7 @@ Be smart about what's actually needed. For example:
 
       // Extract JSON from Claude's response
       const text = content.text;
-      console.log("Claude response received, extracting queries...");
+      logger.debug("generateResearchQueries", "Claude response received, extracting queries", {});
 
       // Try code block first, then find any valid JSON array
       let jsonMatch = text.match(/```json\n([\s\S]*?)\n```/);
@@ -103,8 +103,7 @@ Be smart about what's actually needed. For example:
       }
 
       if (!jsonMatch) {
-        console.error("Failed to extract JSON from Claude response:", text);
-        logger.error("Failed to extract JSON from Claude response", { text });
+        logger.error("generateResearchQueries", "Failed to extract JSON from Claude response", { textPreview: text.substring(0, 200) });
         throw new Error("Could not parse research queries from Claude");
       }
 
@@ -139,7 +138,7 @@ Be smart about what's actually needed. For example:
         return queries.slice(0, 20);
       }
 
-      console.log(`Successfully parsed ${queries.length} research queries`);
+      logger.debug("generateResearchQueries", `Successfully parsed ${queries.length} research queries`, { count: queries.length });
 
       logger.info(
         "Generated research queries",
@@ -217,7 +216,7 @@ async function executeResearchQuery(
   const MAX_RETRIES = 2;
   const RETRY_DELAY = 2000; // 2 seconds between retries
 
-  console.log(`Researching category: ${researchQuery.category}${retryCount > 0 ? ` (retry ${retryCount}/${MAX_RETRIES})` : ''}`);
+  logger.debug("researchCategory", `Researching category: ${researchQuery.category}${retryCount > 0 ? ` (retry ${retryCount}/${MAX_RETRIES})` : ''}`, { category: researchQuery.category, retryCount });
 
   // Create AbortController for timeout
   const abortController = new AbortController();
@@ -243,9 +242,9 @@ async function executeResearchQuery(
     clearTimeout(timeoutId);
 
     const content = response.choices[0]?.message?.content || "";
-    console.log(`Perplexity response for ${researchQuery.category}: ${content.substring(0, 200)}...`);
+    logger.debug("researchCategory", `Perplexity response for ${researchQuery.category}`, { category: researchQuery.category, contentPreview: content.substring(0, 200) });
     const options = parseResponse(content, researchQuery.category);
-    console.log(`Parsed ${options.length} options for ${researchQuery.category}`);
+    logger.debug("researchCategory", `Parsed options for ${researchQuery.category}`, { category: researchQuery.category, optionCount: options.length });
 
     return {
       category: researchQuery.category,
@@ -263,7 +262,7 @@ async function executeResearchQuery(
           `Request aborted for ${researchQuery.category}, retrying (${retryCount + 1}/${MAX_RETRIES})`,
           { category: researchQuery.category, retryCount }
         );
-        console.warn(`Request aborted for ${researchQuery.category}, retrying in ${RETRY_DELAY}ms...`);
+        logger.warn("researchCategory", `Request aborted for ${researchQuery.category}, retrying in ${RETRY_DELAY}ms`, { category: researchQuery.category, retryCount });
 
         // Wait before retrying
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
@@ -276,11 +275,10 @@ async function executeResearchQuery(
           `Max retries reached for ${researchQuery.category}, returning empty results`,
           { category: researchQuery.category }
         );
-        console.warn(`Max retries reached for ${researchQuery.category}, returning empty results`);
+        logger.warn("researchCategory", `Max retries reached for ${researchQuery.category}, returning empty results`, { category: researchQuery.category });
       }
     } else {
-      console.error(`Error researching ${researchQuery.category}:`, error);
-      logger.error(`Failed to research ${researchQuery.category}`, error, {
+      logger.error("researchCategory", error, {
         category: researchQuery.category,
       });
     }
@@ -299,11 +297,11 @@ export const POST = withAuth(async (request) => {
     const { productContext } = body as { productContext: ProductContext };
 
     if (!productContext) {
-      console.error("No product context provided");
+      logger.error("POST /api/research/tech-stack", "No product context provided", {});
       return handleValidationError("Product context required");
     }
 
-    console.log("Product context validated:", {
+    logger.debug("POST /api/research/tech-stack", "Product context validated", {
       productName: productContext.productName,
       description: productContext.description?.substring(0, 100),
       targetAudience: productContext.targetAudience,
@@ -341,13 +339,13 @@ export const POST = withAuth(async (request) => {
     const DELAY_BETWEEN_REQUESTS = 1000; // 1 second delay
     const results: Array<{ category: string; options: any[]; reasoning: string }> = [];
 
-    console.log(`Processing ${researchQueries.length} research queries sequentially...`);
+    logger.debug("POST /api/research/tech-stack", `Processing research queries sequentially`, { queryCount: researchQueries.length });
 
     for (let i = 0; i < researchQueries.length; i++) {
       const query = researchQueries[i];
       if (!query) continue;
 
-      console.log(`[${i + 1}/${researchQueries.length}] Processing: ${query.category}`);
+      logger.debug("POST /api/research/tech-stack", `Processing research query`, { index: i + 1, total: researchQueries.length, category: query.category });
 
       try {
         const result = await executeResearchQuery(query);
@@ -397,16 +395,17 @@ export const POST = withAuth(async (request) => {
       }
     );
 
-    console.log("=== Research Complete ===");
-    console.log(`Categories researched: ${Object.keys(researchResults).join(", ")}`);
-    console.log(`Total queries generated: ${queriesGenerated.length}`);
+    logger.info("POST /api/research/tech-stack", "Research Complete", {
+      categoriesResearched: Object.keys(researchResults),
+      totalQueries: queriesGenerated.length
+    });
 
     return NextResponse.json({
       researchResults,
       queriesGenerated,
     });
   } catch (error) {
-    console.error("=== Research API Error ===", error);
+    logger.error("POST /api/research/tech-stack", error, {});
     return handleAPIError(error, "complete research");
   }
 });

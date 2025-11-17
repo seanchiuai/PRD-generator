@@ -2,6 +2,8 @@
  * Analytics tracking for questions workflow
  */
 
+import { logger } from '@/lib/logger'
+
 interface QuestionsSkipData {
   conversationId: string;
   answeredCount: number;
@@ -15,8 +17,8 @@ interface QuestionsSkipData {
  */
 export function trackQuestionsSkip(data: QuestionsSkipData) {
   if (typeof window !== "undefined" && (window as any).analytics) {
-    // Track to console for now (can be replaced with actual analytics service)
-    console.log("[Analytics] Questions Skipped", {
+    // Track for debugging (can be replaced with actual analytics service)
+    logger.debug("Analytics: Questions Skipped", "", {
       conversation_id: data.conversationId,
       answered_count: data.answeredCount,
       total_count: data.totalCount,
@@ -50,7 +52,7 @@ interface QuestionsCompletedData {
  */
 export function trackQuestionsCompleted(data: QuestionsCompletedData) {
   if (typeof window !== "undefined" && (window as any).analytics) {
-    console.log("[Analytics] Questions Completed", {
+    logger.debug("Analytics: Questions Completed", "", {
       conversation_id: data.conversationId,
       answered_count: data.answeredCount,
       total_count: data.totalCount,
