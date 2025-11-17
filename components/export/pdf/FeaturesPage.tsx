@@ -6,9 +6,10 @@ import { PDFFooter } from "./PDFFooter";
 
 interface FeaturesPageProps {
   prd: PRDData;
+  pageNumber?: number;
 }
 
-export function FeaturesPage({ prd }: FeaturesPageProps) {
+export function FeaturesPage({ prd, pageNumber = 3 }: FeaturesPageProps) {
   return (
     <Page size="A4" style={pdfStyles.page}>
       <PDFHeader title="Features" />
@@ -37,7 +38,7 @@ export function FeaturesPage({ prd }: FeaturesPageProps) {
         ))}
       </View>
 
-      <PDFFooter pageNumber={3} productName={prd.projectOverview.productName} />
+      <PDFFooter pageNumber={pageNumber} productName={prd.projectOverview.productName} />
     </Page>
   );
 }

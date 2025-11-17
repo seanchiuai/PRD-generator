@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 
-export default function Error({
+function AppError({
   error,
   reset,
 }: {
@@ -32,3 +32,5 @@ export default function Error({
     </div>
   );
 }
+
+export default AppError;

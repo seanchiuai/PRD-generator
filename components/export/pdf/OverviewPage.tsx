@@ -6,9 +6,10 @@ import { PDFFooter } from "./PDFFooter";
 
 interface OverviewPageProps {
   prd: PRDData;
+  pageNumber?: number;
 }
 
-export function OverviewPage({ prd }: OverviewPageProps) {
+export function OverviewPage({ prd, pageNumber = 1 }: OverviewPageProps) {
   return (
     <Page size="A4" style={pdfStyles.page}>
       <PDFHeader
@@ -41,7 +42,7 @@ export function OverviewPage({ prd }: OverviewPageProps) {
         ))}
       </View>
 
-      <PDFFooter pageNumber={1} productName={prd.projectOverview.productName} />
+      <PDFFooter pageNumber={pageNumber} productName={prd.projectOverview.productName} />
     </Page>
   );
 }

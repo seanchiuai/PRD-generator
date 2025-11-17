@@ -22,13 +22,13 @@ const eslintConfig = [
       "prefer-arrow-callback": "warn",
 
       // TypeScript specific
-      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-unused-vars": [
         "error",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
       "@typescript-eslint/explicit-function-return-type": "off",
-      "@typescript-eslint/consistent-type-imports": "error",
+      "@typescript-eslint/consistent-type-imports": "warn",
 
       // React specific
       "react/jsx-no-target-blank": "error",

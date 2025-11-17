@@ -1,19 +1,20 @@
 import { Page, Text, View } from "@react-pdf/renderer";
-import type { PRDData } from "@/types";
+import type { PRDData, TechStackItem } from "@/types";
 import { pdfStyles } from "./styles";
 import { PDFHeader } from "./PDFHeader";
 import { PDFFooter } from "./PDFFooter";
 
 interface TechStackPageProps {
   prd: PRDData;
+  pageNumber?: number;
 }
 
-export function TechStackPage({ prd }: TechStackPageProps) {
+export function TechStackPage({ prd, pageNumber = 2 }: TechStackPageProps) {
   return (
     <Page size="A4" style={pdfStyles.page}>
       <PDFHeader title="Technical Stack" />
 
-      {Object.entries(prd.techStack)
+      {(Object.entries(prd.techStack) as [string, TechStackItem | string][])
         .filter(([key]) => key !== "reasoning")
         .map(([key, value]) => {
           if (typeof value === "string") return null;
@@ -28,7 +29,7 @@ export function TechStackPage({ prd }: TechStackPageProps) {
               <Text style={{ ...pdfStyles.subsectionTitle, color: "#059669" }}>
                 Pros
               </Text>
-              {value.pros.map((pro: string, i: number) => (
+              {value.pros.map((pro, i) => (
                 <Text key={i} style={pdfStyles.bulletPoint}>
                   • {pro}
                 </Text>
@@ -37,7 +38,7 @@ export function TechStackPage({ prd }: TechStackPageProps) {
               <Text style={{ ...pdfStyles.subsectionTitle, color: "#DC2626" }}>
                 Cons
               </Text>
-              {value.cons.map((con: string, i: number) => (
+              {value.cons.map((con, i) => (
                 <Text key={i} style={pdfStyles.bulletPoint}>
                   • {con}
                 </Text>
@@ -46,7 +47,7 @@ export function TechStackPage({ prd }: TechStackPageProps) {
           );
         })}
 
-      <PDFFooter pageNumber={2} productName={prd.projectOverview.productName} />
+      <PDFFooter pageNumber={pageNumber} productName={prd.projectOverview.productName} />
     </Page>
   );
 }

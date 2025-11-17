@@ -6,9 +6,10 @@ import { PDFFooter } from "./PDFFooter";
 
 interface TimelinePageProps {
   prd: PRDData;
+  pageNumber?: number;
 }
 
-export function TimelinePage({ prd }: TimelinePageProps) {
+export function TimelinePage({ prd, pageNumber = 5 }: TimelinePageProps) {
   return (
     <Page size="A4" style={pdfStyles.page}>
       <PDFHeader title="Timeline & Risks" />
@@ -46,7 +47,7 @@ export function TimelinePage({ prd }: TimelinePageProps) {
         ))}
       </View>
 
-      <PDFFooter pageNumber={5} productName={prd.projectOverview.productName} />
+      <PDFFooter pageNumber={pageNumber} productName={prd.projectOverview.productName} />
     </Page>
   );
 }
