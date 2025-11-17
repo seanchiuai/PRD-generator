@@ -15,8 +15,8 @@ Product Context:
 - Name: ${productName}
 - Description: ${description}
 - Target Audience: ${targetAudience}
-- Core Features: ${coreFeatures.join(", ")}
-- Additional Context: ${JSON.stringify(answers, null, 2)}
+- Core Features: ${coreFeatures?.join(", ") || "Not specified"}
+- Additional Context: ${JSON.stringify(answers || {}, null, 2)}
 
 Your task is to generate targeted research queries for technology stack recommendations.
 

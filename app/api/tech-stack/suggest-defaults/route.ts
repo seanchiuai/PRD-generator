@@ -55,9 +55,6 @@ export const POST = withAuth(async (request, { userId, token }) => {
       techStack = getDefaultTechStack(extractedContext, clarifyingQuestions)
     }
 
-    // Generate mock research results
-    const researchResults = generateMockResearchResults(techStack)
-
     // Validate the stack before saving
     const validation = validateDefaultStack(techStack)
 
@@ -74,6 +71,9 @@ export const POST = withAuth(async (request, { userId, token }) => {
       auth: techStack.auth || "Clerk",
       hosting: techStack.hosting || "Vercel",
     }
+
+    // Generate mock research results (using completeStack with all required fields)
+    const researchResults = generateMockResearchResults(completeStack)
 
     // Save research results to Convex
     await convexClient.mutation(api.conversations.saveResearchResults, {
@@ -141,8 +141,8 @@ Return ONLY a JSON object:
     messages: [{ role: 'user', content: prompt }],
   })
 
-  const textContent = response.content.find((block) => block.type === 'text')
-  if (!textContent || textContent.type !== 'text') {
+  const textContent = response.content.find((block): block is { type: 'text'; text: string } => block.type === 'text')
+  if (!textContent) {
     throw new Error('Unexpected response type from Claude')
   }
 
