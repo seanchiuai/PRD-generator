@@ -59,18 +59,11 @@ export default function GeneratePage() {
 
       updateStep(1, "in_progress");
 
-      // Build conversation data
-      const conversationData = {
-        messages: conversation.messages,
-        clarifyingQuestions: conversation.clarifyingQuestions,
-        selectedTechStack: conversation.selectedTechStack,
-      };
-
       // Call generation API
       const response = await fetch("/api/prd/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversationData }),
+        body: JSON.stringify({ conversationId }),
       });
 
       if (!response.ok) {

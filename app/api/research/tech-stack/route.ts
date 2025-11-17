@@ -187,7 +187,7 @@ function parseResponse(content: string, _category: string): TechOption[] {
           const cleaned = m.replace(/\*\*/g, '');
           // Extract name before common delimiters
           const nameMatch = cleaned.match(/^([^/:(\n]+)/);
-          return nameMatch ? nameMatch[1].trim() : cleaned.trim();
+          return nameMatch?.[1]?.trim() ?? cleaned.trim();
         });
       }
     }
@@ -204,7 +204,7 @@ function parseResponse(content: string, _category: string): TechOption[] {
       const isSimpleName = !section.includes('\n') && !section.includes('**') && section.length < 50;
 
       if (isSimpleName) {
-        let name = section.trim();
+        const name = section.trim();
 
         // Skip common non-tech phrases
         const skipPhrases = ["and", "or", "the", "these", "those"];
