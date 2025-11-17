@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed - 2025-01-17
+
+#### Group-8 Code Review Issues (827b116)
+
+Resolved 14 code quality and performance issues:
+- Removed redundant Tailwind transform class in SearchBar
+- Fixed React key usage (timestamp instead of index) in ChatContainer
+- Made ClientBody extension attributes configurable with SSR guard
+- Applied responsive CSS visibility (hidden/block md:) to WorkflowProgress
+- Extracted WORKFLOW_STEPS constant to eliminate duplication
+- Optimized array comparison with shallow equality check
+- Added division by zero guard in AutoAdvance progressPercent
+- Implemented countdown reset when AutoAdvance enabled changes
+- Used ref pattern for AutoAdvance onAdvance to prevent dependency issues
+- Added dynamic copyright year in landing page
+- Removed router from useEffect deps (stable reference)
+- Extracted complex boolean (isNextButtonDisabled) for readability
+- Replaced any with proper RawAIResponse type in questions API
+- Fixed ordered list numbering in agent-creating SKILL.md
+
 ### Changed - 2025-01-17
 
 #### Next.js Structure Review & Best Practices Implementation
