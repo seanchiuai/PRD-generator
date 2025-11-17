@@ -5,11 +5,12 @@
 This project uses **lucide-react** for all icons.
 
 **Installation:**
+
 ```bash
 npm install lucide-react
 ```
 
-**Documentation:** https://lucide.dev/
+**Documentation:** [Lucide](https://lucide.dev/)
 
 ## Basic Usage
 
@@ -518,7 +519,7 @@ import {
 ## Finding Icons
 
 **Search on lucide.dev:**
-https://lucide.dev/icons/
+[Lucide icons](https://lucide.dev/icons/)
 
 **Search in VSCode:**
 1. Start typing icon name in import
