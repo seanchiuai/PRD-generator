@@ -4,6 +4,7 @@ import { useState } from "react"
 import { ArrowRight, Loader2 } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
+import { logger } from "@/lib/logger"
 import {
   Tooltip,
   TooltipContent,
@@ -57,7 +58,10 @@ export function SkipButton({
     try {
       await onSkip()
     } catch (error) {
-      console.error('Error during skip:', error)
+      logger.error('SkipButton', error, {
+        action: 'skip',
+        buttonText,
+      })
     }
   }
 

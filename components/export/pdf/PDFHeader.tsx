@@ -15,9 +15,19 @@ export function PDFHeader({
   generatedAt
 }: PDFHeaderProps) {
   const getFormattedDate = () => {
-    if (!generatedAt) return new Date().toLocaleDateString();
+    if (!generatedAt) {
+      return new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
     if (typeof generatedAt === 'string') return generatedAt;
-    return generatedAt.toLocaleDateString();
+    return generatedAt.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
   return (

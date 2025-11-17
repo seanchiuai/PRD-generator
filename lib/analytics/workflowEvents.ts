@@ -39,9 +39,10 @@ export function trackWorkflowComplete(data: {
   completedSteps: string[]
 }) {
   if (typeof window !== 'undefined' && window.analytics) {
-    // Guard against division by zero
-    const skipRate = data.completedSteps.length > 0
-      ? (data.skippedSteps.length / data.completedSteps.length) * 100
+    // Calculate skip rate as percentage of total steps
+    const totalSteps = data.skippedSteps.length + data.completedSteps.length;
+    const skipRate = totalSteps > 0
+      ? (data.skippedSteps.length / totalSteps) * 100
       : 0;
 
     window.analytics.track('Workflow Completed', {

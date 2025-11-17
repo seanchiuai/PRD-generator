@@ -7,20 +7,57 @@ import { internalMutation } from "./_generated/server"
 export const migrateConversationStages = internalMutation({
   args: {},
   handler: async (ctx) => {
-    const conversations = await ctx.db.query("conversations").collect()
-    let updated = 0
+    try {
+      // Check if migration already ran
+      const migrationRecord = await ctx.db
+        .query("migrations")
+        .filter((q) => q.eq(q.field("name"), "migrate_conversation_stages"))
+        .first()
 
-    for (const conversation of conversations) {
-      let newStage = conversation.currentStage
-
-      // Map old stages to new ones
-      if (newStage === "researching" || newStage === "selecting") {
-        newStage = "tech-stack"
-        await ctx.db.patch(conversation._id, { currentStage: newStage })
-        updated++
+      if (migrationRecord) {
+        console.log("Migration already executed")
+        return { success: true, conversationsUpdated: 0, skipped: true }
       }
-    }
 
-    return { success: true, conversationsUpdated: updated }
+      let updated = 0
+      let hasMore = true
+      let continueCursor: string | null = null
+
+      while (hasMore) {
+        const page = await ctx.db
+          .query("conversations")
+          .paginate({ cursor: continueCursor, numItems: 100 })
+
+        for (const conversation of page.page) {
+          const currentStage = conversation.currentStage
+
+          // Type guard: ensure currentStage is a valid string
+          if (
+            typeof currentStage === "string" &&
+            (currentStage === "researching" || currentStage === "selecting")
+          ) {
+            const newStage = "tech-stack"
+            await ctx.db.patch(conversation._id, { currentStage: newStage })
+            updated++
+          }
+        }
+
+        hasMore = page.continueCursor !== null
+        continueCursor = page.continueCursor
+      }
+
+      // Record migration completion
+      await ctx.db.insert("migrations", {
+        name: "migrate_conversation_stages",
+        executedAt: Date.now(),
+        conversationsUpdated: updated
+      })
+
+      console.log(`Migration completed: ${updated} conversations updated`)
+      return { success: true, conversationsUpdated: updated }
+    } catch (error) {
+      console.error("Migration failed:", error)
+      throw error
+    }
   },
 })

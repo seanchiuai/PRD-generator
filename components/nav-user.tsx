@@ -41,7 +41,16 @@ export function NavUser() {
   const userName = user.fullName || user.firstName || user.emailAddresses?.[0]?.emailAddress || "User"
   const userEmail = user.primaryEmailAddress?.emailAddress || ""
   const userAvatar = user.imageUrl || ""
-  const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+
+  // Defensive initials calculation
+  const initials = userName
+    .trim()
+    .split(/\s+/)
+    .filter(part => part.length > 0)
+    .map(part => part[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2) || userEmail.substring(0, 2).toUpperCase() || 'U'
 
   return (
     <SidebarMenu>

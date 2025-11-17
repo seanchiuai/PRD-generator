@@ -10,9 +10,14 @@ import { v } from "convex/values";
  * - prds: Generated Product Requirements Documents
  */
 export default defineSchema({
+  migrations: defineTable({
+    name: v.string(),
+    executedAt: v.number(),
+    conversationsUpdated: v.number(),
+  }).index("by_name", ["name"]),
   users: defineTable({
     clerkId: v.string(),
-    email: v.string(),
+    email: v.optional(v.string()),
     name: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
     createdAt: v.number(),

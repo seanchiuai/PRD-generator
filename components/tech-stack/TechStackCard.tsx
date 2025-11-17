@@ -16,7 +16,7 @@ export function TechStackCard({ option, isSelected, onSelect }: TechStackCardPro
   return (
     <Card
       className={cn(
-        "cursor-pointer transition-all hover:shadow-md relative min-h-[400px] flex flex-col",
+        "cursor-pointer transition-all hover:shadow-md relative min-h-[300px] sm:min-h-[400px] flex flex-col",
         isSelected && "ring-2 ring-primary shadow-lg"
       )}
       onClick={onSelect}

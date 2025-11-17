@@ -75,10 +75,14 @@ export function canNavigateToStep(
  * Get the step ID from a path
  */
 export function getStepFromPath(pathname: string): WorkflowStep {
-  if (pathname.includes('/generate')) return 'generate'
-  if (pathname.includes('/select')) return 'selection'
-  if (pathname.includes('/research')) return 'research'
-  if (pathname.includes('/questions')) return 'questions'
+  // Split pathname by '/' and filter empty segments
+  const segments = pathname.split('/').filter(s => s.length > 0)
+
+  // Check for exact segment matches to avoid false positives
+  if (segments.includes('generate')) return 'generate'
+  if (segments.includes('select')) return 'selection'
+  if (segments.includes('research')) return 'research'
+  if (segments.includes('questions')) return 'questions'
   return 'discovery'
 }
 

@@ -10,11 +10,14 @@ export default function NewChatPage() {
   const router = useRouter();
   const createConversation = useMutation(api.conversations.create);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
+    let errorTimeout: ReturnType<typeof setTimeout> | null = null;
 
     const initConversation = async () => {
+      setIsLoading(true);
       try {
         const conversationId = await createConversation();
         if (mounted) {
@@ -23,7 +26,13 @@ export default function NewChatPage() {
       } catch (error) {
         console.error("Failed to create conversation:", error);
         if (mounted) {
-          setError(error instanceof Error ? error.message : "Failed to create conversation");
+          // Delay showing error to avoid flashing on transient network issues
+          errorTimeout = setTimeout(() => {
+            if (mounted) {
+              setError(error instanceof Error ? error.message : "Failed to create conversation");
+              setIsLoading(false);
+            }
+          }, 400);
         }
       }
     };
@@ -32,6 +41,9 @@ export default function NewChatPage() {
 
     return () => {
       mounted = false;
+      if (errorTimeout) {
+        clearTimeout(errorTimeout);
+      }
     };
   }, [createConversation, router]);
 

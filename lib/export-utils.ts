@@ -2,7 +2,7 @@ import { pdf } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { PRDData } from "@/types";
 
-export async function exportJSON(data: PRDData, filename: string) {
+export function exportJSON(data: PRDData, filename: string) {
   const jsonString = JSON.stringify(data, null, 2);
   const blob = new Blob([jsonString], { type: "application/json" });
   const url = URL.createObjectURL(blob);

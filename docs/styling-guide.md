@@ -194,7 +194,7 @@ mb-8     // Margin bottom 2rem
 
 ### Breakpoints
 
-```
+```text
 sm: 640px
 md: 768px
 lg: 1024px

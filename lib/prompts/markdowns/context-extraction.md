@@ -1,3 +1,5 @@
+# Context Extraction Prompt
+
 Analyze the following product discovery conversation and extract key information about the product being discussed.
 
 Even if the conversation is very brief, make your best attempt to extract whatever information is available.

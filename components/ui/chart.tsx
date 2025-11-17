@@ -70,7 +70,10 @@ function ChartContainer({
 }
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
-  const isValidColor = (color: string) => /^(#[0-9A-Fa-f]{3,8}|rgb|hsl|var\()/.test(color)
+  const isValidColor = (color: string) => {
+    // Strict validation: match entire string, no semicolons or braces
+    return /^(#[0-9A-Fa-f]{3,8}|rgba?\([^)]+\)|hsla?\([^)]+\)|var\(--[\w-]+\))$/.test(color)
+  }
   const isSafeKey = (key: string) => /^[a-zA-Z][\w-]*$/.test(key)
 
   const colorConfig = Object.entries(config).filter(

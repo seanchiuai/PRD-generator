@@ -33,17 +33,23 @@ npm install
 
 1. **Create a Convex account**: Go to [convex.dev](https://convex.dev) and sign up
 2. **Install Convex CLI**:
+
    ```bash
    npm install -g convex
    ```
+
 3. **Login to Convex**:
+
    ```bash
    npx convex login
    ```
+
 4. **Initialize your project**:
+
    ```bash
    npx convex dev
    ```
+
    - This will create a new Convex project and give you a deployment URL
    - Copy the deployment URL (it looks like `https://your-project.convex.cloud`)
 
@@ -90,9 +96,11 @@ CLERK_SECRET_KEY=sk_test_...
 2. Select your project
 3. Go to **"Settings"** → **"Environment Variables"**
 4. Add this variable:
-   ```
+
+   ```env
    CLERK_JWT_ISSUER_DOMAIN=https://your-app.clerk.accounts.dev
    ```
+
    (Replace with your actual Clerk issuer domain from step 4)
 
 ### 7. Update Convex Auth Config
@@ -146,7 +154,7 @@ npm start
 ## 🔧 Available Scripts
 
 - `npm run dev` - Start development servers (frontend + backend)
-- `npm run dev:frontend` - Start only Next.js frontend
+- `npm run dev:frontend` - Start Next.js frontend only
 - `npm run dev:backend` - Start only Convex backend
 - `npm run build` - Build for production
 - `npm run start` - Start production server
@@ -154,7 +162,7 @@ npm start
 
 ## 📁 Project Structure
 
-```
+```text
 ├── app/                 # Next.js pages (App Router)
 ├── components/          # React components
 ├── convex/             # Backend functions and schema

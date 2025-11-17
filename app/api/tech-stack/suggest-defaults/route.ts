@@ -1,17 +1,24 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
 import {
   handleAPIError,
   handleValidationError,
-  handleUnauthorizedError,
 } from "@/lib/api-error-handler";
 import { safeParseAIResponse } from "@/lib/parse-ai-json";
 import { getAuthenticatedConvexClient } from "@/lib/convex-client";
 import { api } from '@/convex/_generated/api'
 import { getDefaultTechStack, generateMockResearchResults } from '@/lib/techStack/defaults'
-import { Id } from "@/convex/_generated/dataModel";
+import type { Id } from "@/convex/_generated/dataModel";
 import { withAuth } from "@/lib/middleware/withAuth";
 import type { ExtractedContext, Question, SimpleTechStack, ValidationResult } from "@/types";
+
+const _DEFAULT_STACK: SimpleTechStack = {
+  frontend: "Next.js",
+  backend: "Node.js with Express",
+  database: "PostgreSQL",
+  auth: "Clerk",
+  hosting: "Vercel",
+};
 
 export const POST = withAuth(async (request, { userId, token }) => {
   try {
@@ -64,12 +71,9 @@ export const POST = withAuth(async (request, { userId, token }) => {
     }
 
     // Ensure all required fields are present for Convex mutation
-    const completeStack = {
-      frontend: techStack.frontend || "Next.js",
-      backend: techStack.backend || "Node.js with Express",
-      database: techStack.database || "PostgreSQL",
-      auth: techStack.auth || "Clerk",
-      hosting: techStack.hosting || "Vercel",
+    const completeStack: SimpleTechStack = {
+      ...DEFAULT_STACK,
+      ...techStack,
     }
 
     // Generate mock research results (using completeStack with all required fields)
@@ -153,22 +157,19 @@ function validateDefaultStack(stack: SimpleTechStack): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  // Validate required fields exist and are non-empty
-  if (!stack.frontend || stack.frontend.trim() === "") {
-    errors.push("Frontend framework is required");
-  }
-  if (!stack.backend || stack.backend.trim() === "") {
-    errors.push("Backend framework is required");
-  }
-  if (!stack.database || stack.database.trim() === "") {
-    errors.push("Database is required");
-  }
-  if (!stack.auth || stack.auth.trim() === "") {
-    errors.push("Authentication solution is required");
-  }
-  if (!stack.hosting || stack.hosting.trim() === "") {
-    errors.push("Hosting platform is required");
-  }
+  // Normalize and validate required fields
+  const fields: Array<keyof SimpleTechStack> = ['frontend', 'backend', 'database', 'auth', 'hosting'];
+
+  fields.forEach(field => {
+    const value = stack[field]?.trim();
+    if (!value) {
+      const fieldName = field.charAt(0).toUpperCase() + field.slice(1);
+      errors.push(`${fieldName === 'Auth' ? 'Authentication solution' : fieldName + (field === 'hosting' ? ' platform' : ' framework')} is required`);
+    } else {
+      // Normalize: trim and assign back
+      stack[field] = value;
+    }
+  });
 
   // Basic compatibility checks
   if (stack.frontend && stack.hosting) {
@@ -206,29 +207,11 @@ function validateDefaultStack(stack: SimpleTechStack): ValidationResult {
 
 async function fixStackErrors(
   stack: SimpleTechStack,
-  errors: string[]
+  _errors: string[]
 ): Promise<SimpleTechStack> {
-  // Create a copy to fix
-  const fixedStack = { ...stack };
-
-  // Fix missing required fields with safe defaults
-  errors.forEach((error) => {
-    if (error.includes("Frontend")) {
-      fixedStack.frontend = "Next.js";
-    }
-    if (error.includes("Backend")) {
-      fixedStack.backend = "Node.js with Express";
-    }
-    if (error.includes("Database")) {
-      fixedStack.database = "PostgreSQL";
-    }
-    if (error.includes("Authentication")) {
-      fixedStack.auth = "Clerk";
-    }
-    if (error.includes("Hosting")) {
-      fixedStack.hosting = "Vercel";
-    }
-  });
-
-  return fixedStack;
+  // Merge with defaults to fix missing fields
+  return {
+    ..._DEFAULT_STACK,
+    ...stack,
+  };
 }

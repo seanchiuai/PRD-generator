@@ -14,7 +14,6 @@ function AppError({
 }) {
   useEffect(() => {
     logger.error("App error boundary", error);
-    console.error("Application error:", error); // Fallback for client-side
   }, [error]);
 
   return (

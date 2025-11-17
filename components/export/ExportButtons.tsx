@@ -9,18 +9,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { PRDData } from "@/types";
-
 interface ExportButtonsProps {
-  prd: PRDData;
-  productName: string;
   onExportJSON: () => Promise<void>;
   onExportPDF: () => Promise<void>;
 }
 
 export function ExportButtons({
-  prd: _prd,
-  productName: _productName,
   onExportJSON,
   onExportPDF,
 }: ExportButtonsProps) {
@@ -37,6 +31,11 @@ export function ExportButtons({
       } else {
         await onExportPDF();
       }
+    } catch (error) {
+      console.error(`Export failed for ${type}:`, error);
+      // Note: Consider adding toast notification here
+      // toast.error(`Failed to export ${type.toUpperCase()}`)
+      throw error; // Re-throw to allow parent component to handle
     } finally {
       setIsExporting(false);
       setExportType(null);
@@ -52,7 +51,7 @@ export function ExportButtons({
           ) : (
             <Download className="h-4 w-4 mr-2" />
           )}
-          {isExporting ? `Exporting ${exportType?.toUpperCase()}...` : "Export PRD"}
+          {isExporting && exportType ? `Exporting ${exportType.toUpperCase()}...` : isExporting ? "Exporting..." : "Export PRD"}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

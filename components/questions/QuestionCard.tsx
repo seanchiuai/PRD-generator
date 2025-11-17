@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useReducer, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,85 +23,135 @@ interface QuestionCardProps {
   onAnswerChange: (answer: string) => void;
 }
 
+type State = {
+  selectedOption: string | null;
+  selectedOptions: string[];
+  isOtherSelected: boolean;
+  otherText: string;
+};
+
+type Action =
+  | { type: "TOGGLE_MULTISELECT"; option: string }
+  | { type: "SELECT_OPTION"; option: string }
+  | { type: "TOGGLE_OTHER" }
+  | { type: "UPDATE_OTHER_TEXT"; text: string }
+  | { type: "INITIALIZE"; payload: State };
+
+function questionReducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "TOGGLE_MULTISELECT": {
+      const newSelected = state.selectedOptions.includes(action.option)
+        ? state.selectedOptions.filter((o) => o !== action.option)
+        : [...state.selectedOptions, action.option];
+      return {
+        ...state,
+        selectedOptions: newSelected,
+      };
+    }
+    case "SELECT_OPTION":
+      return {
+        ...state,
+        selectedOption: action.option,
+        isOtherSelected: false,
+        otherText: "",
+      };
+    case "TOGGLE_OTHER": {
+      const newValue = !state.isOtherSelected;
+      return {
+        ...state,
+        isOtherSelected: newValue,
+        selectedOption: newValue ? null : state.selectedOption,
+        otherText: newValue ? state.otherText : "",
+      };
+    }
+    case "UPDATE_OTHER_TEXT":
+      return {
+        ...state,
+        otherText: action.text,
+        isOtherSelected: action.text.trim().length > 0,
+        selectedOption: action.text.trim().length > 0 ? null : state.selectedOption,
+      };
+    case "INITIALIZE":
+      return action.payload;
+    default:
+      return state;
+  }
+}
+
 export function QuestionCard({ question, onAnswerChange }: QuestionCardProps) {
-  // For multiselect, parse comma-separated answer into array
-  const [selectedOptions, setSelectedOptions] = useState<string[]>(() => {
-    if (question.type === "multiselect" && question.answer) {
-      return question.answer.split(", ").filter(Boolean);
-    }
-    return [];
-  });
+  // Initialize state from question props
+  const getInitialState = (): State => {
+    const isMultiselect = question.type === "multiselect";
+    const answer = question.answer || "";
+    const options = question.suggestedOptions || [];
 
-  // Determine initial state based on existing answer
-  const [selectedOption, setSelectedOption] = useState<string | null>(() => {
-    if (
-      question.type !== "multiselect" &&
-      question.answer &&
-      question.suggestedOptions?.includes(question.answer)
-    ) {
-      return question.answer;
+    if (isMultiselect && answer) {
+      return {
+        selectedOption: null,
+        selectedOptions: answer.split(", ").filter(Boolean),
+        isOtherSelected: false,
+        otherText: "",
+      };
     }
-    return null;
-  });
 
-  const [isOtherSelected, setIsOtherSelected] = useState(() => {
-    return (
-      !!question.answer &&
-      !question.suggestedOptions?.includes(question.answer || "")
-    );
-  });
-
-  const [otherText, setOtherText] = useState(() => {
-    if (
-      question.answer &&
-      !question.suggestedOptions?.includes(question.answer)
-    ) {
-      return question.answer;
+    if (!isMultiselect && answer) {
+      const isAnswerInOptions = options.includes(answer);
+      return {
+        selectedOption: isAnswerInOptions ? answer : null,
+        selectedOptions: [],
+        isOtherSelected: !isAnswerInOptions,
+        otherText: !isAnswerInOptions ? answer : "",
+      };
     }
-    return "";
-  });
+
+    return {
+      selectedOption: null,
+      selectedOptions: [],
+      isOtherSelected: false,
+      otherText: "",
+    };
+  };
+
+  const [state, dispatch] = useReducer(questionReducer, null, getInitialState);
+
+  // Emit answer changes
+  useEffect(() => {
+    if (question.type === "multiselect") {
+      onAnswerChange(state.selectedOptions.join(", "));
+    } else if (state.isOtherSelected && state.otherText.trim()) {
+      onAnswerChange(state.otherText);
+    } else if (state.selectedOption) {
+      onAnswerChange(state.selectedOption);
+    } else if (!state.isOtherSelected) {
+      onAnswerChange("");
+    }
+  }, [
+    state.selectedOptions,
+    state.selectedOption,
+    state.isOtherSelected,
+    state.otherText,
+    question.type,
+    onAnswerChange,
+  ]);
 
   // Handle multiselect option toggle
   const handleMultiselectToggle = (option: string) => {
-    const newSelected = selectedOptions.includes(option)
-      ? selectedOptions.filter((o) => o !== option)
-      : [...selectedOptions, option];
-    setSelectedOptions(newSelected);
-    onAnswerChange(newSelected.join(", "));
+    dispatch({ type: "TOGGLE_MULTISELECT", option });
   };
 
   // Handle option button click (for single select)
   const handleOptionClick = (option: string) => {
-    setSelectedOption(option);
-    setIsOtherSelected(false);
-    setOtherText("");
-    onAnswerChange(option);
+    dispatch({ type: "SELECT_OPTION", option });
   };
 
   // Handle "Other" checkbox toggle
   const handleOtherToggle = () => {
-    const newValue = !isOtherSelected;
-    setIsOtherSelected(newValue);
-    if (newValue) {
-      setSelectedOption(null);
-      // If there's text, keep it; otherwise clear
-      if (otherText.trim()) {
-        onAnswerChange(otherText);
-      }
-    } else {
-      setOtherText("");
-      onAnswerChange("");
-    }
+    dispatch({ type: "TOGGLE_OTHER" });
   };
 
   // Handle "Other" text change
   const handleOtherChange = (text: string) => {
-    setOtherText(text);
-    if (text.trim()) {
-      setIsOtherSelected(true);
-      setSelectedOption(null);
-      onAnswerChange(text);
-    }
+    dispatch({ type: "UPDATE_OTHER_TEXT", text });
   };
 
   // If no suggested options, render traditional input
@@ -171,7 +221,7 @@ export function QuestionCard({ question, onAnswerChange }: QuestionCardProps) {
           {question.suggestedOptions.map((option) => (
             <div key={option} className="flex items-start gap-3 p-3 rounded border hover:bg-accent/50 cursor-pointer" onClick={() => handleMultiselectToggle(option)}>
               <Checkbox
-                checked={selectedOptions.includes(option)}
+                checked={state.selectedOptions.includes(option)}
                 onCheckedChange={() => handleMultiselectToggle(option)}
                 className="mt-0.5"
               />
@@ -187,11 +237,11 @@ export function QuestionCard({ question, onAnswerChange }: QuestionCardProps) {
           {question.suggestedOptions.map((option) => (
             <Button
               key={option}
-              variant={selectedOption === option ? "default" : "outline"}
+              variant={state.selectedOption === option ? "default" : "outline"}
               onClick={() => handleOptionClick(option)}
               className="flex-1 h-auto py-3 px-4 text-left justify-start whitespace-normal"
             >
-              {selectedOption === option && (
+              {state.selectedOption === option && (
                 <Check className="h-4 w-4 mr-2 flex-shrink-0" />
               )}
               <span className="text-sm">{option}</span>
@@ -205,7 +255,7 @@ export function QuestionCard({ question, onAnswerChange }: QuestionCardProps) {
         <div className="flex items-center gap-2">
           <Checkbox
             id={`other-${question.question}`}
-            checked={isOtherSelected}
+            checked={state.isOtherSelected}
             onCheckedChange={handleOtherToggle}
           />
           <label
@@ -216,9 +266,9 @@ export function QuestionCard({ question, onAnswerChange }: QuestionCardProps) {
           </label>
         </div>
 
-        {isOtherSelected && (
+        {state.isOtherSelected && (
           <Textarea
-            value={otherText}
+            value={state.otherText}
             onChange={(e) => handleOtherChange(e.target.value)}
             placeholder={question.placeholder || "Enter your answer..."}
             className={cn("min-h-[100px] transition-all", question.autoCompleted && "border-blue-300")}

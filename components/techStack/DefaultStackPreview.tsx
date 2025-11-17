@@ -15,6 +15,22 @@ interface DefaultStackPreviewProps {
   productType?: string
 }
 
+type StackKey = keyof DefaultStackPreviewProps['stack']
+
+interface StackItem {
+  key: StackKey
+  label: string
+  fullWidth?: boolean
+}
+
+const stackItems: StackItem[] = [
+  { key: 'frontend', label: 'Frontend' },
+  { key: 'backend', label: 'Backend' },
+  { key: 'database', label: 'Database' },
+  { key: 'auth', label: 'Auth' },
+  { key: 'hosting', label: 'Hosting', fullWidth: true },
+]
+
 export function DefaultStackPreview({ stack, productType }: DefaultStackPreviewProps) {
   return (
     <Card className="p-6 border-green-200 bg-green-50">
@@ -25,31 +41,22 @@ export function DefaultStackPreview({ stack, productType }: DefaultStackPreviewP
 
       {productType && (
         <p className="text-sm text-muted-foreground mb-4">
-          Optimized for {productType.replaceAll('_', ' ')} applications
+          Optimized for {productType.replace(/_/g, ' ')} applications
         </p>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div className="flex items-center justify-between p-3 bg-white rounded-md">
-          <span className="text-sm font-medium">Frontend</span>
-          <Badge>{stack.frontend}</Badge>
-        </div>
-        <div className="flex items-center justify-between p-3 bg-white rounded-md">
-          <span className="text-sm font-medium">Backend</span>
-          <Badge>{stack.backend}</Badge>
-        </div>
-        <div className="flex items-center justify-between p-3 bg-white rounded-md">
-          <span className="text-sm font-medium">Database</span>
-          <Badge>{stack.database}</Badge>
-        </div>
-        <div className="flex items-center justify-between p-3 bg-white rounded-md">
-          <span className="text-sm font-medium">Auth</span>
-          <Badge>{stack.auth}</Badge>
-        </div>
-        <div className="flex items-center justify-between p-3 bg-white rounded-md col-span-2">
-          <span className="text-sm font-medium">Hosting</span>
-          <Badge>{stack.hosting}</Badge>
-        </div>
+        {stackItems.map((item) => (
+          <div
+            key={item.key}
+            className={`flex items-center justify-between p-3 bg-white rounded-md${
+              item.fullWidth ? ' md:col-span-2' : ''
+            }`}
+          >
+            <span className="text-sm font-medium">{item.label}</span>
+            <Badge>{stack[item.key]}</Badge>
+          </div>
+        ))}
       </div>
     </Card>
   )

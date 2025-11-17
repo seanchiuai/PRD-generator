@@ -63,8 +63,8 @@ export function TechStackCard({ option, isSelected, onSelect }: TechStackCardPro
                     Pros
                   </h5>
                   <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                    {option.pros.map((pro, i) => (
-                      <li key={i}>{pro}</li>
+                    {option.pros.map((pro) => (
+                      <li key={pro}>{pro}</li>
                     ))}
                   </ul>
                 </div>
@@ -74,8 +74,8 @@ export function TechStackCard({ option, isSelected, onSelect }: TechStackCardPro
                     Cons
                   </h5>
                   <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                    {option.cons.map((con, i) => (
-                      <li key={i}>{con}</li>
+                    {option.cons.map((con) => (
+                      <li key={con}>{con}</li>
                     ))}
                   </ul>
                 </div>

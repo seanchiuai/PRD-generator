@@ -1,6 +1,6 @@
 ---
 name: "Skill Creating"
-description: "Used to create a new skill. Used when a user wants to create a new skill "
+description: "Creates new reusable skills when requested by user. Structures skill workflow with clear instructions, examples, and optional resources."
 version: "1.0.0"
 dependencies: ["context7", "mcp-api", "python>=3.8"]
 allowed-tools: ["file_write"]
@@ -11,7 +11,7 @@ allowed-tools: ["file_write"]
 ## Instructions
 
 When requested to create a new skill, follow these steps:
-1. Create a new folder in `.claude/skills` with the skill name `xyz.md` (make name gerund form)
+1. Create a new folder in `.claude/skills/` with the skill name (e.g., `writing/`) in gerund form, then create `SKILL.md` inside that folder (e.g., `.claude/skills/writing/SKILL.md`)
 2. Take the requested input to turn into a re-usable skill
 3. Be sure to have the description field be precise and explain what it does and how to use it - 2-4 sentences max
 4. Store documentation and sample inputs/outputs in a new sub-folder there `resources/` if they exceed several lines or will be referenced for depth.
@@ -20,11 +20,14 @@ When requested to create a new skill, follow these steps:
 
 ## Examples
 
-skill.md
+### SKILL.md
+
+```yaml
 ---
 name: Generating Commit Messages
 description: Generates clear commit messages from git diffs. Use when writing commit messages or reviewing staged changes.
 ---
+```
 
 # Generating Commit Messages
 
@@ -40,7 +43,6 @@ description: Generates clear commit messages from git diffs. Use when writing co
 
 - Use present tense
 - Explain what and why, not how
-
 
 ## References
 

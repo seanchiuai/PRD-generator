@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
 import { handleAPIError, handleValidationError, handleUnauthorizedError } from "@/lib/api-error-handler";
 import { parseAIResponse } from "@/lib/parse-ai-json";
@@ -61,12 +61,12 @@ export const POST = withAuth(async (request, { userId, token }) => {
     // Build comprehensive prompt
     const userPrompt = `
 # Product Discovery Conversation
-${conversationData.messages.map((m: Message) => `${m.role}: ${m.content}`).join("\n")}
+${conversationData.messages?.map((m: Message) => `${m.role}: ${m.content}`).join("\n") || "No messages"}
 
 # Clarifying Questions & Answers
 ${conversationData.clarifyingQuestions
   ?.map((q: Question) => `Q: ${q.question}\nA: ${q.answer || "Not answered"}`)
-  .join("\n\n")}
+  .join("\n\n") || "No questions answered"}
 
 # Selected Tech Stack
 ${

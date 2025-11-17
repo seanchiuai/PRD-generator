@@ -6,7 +6,7 @@ All API routes are located in `/app/api/[feature]/[action]/route.ts`
 
 ### File Location Pattern
 
-```
+```text
 /app/api
   /conversation
     /message/route.ts              # Handle chat messages

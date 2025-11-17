@@ -1,5 +1,37 @@
 import { mutation, query } from "./_generated/server"
 import { v } from "convex/values"
+import type { MutationCtx, QueryCtx } from "./_generated/server"
+import type { Id } from "./_generated/dataModel"
+
+/**
+ * Get default workflow progress state
+ */
+function getDefaultProgress() {
+  return {
+    currentStep: "discovery" as const,
+    completedSteps: [],
+    skippedSteps: [],
+    lastUpdated: Date.now(),
+  }
+}
+
+/**
+ * Validate conversation access (auth + ownership)
+ * @throws Error if unauthorized or conversation not found
+ */
+async function validateConversationAccess(
+  ctx: MutationCtx | QueryCtx,
+  conversationId: Id<"conversations">
+) {
+  const identity = await ctx.auth.getUserIdentity()
+  if (!identity) throw new Error("Unauthorized")
+
+  const conversation = await ctx.db.get(conversationId)
+  if (!conversation) throw new Error("Conversation not found")
+  if (conversation.userId !== identity.subject) throw new Error("Unauthorized")
+
+  return conversation
+}
 
 /**
  * Update workflow progress for a conversation
@@ -18,12 +50,7 @@ export const updateProgress = mutation({
     skippedSteps: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity()
-    if (!identity) throw new Error("Unauthorized")
-
-    const conversation = await ctx.db.get(args.conversationId)
-    if (!conversation) throw new Error("Conversation not found")
-    if (conversation.userId !== identity.subject) throw new Error("Unauthorized")
+    await validateConversationAccess(ctx, args.conversationId)
 
     await ctx.db.patch(args.conversationId, {
       workflowProgress: {
@@ -51,12 +78,7 @@ export const getProgress = query({
     const conversation = await ctx.db.get(args.conversationId)
     if (!conversation || conversation.userId !== identity.subject) return null
 
-    return conversation.workflowProgress || {
-      currentStep: "discovery",
-      completedSteps: [],
-      skippedSteps: [],
-      lastUpdated: Date.now(),
-    }
+    return conversation.workflowProgress || getDefaultProgress()
   },
 })
 
@@ -67,22 +89,17 @@ export const getProgress = query({
 export const completeStep = mutation({
   args: {
     conversationId: v.id("conversations"),
-    step: v.string(),
+    step: v.union(
+      v.literal("discovery"),
+      v.literal("questions"),
+      v.literal("tech-stack"),
+      v.literal("generate")
+    ),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity()
-    if (!identity) throw new Error("Unauthorized")
+    const conversation = await validateConversationAccess(ctx, args.conversationId)
 
-    const conversation = await ctx.db.get(args.conversationId)
-    if (!conversation) throw new Error("Conversation not found")
-    if (conversation.userId !== identity.subject) throw new Error("Unauthorized")
-
-    const currentProgress = conversation.workflowProgress || {
-      currentStep: "discovery",
-      completedSteps: [],
-      skippedSteps: [],
-      lastUpdated: Date.now(),
-    }
+    const currentProgress = conversation.workflowProgress || getDefaultProgress()
 
     // Add step to completedSteps if not already there
     const completedSteps = currentProgress.completedSteps.includes(args.step)
@@ -108,22 +125,17 @@ export const completeStep = mutation({
 export const skipStep = mutation({
   args: {
     conversationId: v.id("conversations"),
-    step: v.string(),
+    step: v.union(
+      v.literal("discovery"),
+      v.literal("questions"),
+      v.literal("tech-stack"),
+      v.literal("generate")
+    ),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity()
-    if (!identity) throw new Error("Unauthorized")
+    const conversation = await validateConversationAccess(ctx, args.conversationId)
 
-    const conversation = await ctx.db.get(args.conversationId)
-    if (!conversation) throw new Error("Conversation not found")
-    if (conversation.userId !== identity.subject) throw new Error("Unauthorized")
-
-    const currentProgress = conversation.workflowProgress || {
-      currentStep: "discovery",
-      completedSteps: [],
-      skippedSteps: [],
-      lastUpdated: Date.now(),
-    }
+    const currentProgress = conversation.workflowProgress || getDefaultProgress()
 
     // Add step to skippedSteps if not already there
     const skippedSteps = currentProgress.skippedSteps.includes(args.step)

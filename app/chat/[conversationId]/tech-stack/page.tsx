@@ -15,6 +15,7 @@ import { Sparkles } from "lucide-react";
 import { trackTechStackSkip } from "@/lib/analytics/techStackEvents";
 import { detectProductType } from "@/lib/techStack/defaults";
 import { logger } from "@/lib/logger";
+import { TIMEOUTS } from "@/lib/constants";
 import type { ValidationWarning, TechOption } from "@/types";
 
 export default function TechStackPage() {
@@ -97,7 +98,9 @@ export default function TechStackPage() {
   }, [isAutoSelected, conversation?.selection, showCountdown, hasExistingResults]);
 
   const validateSelections = useCallback(async (currentSelections: Record<string, string>) => {
-    if (Object.keys(currentSelections).length < 2) return;
+    // Require at least 2 selections for meaningful compatibility validation
+    const MIN_SELECTIONS_FOR_VALIDATION = 2;
+    if (Object.keys(currentSelections).length < MIN_SELECTIONS_FOR_VALIDATION) return;
 
     // Abort previous validation request
     if (validationAbortController) {
@@ -220,9 +223,31 @@ export default function TechStackPage() {
     setSelections(newSelections);
 
     try {
-      // Save to Convex
+      // Save to Convex - validate and extract options
       const categoryData = conversation?.researchResults?.[category as keyof typeof conversation.researchResults];
-      const options = (Array.isArray(categoryData) ? categoryData : (categoryData?.options || [])) as TechOption[];
+
+      // Type guard for TechOption
+      const isValidTechOption = (obj: unknown): obj is TechOption => {
+        return (
+          typeof obj === 'object' &&
+          obj !== null &&
+          'name' in obj &&
+          typeof (obj as TechOption).name === 'string'
+        );
+      };
+
+      // Extract and validate options
+      const rawOptions = Array.isArray(categoryData) ? categoryData : (categoryData?.options || []);
+      const options = rawOptions.filter(isValidTechOption);
+
+      if (options.length === 0) {
+        logger.warn("TechStackPage.handleSelection", "No valid options found", {
+          category,
+          conversationId,
+        });
+        return;
+      }
+
       await saveSelection({
         conversationId,
         category,
@@ -289,8 +314,8 @@ export default function TechStackPage() {
           description: `${techStack.frontend}, ${techStack.backend}, ${techStack.database}`,
         });
 
-        // Add 1.5 second delay to show toast
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // Add delay to show toast
+        await new Promise(resolve => setTimeout(resolve, TIMEOUTS.TOAST_BEFORE_NAVIGATION));
 
         // Navigate directly to generate
         router.push(`/chat/${conversationId}/generate`);
@@ -371,6 +396,7 @@ export default function TechStackPage() {
 
   const selectedCount = Object.keys(selections).length;
   const hasErrors = validationWarnings.some((w) => w.level === "error");
+  const isNextButtonDisabled = isResearching || isValidating || hasErrors || selectedCount < categories.length || !hasExistingResults;
 
   return (
     <WorkflowLayout
@@ -387,7 +413,7 @@ export default function TechStackPage() {
       onBack={() => router.push(`/chat/${conversationId}/questions`)}
       onNext={handleContinue}
       nextButtonText={isValidating ? "Validating..." : "Generate PRD"}
-      nextButtonDisabled={isResearching || isValidating || hasErrors || selectedCount < categories.length || !hasExistingResults}
+      nextButtonDisabled={isNextButtonDisabled}
     >
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}

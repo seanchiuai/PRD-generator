@@ -25,7 +25,8 @@ function RedirectToDashboard() {
 
   useEffect(() => {
     router.push('/dashboard');
-  }, [router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
@@ -257,7 +258,7 @@ function LandingPage() {
                 <span className="font-display text-sm font-semibold text-muted-foreground">VIBED</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                © 2024 VIBED. AI-Powered PRD Generation.
+                © {new Date().getFullYear()} VIBED. AI-Powered PRD Generation.
               </p>
             </div>
           </div>

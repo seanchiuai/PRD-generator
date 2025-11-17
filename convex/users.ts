@@ -35,7 +35,7 @@ export const store = mutation({
     // Create new user
     return await ctx.db.insert("users", {
       clerkId: identity.subject,
-      email: identity.email ?? "",
+      email: identity.email ?? undefined,
       name: identity.name,
       imageUrl: identity.pictureUrl,
       createdAt: Date.now(),

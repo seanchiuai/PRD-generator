@@ -1,30 +1,38 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, paginationOptsValidator } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 
 export const list = query({
   args: {
     search: v.optional(v.string()),
+    paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return [];
+    if (!identity) {
+      return {
+        page: [],
+        isDone: true,
+        continueCursor: null as string | null,
+      };
+    }
 
-    let prds = await ctx.db
+    // Use pagination to limit the number of PRDs fetched
+    const result = await ctx.db
       .query("prds")
       .withIndex("by_user", (q) => q.eq("userId", identity.subject))
       .order("desc")
-      .collect();
+      .paginate(args.paginationOpts);
 
-    // Client-side search filter (Convex doesn't have full-text search)
+    // Client-side search filter (applied after pagination)
     if (args.search) {
       const searchLower = args.search.toLowerCase();
-      prds = prds.filter((prd) =>
+      result.page = result.page.filter((prd) =>
         prd.productName.toLowerCase().includes(searchLower)
       );
     }
 
-    return prds;
+    return result;
   },
 });
 
@@ -56,6 +64,14 @@ export const deletePRD = mutation({
     const prd = await ctx.db.get(args.prdId);
     if (!prd || prd.userId !== identity.subject) {
       throw new Error("Unauthorized");
+    }
+
+    // Clear prdId reference in any associated conversation
+    if (prd.conversationId) {
+      const conversation = await ctx.db.get(prd.conversationId);
+      if (conversation && conversation.prdId === args.prdId) {
+        await ctx.db.patch(prd.conversationId, { prdId: undefined });
+      }
     }
 
     await ctx.db.delete(args.prdId);

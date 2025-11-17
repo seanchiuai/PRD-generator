@@ -20,18 +20,22 @@ export function WorkflowProgress({
 }: WorkflowProgressProps) {
   return (
     <div className="w-full bg-white dark:bg-gray-900 border-b">
-      <DesktopWorkflow
-        currentStep={currentStep}
-        completedSteps={completedSteps}
-        conversationId={conversationId}
-        onStepClick={onStepClick}
-      />
-      <MobileWorkflow
-        currentStep={currentStep}
-        completedSteps={completedSteps}
-        conversationId={conversationId}
-        onStepClick={onStepClick}
-      />
+      <div className="hidden md:block">
+        <DesktopWorkflow
+          currentStep={currentStep}
+          completedSteps={completedSteps}
+          conversationId={conversationId}
+          onStepClick={onStepClick}
+        />
+      </div>
+      <div className="block md:hidden">
+        <MobileWorkflow
+          currentStep={currentStep}
+          completedSteps={completedSteps}
+          conversationId={conversationId}
+          onStepClick={onStepClick}
+        />
+      </div>
     </div>
   );
 }

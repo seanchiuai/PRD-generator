@@ -19,8 +19,32 @@ export const POST = withAuth(async (request, { userId }) => {
       return handleValidationError("Project name and description are required");
     }
 
+    // Validate input lengths
+    if (projectName.length > 100) {
+      return handleValidationError("Project name must be 100 characters or less");
+    }
+    if (projectDescription.length > 2000) {
+      return handleValidationError("Project description must be 2000 characters or less");
+    }
+
+    // Sanitize inputs: trim, remove control characters, collapse whitespace
+    const sanitizedName = projectName
+      .trim()
+      .replace(/[\x00-\x1F\x7F]/g, '') // Remove control characters
+      .replace(/\s+/g, ' '); // Collapse multiple whitespace
+
+    const sanitizedDescription = projectDescription
+      .trim()
+      .replace(/[\x00-\x1F\x7F]/g, '') // Remove control characters
+      .replace(/\s+/g, ' '); // Collapse multiple whitespace
+
+    // Validate after sanitization
+    if (!sanitizedName || !sanitizedDescription) {
+      return handleValidationError("Project name and description cannot be empty after sanitization");
+    }
+
     // Create a user message that provides the project context
-    const contextMessage = `My app will be called "${projectName}". Here's the initial description: ${projectDescription}`;
+    const contextMessage = `My app will be called "${sanitizedName}". Here's the initial description: ${sanitizedDescription}`;
 
     // Call Claude API to generate the initial discovery message
     const response = await anthropic.messages.create({
@@ -40,9 +64,21 @@ export const POST = withAuth(async (request, { userId }) => {
       throw new Error("Unexpected response type");
     }
 
+    // Monitor token usage and warn if approaching limits
+    const tokenUsagePercentage = (response.usage.output_tokens / TOKEN_LIMITS.CONVERSATION) * 100;
+    if (tokenUsagePercentage > 80) {
+      logger.warn("Initial Message", "High token usage detected", {
+        userId,
+        usage: response.usage,
+        limit: TOKEN_LIMITS.CONVERSATION,
+        percentage: tokenUsagePercentage.toFixed(1),
+      });
+    }
+
     logger.info("Initial Message Generated", "Generated discovery greeting", {
       userId,
       projectName,
+      tokenUsage: response.usage,
     });
 
     return NextResponse.json({

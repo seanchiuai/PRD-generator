@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { WorkflowLayout } from "@/components/workflow/WorkflowLayout";
 import { Download } from "lucide-react";
 import { logger } from "@/lib/logger";
+import type { PRDData } from "@/types";
 
 export default function GeneratePage() {
   const params = useParams();
@@ -24,7 +25,7 @@ export default function GeneratePage() {
   const createPRD = useMutation(api.prds.create);
 
   const [isGenerating, setIsGenerating] = useState(false);
-  const [prd, setPrd] = useState<any>(null);
+  const [prd, setPrd] = useState<PRDData | null>(null);
   const [generationSteps, setGenerationSteps] = useState<Array<{ name: string; status: "pending" | "in_progress" | "completed" }>>([
     { name: "Analyzing conversation data", status: "pending" },
     { name: "Extracting product requirements", status: "pending" },

@@ -1,3 +1,12 @@
+interface AuthProvider {
+  domain: string
+  applicationID: string
+}
+
+interface AuthConfig {
+  providers: AuthProvider[]
+}
+
 if (!process.env.CLERK_JWT_ISSUER_DOMAIN) {
   throw new Error(
     "CLERK_JWT_ISSUER_DOMAIN environment variable is required. " +
@@ -6,7 +15,7 @@ if (!process.env.CLERK_JWT_ISSUER_DOMAIN) {
   );
 }
 
-const authConfig = {
+const authConfig: AuthConfig = {
   providers: [
     {
       // Replace with your own Clerk Issuer URL from your "convex" JWT template

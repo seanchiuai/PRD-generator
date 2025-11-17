@@ -73,7 +73,34 @@ export default function QuestionsPage() {
     if (!conversation) return;
 
     if (conversation.clarifyingQuestions) {
-      setQuestions(conversation.clarifyingQuestions as Question[]);
+      // Validate questions structure before setting
+      const rawQuestions = conversation.clarifyingQuestions;
+      if (
+        Array.isArray(rawQuestions) &&
+        rawQuestions.every(
+          (q) =>
+            q &&
+            typeof q === "object" &&
+            "id" in q &&
+            "question" in q &&
+            typeof q.id === "string" &&
+            typeof q.question === "string"
+        )
+      ) {
+        setQuestions(rawQuestions as Question[]);
+      } else {
+        logger.error(
+          "QuestionsPage.invalidQuestionsStructure",
+          new Error("Invalid questions structure"),
+          { conversationId }
+        );
+        toast({
+          title: "Error",
+          description: "Invalid questions data. Please try regenerating.",
+          variant: "destructive",
+        });
+        setQuestions([]);
+      }
     } else if (!hasGeneratedRef.current) {
       hasGeneratedRef.current = true;
       generateQuestions();
@@ -85,7 +112,10 @@ export default function QuestionsPage() {
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [conversation, generateQuestions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Note: generateQuestions is intentionally excluded to prevent re-generation loops
+    // The ref (hasGeneratedRef) ensures it only runs once
+  }, [conversation, conversationId, toast]);
 
   const handleAnswerChange = async (questionId: string, answer: string) => {
     const updatedQuestions = questions.map((q) =>
@@ -132,6 +162,12 @@ export default function QuestionsPage() {
   };
 
   const handleSkip = async () => {
+    // Clear any pending auto-save
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
+
     setIsSkipping(true);
     try {
       const answeredCount = questions.filter((q) => q.answer?.trim()).length;

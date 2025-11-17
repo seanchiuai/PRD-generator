@@ -60,6 +60,7 @@ npm install
    ```bash
    npx convex dev
    ```
+
    - When prompted, select "Create a new project"
    - Enter your project name
    - This will create a `.env.local` file with your Convex deployment URL
@@ -162,26 +163,31 @@ npm run dev:backend
 ## Troubleshooting
 
 ### "Missing Clerk Publishable Key" Error
+
 - Ensure `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` is set in `.env.local`
 - Restart the Next.js dev server after adding environment variables
 
 ### "Convex client not configured" Error
+
 - Ensure `NEXT_PUBLIC_CONVEX_URL` is set correctly in `.env.local`
 - Check that your Convex dev server is running: `npm run dev:backend`
 - Verify your internet connection
 
 ### Authentication Not Working
+
 - Verify the JWT template in Clerk is named exactly "convex"
 - Check that `CLERK_JWT_ISSUER_DOMAIN` is set in Convex Dashboard environment variables
 - Ensure `convex/auth.config.ts` has the correct domain
 - Check that you're using the correct Clerk publishable key and secret key
 
 ### Build Errors
+
 - Run `npm run lint` to check for linting issues
 - Ensure all environment variables are set
 - Clear the `.next` cache: `rm -rf .next` and rebuild
 
 ### Middleware Issues
+
 - Check `middleware.ts` configuration
 - Ensure protected routes are properly configured
 - Verify Clerk middleware is correctly set up
@@ -191,6 +197,7 @@ npm run dev:backend
 ### Deploy to Vercel
 
 1. **Push to GitHub**
+
    ```bash
    git push origin main
    ```
@@ -219,6 +226,7 @@ npm run dev:backend
    - Convex will automatically deploy when you push to main
 
 2. **Manual Deploy**
+
    ```bash
    npx convex deploy --prod
    ```
@@ -249,7 +257,7 @@ For production:
 
 ## Project Structure
 
-```
+```text
 ├── app/                 # Next.js pages and layouts (App Router)
 │   ├── layout.tsx       # Root layout with ClerkProvider
 │   └── ...
@@ -296,6 +304,6 @@ Once your setup is complete, you can:
 
 ---
 
-**Happy coding! 🎉**
+## Happy coding! 🎉
 
 For questions or issues, please open a GitHub issue or check the documentation links above.

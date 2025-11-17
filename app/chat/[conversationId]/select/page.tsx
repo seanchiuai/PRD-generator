@@ -8,16 +8,38 @@ import { useToast } from "@/hooks/use-toast";
 export default function SelectRedirectPage() {
   const params = useParams();
   const router = useRouter();
-  const conversationId = params.conversationId as Id<"conversations">;
   const { toast } = useToast();
 
+  // Validate conversationId parameter
+  const conversationId = params?.conversationId;
+
   useEffect(() => {
+    // Validate conversationId exists and is a string
+    if (!conversationId || typeof conversationId !== 'string' || conversationId.trim() === '') {
+      toast({
+        title: "Invalid Conversation",
+        description: "Conversation ID is missing or invalid. Redirecting to dashboard.",
+        variant: "destructive",
+      });
+      router.replace('/dashboard');
+      return;
+    }
+
+    // Type assert after validation
+    const validConversationId = conversationId as Id<"conversations">;
+
     toast({
       title: "Page Updated",
       description: "Research and Selection have been merged into a single Tech Stack page.",
     });
-    router.replace(`/chat/${conversationId}/tech-stack`);
-  }, [conversationId, router, toast]);
+    router.replace(`/chat/${validConversationId}/tech-stack`);
+  }, [conversationId, router]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+  // Early return if no conversationId
+  if (!conversationId) {
+    return null;
+  }
 
   return (
     <div className="container mx-auto py-8 flex items-center justify-center min-h-screen">

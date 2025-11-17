@@ -18,28 +18,13 @@ class Logger {
    * Logs an error with context and metadata
    */
   error(context: string, error: unknown, metadata?: LogMetadata): void {
-    const timestamp = new Date().toISOString();
     const errorMessage = error instanceof Error ? error.message : String(error);
     const errorStack = error instanceof Error ? error.stack : undefined;
 
-    if (this.isDevelopment) {
-      console.error(`[ERROR] [${timestamp}] ${context}:`, {
-        message: errorMessage,
-        stack: errorStack,
-        ...metadata,
-      });
-    } else {
-      // In production, send to logging service
-      // Example: Sentry.captureException(error, { tags: { context }, extra: metadata });
-      console.error(JSON.stringify({
-        level: "error",
-        timestamp,
-        context,
-        message: errorMessage,
-        stack: errorStack,
-        ...metadata,
-      }));
-    }
+    this.log("error", context, errorMessage, {
+      stack: errorStack,
+      ...metadata,
+    });
   }
 
   /**

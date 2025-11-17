@@ -62,7 +62,7 @@ export default function ChatPage() {
     const trimmedContent = content.trim();
 
     try {
-      // Add user message to Convex
+      // Add user message to Convex and wait for completion
       await addMessage({
         conversationId,
         role: "user",
@@ -71,15 +71,12 @@ export default function ChatPage() {
 
       setIsTyping(true);
 
-      // Call API for Claude response
+      // Call API for Claude response - server will fetch authoritative message list
       const response = await fetch("/api/conversation/message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: [
-            ...conversation.messages,
-            { role: "user", content: trimmedContent, timestamp: Date.now() },
-          ],
+          conversationId,
         }),
       });
 

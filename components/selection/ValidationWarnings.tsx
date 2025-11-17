@@ -22,8 +22,8 @@ export function ValidationWarnings({ warnings }: ValidationWarningsProps) {
 
   return (
     <div className="space-y-3">
-      {errors.map((error, index) => (
-        <Alert key={`error-${index}`} variant="destructive">
+      {errors.map((error) => (
+        <Alert key={`${error.message}::${error.affectedTechnologies.join('|')}`} variant="destructive">
           <XCircle className="h-4 w-4" />
           <AlertTitle>Incompatible Combination</AlertTitle>
           <AlertDescription>
@@ -38,8 +38,8 @@ export function ValidationWarnings({ warnings }: ValidationWarningsProps) {
         </Alert>
       ))}
 
-      {warningsOnly.map((warning, index) => (
-        <Alert key={`warning-${index}`} className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
+      {warningsOnly.map((warning) => (
+        <Alert key={`${warning.message}::${warning.affectedTechnologies.join('|')}`} className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
           <AlertTriangle className="h-4 w-4 text-yellow-600" />
           <AlertTitle className="text-yellow-900 dark:text-yellow-100">
             Consider This

@@ -6,7 +6,7 @@ import { ReactNode } from 'react'
 interface PageTransitionProps {
   children: ReactNode
   className?: string
-  pageKey?: string
+  pageKey: string
 }
 
 export function PageTransition({ children, className, pageKey }: PageTransitionProps) {

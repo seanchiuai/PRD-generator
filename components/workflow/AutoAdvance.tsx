@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -23,6 +23,20 @@ export function AutoAdvance({
 }: AutoAdvanceProps) {
   const [countdown, setCountdown] = useState(delaySeconds)
   const [isPaused, setIsPaused] = useState(false)
+  const onAdvanceRef = useRef(onAdvance)
+
+  // Keep ref up to date
+  useEffect(() => {
+    onAdvanceRef.current = onAdvance
+  }, [onAdvance])
+
+  // Reset countdown when enabled changes to true
+  useEffect(() => {
+    if (enabled) {
+      setCountdown(delaySeconds)
+      setIsPaused(false)
+    }
+  }, [enabled, delaySeconds])
 
   useEffect(() => {
     if (!enabled || isPaused) return undefined
@@ -35,10 +49,10 @@ export function AutoAdvance({
       return () => clearTimeout(timer)
     } else {
       // Countdown finished, advance
-      onAdvance()
+      onAdvanceRef.current()
     }
     return undefined
-  }, [enabled, countdown, isPaused, onAdvance])
+  }, [enabled, countdown, isPaused])
 
   const handlePause = () => {
     setIsPaused(true)
@@ -47,7 +61,7 @@ export function AutoAdvance({
 
   if (!enabled || isPaused) return null
 
-  const progressPercent = ((delaySeconds - countdown) / delaySeconds) * 100
+  const progressPercent = delaySeconds > 0 ? ((delaySeconds - countdown) / delaySeconds) * 100 : 100
 
   return (
     <Card className="fixed bottom-8 right-8 p-6 max-w-sm shadow-xl border-blue-200 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950 dark:to-gray-900 dark:border-blue-800 z-50">

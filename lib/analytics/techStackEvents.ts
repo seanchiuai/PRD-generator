@@ -72,8 +72,6 @@ export function trackTechStackSelection(data: {
 
 export function trackDefaultStackModified(data: {
   conversationId: string
-  originalStack: any
-  modifiedStack: any
   changedFields: string[]
 }) {
   if (typeof window !== 'undefined' && (window as any).analytics) {

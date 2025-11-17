@@ -56,34 +56,29 @@ export function WorkflowLayout({
             completedSteps={completedSteps}
             conversationId={conversationId}
           />
-          {showSkipButton && onSkip && (
-            <div className="absolute top-4 right-4 hidden md:block">
-              <SkipButton
-                onSkip={onSkip}
-                buttonText={skipButtonText}
-                loading={skipButtonLoading}
-                disabled={skipButtonDisabled}
-                disabledMessage={skipButtonDisabledMessage}
-                confirmMessage={skipConfirmMessage}
-                confirmTitle={skipConfirmTitle}
-              />
-            </div>
-          )}
+          {showSkipButton && onSkip && (() => {
+            const skipButtonProps = {
+              onSkip,
+              buttonText: skipButtonText,
+              loading: skipButtonLoading,
+              disabled: skipButtonDisabled,
+              disabledMessage: skipButtonDisabledMessage,
+              confirmMessage: skipConfirmMessage,
+              confirmTitle: skipConfirmTitle,
+            };
+
+            return (
+              <>
+                <div className="absolute top-4 right-4 hidden md:block">
+                  <SkipButton {...skipButtonProps} />
+                </div>
+                <div className="md:hidden px-4 pb-3 absolute top-4 right-4 md:relative md:top-0 md:right-0">
+                  <SkipButton {...skipButtonProps} />
+                </div>
+              </>
+            );
+          })()}
         </div>
-        {/* Mobile skip button */}
-        {showSkipButton && onSkip && (
-          <div className="md:hidden px-4 pb-3">
-            <SkipButton
-              onSkip={onSkip}
-              buttonText={skipButtonText}
-              loading={skipButtonLoading}
-              disabled={skipButtonDisabled}
-              disabledMessage={skipButtonDisabledMessage}
-              confirmMessage={skipConfirmMessage}
-              confirmTitle={skipConfirmTitle}
-            />
-          </div>
-        )}
       </header>
 
       {/* Main content */}

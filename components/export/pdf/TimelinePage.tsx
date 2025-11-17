@@ -20,13 +20,13 @@ export function TimelinePage({ prd, pageNumber = 5 }: TimelinePageProps) {
           Estimated Duration: {prd.timeline.estimatedDuration}
         </Text>
 
-        {prd.timeline.phases.map((phase, i) => (
-          <View key={i} style={{ marginTop: 10 }}>
+        {prd.timeline.phases.map((phase) => (
+          <View key={`${phase.name}-${phase.duration}`} style={{ marginTop: 10 }}>
             <Text style={pdfStyles.subsectionTitle}>
               {phase.name} ({phase.duration})
             </Text>
-            {phase.deliverables.map((deliverable, j) => (
-              <Text key={j} style={pdfStyles.bulletPoint}>
+            {phase.deliverables.map((deliverable, index) => (
+              <Text key={`${phase.name}-deliverable-${index}-${deliverable.substring(0, 20)}`} style={pdfStyles.bulletPoint}>
                 • {deliverable}
               </Text>
             ))}
@@ -36,8 +36,8 @@ export function TimelinePage({ prd, pageNumber = 5 }: TimelinePageProps) {
 
       <View style={pdfStyles.section}>
         <Text style={pdfStyles.sectionTitle}>Risks & Mitigation</Text>
-        {prd.risks.map((risk, i) => (
-          <View key={i} style={{ marginBottom: 10 }}>
+        {prd.risks.map((risk) => (
+          <View key={`${risk.category}-${risk.description.substring(0, 30)}`} style={{ marginBottom: 10 }}>
             <Text style={pdfStyles.subsectionTitle}>
               {risk.category}: {risk.description}
             </Text>

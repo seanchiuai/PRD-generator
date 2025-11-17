@@ -22,16 +22,11 @@ function extractJSON(text: string): string | null {
     const arrayStart = trimmed.indexOf('[');
 
     let startIndex = -1;
-    let endChar = '';
 
     if (objectStart !== -1 && (arrayStart === -1 || objectStart < arrayStart)) {
       startIndex = objectStart;
-      startChar as '{';
-      endChar = '}';
     } else if (arrayStart !== -1) {
       startIndex = arrayStart;
-      startChar as '[';
-      endChar = ']';
     } else {
       return null;
     }
@@ -75,7 +70,6 @@ function extractJSON(text: string): string | null {
   }
 
   // JSON starts at the beginning
-  const endChar = startChar === '{' ? '}' : ']';
   let depth = 0;
   let inString = false;
   let escapeNext = false;

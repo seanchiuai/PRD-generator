@@ -8,16 +8,27 @@ import { useToast } from "@/hooks/use-toast";
 export default function ResearchRedirectPage() {
   const params = useParams();
   const router = useRouter();
-  const conversationId = params.conversationId as Id<"conversations">;
   const { toast } = useToast();
 
   useEffect(() => {
+    if (!params.conversationId || typeof params.conversationId !== "string") {
+      toast({
+        title: "Error",
+        description: "Invalid conversation ID",
+        variant: "destructive",
+      });
+      router.replace("/");
+      return;
+    }
+
+    const conversationId = params.conversationId as Id<"conversations">;
+
     toast({
       title: "Page Updated",
       description: "Research and Selection have been merged into a single Tech Stack page.",
     });
     router.replace(`/chat/${conversationId}/tech-stack`);
-  }, [conversationId, router, toast]);
+  }, [params.conversationId, router, toast]);
 
   return (
     <div className="container mx-auto py-8 flex items-center justify-center min-h-screen">

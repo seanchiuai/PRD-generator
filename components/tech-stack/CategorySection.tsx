@@ -16,6 +16,7 @@ interface CategorySectionProps {
   isLoading?: boolean;
   error?: string;
   onRetry?: () => void;
+  expectedOptionsCount?: number;
 }
 
 function CategorySkeleton() {
@@ -53,6 +54,7 @@ export function CategorySection({
   isLoading = false,
   error,
   onRetry,
+  expectedOptionsCount = 3,
 }: CategorySectionProps) {
   return (
     <div className="space-y-4">
@@ -72,10 +74,10 @@ export function CategorySection({
 
       {/* Loading State */}
       {isLoading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <CategorySkeleton />
-          <CategorySkeleton />
-          <CategorySkeleton />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {Array.from({ length: expectedOptionsCount }).map((_, i) => (
+            <CategorySkeleton key={`skeleton-${i}`} />
+          ))}
         </div>
       )}
 

@@ -118,6 +118,9 @@ export const TIMEOUTS = {
 
   /** Toast notification duration */
   TOAST_DURATION: 5000,
+
+  /** Delay before navigation to show toast */
+  TOAST_BEFORE_NAVIGATION: 1500,
 } as const;
 
 // ============================================================================
@@ -149,16 +152,30 @@ export const VALIDATION_RULES = {
 // ============================================================================
 
 /**
+ * Sanitizes a product name for use in filenames
+ * - Removes special characters
+ * - Collapses multiple underscores
+ * - Trims leading/trailing underscores
+ */
+export function sanitizeForFilename(productName: string): string {
+  return (productName || "unnamed_product")
+    .trim()
+    .replace(/[^a-zA-Z0-9_-]/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_|_$/g, "");
+}
+
+/**
  * Export file naming patterns
  */
 export const EXPORT_PATTERNS = {
   /** JSON file name pattern: {productName}_PRD_{timestamp}.json */
   JSON_FILENAME: (productName: string) =>
-    `${(productName || "unnamed_product").trim().replace(/[^a-zA-Z0-9_-]/g, "_").replace(/_+/g, "_").replace(/^_|_$/g, "")}_PRD_${Date.now()}.json`,
+    `${sanitizeForFilename(productName)}_PRD_${Date.now()}.json`,
 
   /** PDF file name pattern: {productName}_PRD_{timestamp}.pdf */
   PDF_FILENAME: (productName: string) =>
-    `${(productName || "unnamed_product").trim().replace(/[^a-zA-Z0-9_-]/g, "_").replace(/_+/g, "_").replace(/^_|_$/g, "")}_PRD_${Date.now()}.pdf`,
+    `${sanitizeForFilename(productName)}_PRD_${Date.now()}.pdf`,
 } as const;
 
 // ============================================================================

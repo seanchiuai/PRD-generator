@@ -17,23 +17,31 @@ export function ArchitecturePage({ prd, pageNumber = 4 }: ArchitecturePageProps)
       <View style={pdfStyles.section}>
         <Text style={pdfStyles.sectionTitle}>System Design</Text>
         <Text style={pdfStyles.text}>
-          {prd.technicalArchitecture.systemDesign}
+          {prd.technicalArchitecture?.systemDesign || 'Not specified'}
         </Text>
       </View>
 
       <View style={pdfStyles.section}>
         <Text style={pdfStyles.sectionTitle}>Data Models</Text>
-        {prd.technicalArchitecture.dataModels.map((model) => (
-          <View key={model.entityName} style={pdfStyles.dataModel}>
-            <Text style={pdfStyles.subsectionTitle}>{model.entityName}</Text>
-            <Text style={pdfStyles.text}>{model.description}</Text>
-            {model.fields.map((field) => (
-              <Text key={field.name} style={pdfStyles.fieldItem}>
-                - {field.name}: {field.type} {field.required ? "*" : ""}
-              </Text>
-            ))}
-          </View>
-        ))}
+        {Array.isArray(prd.technicalArchitecture?.dataModels) && prd.technicalArchitecture.dataModels.length > 0 ? (
+          prd.technicalArchitecture.dataModels.map((model) => (
+            <View key={model.entityName || 'unnamed'} style={pdfStyles.dataModel}>
+              <Text style={pdfStyles.subsectionTitle}>{model.entityName || 'Unnamed Entity'}</Text>
+              <Text style={pdfStyles.text}>{model.description || 'No description'}</Text>
+              {Array.isArray(model.fields) && model.fields.length > 0 ? (
+                model.fields.map((field) => (
+                  <Text key={field.name || 'unnamed-field'} style={pdfStyles.fieldItem}>
+                    - {field.name || 'unnamed'}: {field.type || 'unknown'} {field.required ? "*" : ""}
+                  </Text>
+                ))
+              ) : (
+                <Text style={pdfStyles.text}>No fields defined</Text>
+              )}
+            </View>
+          ))
+        ) : (
+          <Text style={pdfStyles.text}>No data models defined</Text>
+        )}
       </View>
 
       <PDFFooter pageNumber={pageNumber} productName={prd.projectOverview.productName} />

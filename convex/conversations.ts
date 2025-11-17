@@ -11,7 +11,15 @@ function mergeCompletedSteps(
   const stepOrder = ["setup", "discovery", "questions", "research", "selection", "generate"];
   // Remove duplicates and sort by defined order
   const uniqueSteps = Array.from(new Set(allSteps));
-  return uniqueSteps.sort((a, b) => stepOrder.indexOf(a) - stepOrder.indexOf(b));
+  return uniqueSteps.sort((a, b) => {
+    const aIndex = stepOrder.indexOf(a);
+    const bIndex = stepOrder.indexOf(b);
+    // Handle steps not in stepOrder by placing them at the end
+    if (aIndex === -1 && bIndex === -1) return a.localeCompare(b); // Stable sort for unknown steps
+    if (aIndex === -1) return 1;
+    if (bIndex === -1) return -1;
+    return aIndex - bIndex;
+  });
 }
 
 export const create = mutation({

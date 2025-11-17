@@ -27,6 +27,13 @@ export const convexClient = new ConvexHttpClient(
   process.env.NEXT_PUBLIC_CONVEX_URL
 );
 
+// Emit deprecation warning when module is loaded
+if (typeof console !== 'undefined' && console.warn) {
+  console.warn(
+    '[DEPRECATED] convexClient export is deprecated. Use getAuthenticatedConvexClient() instead for authenticated routes. This ensures proper authentication context and security.'
+  );
+}
+
 /**
  * Get an authenticated Convex client with Clerk JWT token
  *

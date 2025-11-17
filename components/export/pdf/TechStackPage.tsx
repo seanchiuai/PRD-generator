@@ -1,5 +1,5 @@
 import { Page, Text, View } from "@react-pdf/renderer";
-import type { PRDData, TechStackItem } from "@/types";
+import type { PRDData } from "@/types";
 import { pdfStyles } from "./styles";
 import { PDFHeader } from "./PDFHeader";
 import { PDFFooter } from "./PDFFooter";
@@ -9,6 +9,13 @@ interface TechStackPageProps {
   pageNumber?: number;
 }
 
+const formatKey = (key: string): string => {
+  return key
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (str) => str.toUpperCase())
+    .trim();
+};
+
 export function TechStackPage({ prd, pageNumber = 2 }: TechStackPageProps) {
   return (
     <Page size="A4" style={pdfStyles.page}>
@@ -16,12 +23,12 @@ export function TechStackPage({ prd, pageNumber = 2 }: TechStackPageProps) {
 
       {Object.entries(prd.techStack)
         .filter(([key]) => key !== "reasoning")
+        .filter(([, value]) => typeof value !== "string")
         .map(([key, value]) => {
-          if (typeof value === "string") return null;
           return (
             <View key={key} style={pdfStyles.section}>
               <Text style={pdfStyles.sectionTitle}>
-                {key.charAt(0).toUpperCase() + key.slice(1)}
+                {formatKey(key)}
               </Text>
               <Text style={pdfStyles.subsectionTitle}>{value.name}</Text>
               <Text style={pdfStyles.text}>{value.purpose}</Text>

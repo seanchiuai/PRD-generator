@@ -9,6 +9,12 @@ import { logger } from '@/lib/logger'
 
 export type WorkflowStep = 'discovery' | 'questions' | 'research' | 'selection' | 'generate'
 
+const WORKFLOW_STEPS: WorkflowStep[] = ['discovery', 'questions', 'research', 'selection', 'generate']
+
+function arraysEqual<T>(a: T[], b: T[]): boolean {
+  return a.length === b.length && a.every((val, idx) => val === b[idx])
+}
+
 interface WorkflowState {
   currentStep: WorkflowStep
   completedSteps: WorkflowStep[]
@@ -59,8 +65,8 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
         // Only update if values have changed
         if (
           prev.currentStep === progress.currentStep &&
-          JSON.stringify(prev.completedSteps) === JSON.stringify(progress.completedSteps) &&
-          JSON.stringify(prev.skippedSteps) === JSON.stringify(progress.skippedSteps)
+          arraysEqual(prev.completedSteps, progress.completedSteps as WorkflowStep[]) &&
+          arraysEqual(prev.skippedSteps, progress.skippedSteps as WorkflowStep[])
         ) {
           return prev
         }
@@ -136,11 +142,10 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
   }
 
   const advanceToNextStep = async () => {
-    const steps: WorkflowStep[] = ['discovery', 'questions', 'research', 'selection', 'generate']
-    const currentIndex = steps.indexOf(state.currentStep)
+    const currentIndex = WORKFLOW_STEPS.indexOf(state.currentStep)
 
-    if (currentIndex < steps.length - 1) {
-      const nextStep = steps[currentIndex + 1]
+    if (currentIndex < WORKFLOW_STEPS.length - 1) {
+      const nextStep = WORKFLOW_STEPS[currentIndex + 1]
       const newCompletedSteps = state.completedSteps.includes(state.currentStep)
         ? state.completedSteps
         : [...state.completedSteps, state.currentStep]
@@ -174,8 +179,6 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
 
   const goToStep = async (step: WorkflowStep) => {
     if (canNavigateToStep(step)) {
-      setState(prev => ({ ...prev, currentStep: step }))
-
       if (conversationId) {
         // Await the promise and handle errors
         try {
@@ -185,9 +188,15 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
             completedSteps: state.completedSteps,
             skippedSteps: state.skippedSteps,
           })
+
+          // Update local state only after successful remote update
+          setState(prev => ({ ...prev, currentStep: step }))
         } catch (error) {
           logger.error('WorkflowContext.goToStep', error, { conversationId, step })
         }
+      } else {
+        // No conversationId, update local state directly
+        setState(prev => ({ ...prev, currentStep: step }))
       }
     }
   }
@@ -197,9 +206,8 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
     if (state.completedSteps.includes(targetStep)) return true
 
     // Can only navigate to next step after current
-    const steps: WorkflowStep[] = ['discovery', 'questions', 'research', 'selection', 'generate']
-    const currentIndex = steps.indexOf(state.currentStep)
-    const targetIndex = steps.indexOf(targetStep)
+    const currentIndex = WORKFLOW_STEPS.indexOf(state.currentStep)
+    const targetIndex = WORKFLOW_STEPS.indexOf(targetStep)
 
     return targetIndex <= currentIndex + 1
   }

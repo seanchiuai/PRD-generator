@@ -17,6 +17,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 
+interface UserAvatarProps {
+  size?: string;
+  userAvatar: string;
+  userName: string;
+  initials: string;
+}
+
+function UserAvatar({ size = "h-10 w-10", userAvatar, userName, initials }: UserAvatarProps) {
+  return (
+    <Avatar className={size}>
+      <AvatarImage src={userAvatar} alt={userName} />
+      <AvatarFallback className="bg-gradient-to-br from-macaron-lavender to-macaron-mint text-white font-semibold">
+        {initials}
+      </AvatarFallback>
+    </Avatar>
+  );
+}
+
 export function ProfileMenu() {
   const { user } = useUser();
   const { signOut } = useClerk();
@@ -30,15 +48,9 @@ export function ProfileMenu() {
   const userAvatar = user.imageUrl || "";
 
   // Safely compute initials with proper fallbacks
-  const nameParts = userName
-    .trim()
-    .split(/\s+/)
-    .filter(part => part.length > 0)
-    .map(part => part[0])
-    .filter(char => char !== undefined);
-
-  const initials = nameParts.length > 0
-    ? nameParts.join('').toUpperCase().slice(0, 2)
+  const nameParts = userName.trim().split(/\s+/).filter(Boolean);
+  const initials = nameParts.length > 0 && nameParts[0]
+    ? nameParts.map(part => part[0]).join('').toUpperCase().slice(0, 2)
     : (userEmail[0]?.toUpperCase() || "U");
 
   // Format the date joined using user's preferred locale
@@ -59,23 +71,22 @@ export function ProfileMenu() {
           aria-label={`Open profile menu for ${userName || 'user'}`}
           aria-haspopup="true"
         >
-          <Avatar className="h-10 w-10">
-            <AvatarImage src={userAvatar} alt={userName} />
-            <AvatarFallback className="bg-gradient-to-br from-macaron-lavender to-macaron-mint text-white font-semibold">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar
+            userAvatar={userAvatar}
+            userName={userName}
+            initials={initials}
+          />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-64" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex items-center gap-3 p-2">
-            <Avatar className="h-12 w-12">
-              <AvatarImage src={userAvatar} alt={userName} />
-              <AvatarFallback className="bg-gradient-to-br from-macaron-lavender to-macaron-mint text-white font-semibold">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar
+              size="h-12 w-12"
+              userAvatar={userAvatar}
+              userName={userName}
+              initials={initials}
+            />
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">{userName}</p>
               <p className="text-xs leading-none text-muted-foreground">

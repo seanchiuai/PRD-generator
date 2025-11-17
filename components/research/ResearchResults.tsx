@@ -31,8 +31,8 @@ export function ResearchResults({ category, options, reasoning }: ResearchResult
       </CardHeader>
       <CardContent>
         <Accordion type="single" collapsible className="w-full">
-          {options.map((option, index) => (
-            <AccordionItem key={index} value={`option-${index}`}>
+          {options.map((option) => (
+            <AccordionItem key={option.name} value={option.name}>
               <AccordionTrigger>
                 <div className="flex items-center gap-2">
                   <span className="font-semibold">{option.name}</span>

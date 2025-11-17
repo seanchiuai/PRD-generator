@@ -13,6 +13,17 @@ interface GenerationProgressProps {
   steps: GenerationStep[];
 }
 
+function renderStatusIcon(status: GenerationStep['status']): JSX.Element {
+  switch (status) {
+    case 'completed':
+      return <CheckCircle2 className="h-5 w-5 text-green-600" />;
+    case 'in_progress':
+      return <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />;
+    case 'pending':
+      return <div className="h-5 w-5 rounded-full border-2 border-muted" />;
+  }
+}
+
 export function GenerationProgress({ steps }: GenerationProgressProps) {
   const completedSteps = steps.filter((s) => s.status === "completed").length;
   const progress = steps.length > 0 ? (completedSteps / steps.length) * 100 : 0;
@@ -33,15 +44,7 @@ export function GenerationProgress({ steps }: GenerationProgressProps) {
           <div className="space-y-2">
             {steps.map((step) => (
               <div key={step.name} className="flex items-center gap-3">
-                {step.status === "completed" && (
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
-                )}
-                {step.status === "in_progress" && (
-                  <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
-                )}
-                {step.status === "pending" && (
-                  <div className="h-5 w-5 rounded-full border-2 border-muted" />
-                )}
+                {renderStatusIcon(step.status)}
                 <span
                   className={step.status === "completed" ? "text-muted-foreground" : ""}
                 >

@@ -19,10 +19,23 @@ interface ChatContainerProps {
 export function ChatContainer({ messages, isTyping, isLoadingInitialMessage }: ChatContainerProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom on new messages
+  // Auto-scroll to bottom on new messages only if user is near bottom
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: "smooth" });
+      const container = scrollRef.current.parentElement;
+      if (container) {
+        // Check if user is near the bottom (within 100px)
+        const isNearBottom =
+          container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+
+        // Only auto-scroll if user is near bottom
+        if (isNearBottom) {
+          scrollRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+      } else {
+        // Fallback: always scroll if container not found (initial load)
+        scrollRef.current.scrollIntoView({ behavior: "smooth" });
+      }
     }
   }, [messages, isTyping]);
 
@@ -35,8 +48,8 @@ export function ChatContainer({ messages, isTyping, isLoadingInitialMessage }: C
         </div>
       ) : (
         <>
-          {messages.map((message, index) => (
-            <ChatMessage key={index} message={message} />
+          {messages.map((message) => (
+            <ChatMessage key={message.timestamp} message={message} />
           ))}
           {isTyping && <TypingIndicator />}
         </>

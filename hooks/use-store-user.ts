@@ -21,5 +21,5 @@ export function useStoreUser() {
     storeUser().catch((error) => {
       logger.error("useStoreUser", error, { userId: user.id });
     });
-  }, [user, isLoaded, storeUser]);
+  }, [user?.id, isLoaded]);
 }

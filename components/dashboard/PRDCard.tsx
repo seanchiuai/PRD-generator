@@ -12,17 +12,18 @@ import {
 import { Download, ExternalLink, MoreVertical, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { Id } from "@/convex/_generated/dataModel";
+import type { PRDData, PRDStatus } from "@/types";
 
 interface PRDCardProps {
   prd: {
     _id: Id<"prds">;
     conversationId: Id<"conversations">;
     productName: string;
-    prdData: any;
+    prdData: PRDData;
     createdAt: number;
     updatedAt: number;
     version: number;
-    status: "generating" | "completed" | "failed";
+    status: PRDStatus;
   };
   onDelete: (prdId: Id<"prds">) => void;
 }
@@ -76,7 +77,7 @@ export function PRDCard({ prd, onDelete }: PRDCardProps) {
               {prd.status === "completed" && (
                 <DropdownMenuItem onClick={() => router.push(`/prd/${prd._id}`)}>
                   <Download className="h-4 w-4 mr-2" />
-                  Export
+                  View & Export
                 </DropdownMenuItem>
               )}
               <DropdownMenuItem
@@ -102,14 +103,20 @@ export function PRDCard({ prd, onDelete }: PRDCardProps) {
           )}
           {prd.prdData?.techStack && (
             <div className="flex flex-wrap gap-2 mt-3">
-              {Object.entries(prd.prdData.techStack).slice(0, 3).map(([key, value]: [string, any]) => {
-                if (key === "reasoning" || !value?.name) return null;
-                return (
+              {Object.entries(prd.prdData.techStack)
+                .filter(([key, value]) => {
+                  // Skip entries that should not be displayed
+                  if (key === "reasoning") return false;
+                  if (!value || typeof value !== "object") return false;
+                  if (!("name" in value) || typeof value.name !== "string") return false;
+                  return true;
+                })
+                .slice(0, 3)
+                .map(([key, value]) => (
                   <Badge key={key} variant="outline" className="rounded-full border-2 px-3 py-1 font-medium">
-                    {value.name}
+                    {(value as { name: string }).name}
                   </Badge>
-                );
-              })}
+                ))}
             </div>
           )}
         </div>

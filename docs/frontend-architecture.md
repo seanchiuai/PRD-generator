@@ -4,7 +4,7 @@
 
 ### Route Organization
 
-```
+```text
 /app
   page.tsx                          # Home/Auth landing page
   layout.tsx                        # Root layout with providers
@@ -63,7 +63,7 @@
 - `[prdId]`: PRD-specific pages
 
 **Workflow Progression:**
-```
+```text
 / → /dashboard → /chat/new → /chat/[id] → /chat/[id]/questions
   → /chat/[id]/tech-stack → /chat/[id]/generate → /prd/[prdId]
 ```
@@ -72,7 +72,7 @@
 
 ### Feature-Based Structure
 
-```
+```text
 /components
   /chat                   # Discovery chat UI
     ChatContainer.tsx

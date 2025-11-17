@@ -3,15 +3,14 @@ import { anthropic, AI_MODELS, TOKEN_LIMITS } from "@/lib/ai-clients";
 import {
   handleAPIError,
   handleValidationError,
-  handleUnauthorizedError,
 } from "@/lib/api-error-handler";
 import { safeParseAIResponse } from "@/lib/parse-ai-json";
 import { getAuthenticatedConvexClient } from "@/lib/convex-client";
 import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
+import type { Id } from "@/convex/_generated/dataModel";
 import { withAuth } from "@/lib/middleware/withAuth";
 import { CONTEXT_EXTRACTION_PROMPT } from "@/lib/prompts/conversation";
-import { ExtractedContext } from "@/types";
+import type { ExtractedContext } from "@/types";
 
 const FALLBACK_CONTEXT = {
   productName: "New Product",
@@ -30,26 +29,33 @@ const ensureArray = (value: unknown): string[] => {
   if (!Array.isArray(value)) {
     return [];
   }
-  return value
-    .filter((el) => typeof el === "string")
-    .map((el) => String(el));
+  return value.filter((el): el is string => typeof el === "string");
 };
 
 export const POST = withAuth(async (request, { userId, token }) => {
   try {
     const { conversationId } = await request.json();
 
-    if (!conversationId) {
-      return handleValidationError("Conversation ID required");
+    if (!conversationId || typeof conversationId !== "string") {
+      return handleValidationError("Valid conversation ID required");
     }
 
     // Get authenticated Convex client
     const convexClient = getAuthenticatedConvexClient(token);
 
-    // Fetch conversation messages
-    const conversation = await convexClient.query(api.conversations.get, {
-      conversationId: conversationId as Id<"conversations">,
-    });
+    // Fetch conversation messages with error handling for invalid ID
+    let conversation;
+    try {
+      conversation = await convexClient.query(api.conversations.get, {
+        conversationId: conversationId as Id<"conversations">,
+      });
+    } catch {
+      return handleAPIError(
+        new Error("Invalid conversation ID format"),
+        "validate conversation ID",
+        400
+      );
+    }
 
     if (!conversation) {
       return handleAPIError(
@@ -64,10 +70,33 @@ export const POST = withAuth(async (request, { userId, token }) => {
       return handleUnauthorizedError();
     }
 
-    // Build message history for Claude
-    const messageHistory = conversation.messages
-      .map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`)
-      .join("\n\n");
+    // Build message history for Claude with sanitization
+    const PER_MESSAGE_LIMIT = 2000;
+    const TOTAL_HISTORY_LIMIT = 10000;
+
+    const sanitizeContent = (content: string): string => {
+      return content
+        .trim()
+        .replace(/[\x00-\x1F\x7F-\x9F]/g, '') // Remove control characters
+        .replace(/`{3,}/g, '``') // Escape multiple backticks
+        .slice(0, PER_MESSAGE_LIMIT);
+    };
+
+    const messages = conversation.messages
+      .map((m) => {
+        const role = m.role === "user" ? "User" : "Assistant";
+        const sanitized = sanitizeContent(m.content);
+        return `${role}: ${sanitized}`;
+      });
+
+    let messageHistory = messages.join("\n\n");
+
+    // Enforce total history limit
+    if (messageHistory.length > TOTAL_HISTORY_LIMIT) {
+      // Trim from the start (keep most recent messages)
+      const excess = messageHistory.length - TOTAL_HISTORY_LIMIT;
+      messageHistory = "...(earlier messages truncated)\n\n" + messageHistory.slice(excess);
+    }
 
     // Call Claude to extract context
     const response = await anthropic.messages.create({
