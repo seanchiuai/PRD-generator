@@ -3,8 +3,15 @@
 ## 2025-11-17
 
 ### Added
+- **Unified Tech Stack Page**: Merged research and selection phases into single `/tech-stack` page with always-visible pros/cons cards. Improves UX by eliminating redundant navigation and accordion clicks.
 - **Skip Button Protection**: Skip button now disabled during message processing to prevent race conditions.
 - **Merge Plan**: Created plan to merge research/selection phases for streamlined workflow.
+
+### Changed
+- **Workflow Stages**: Replaced "researching" and "selecting" stages with single "tech-stack" stage in schema and mutations.
+- **Navigation**: Updated workflow progress to show 4 steps (Discovery → Questions → Tech Stack → Generate) instead of 5.
+- **TechStackCard Component**: Enhanced to display pros/cons lists directly without accordion. Moved from `components/selection/` to `components/tech-stack/`.
+- **Old Pages**: `/research` and `/select` now redirect to `/tech-stack` with notification toast.
 
 ### Fixed
 - **PRD Generation**: Fixed API payload structure - removed incorrect `researchData` wrapper causing generation failures.

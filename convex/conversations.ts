@@ -150,8 +150,7 @@ export const updateStage = mutation({
       v.literal("setup"),
       v.literal("discovery"),
       v.literal("clarifying"),
-      v.literal("researching"),
-      v.literal("selecting"),
+      v.literal("tech-stack"),
       v.literal("generating"),
       v.literal("completed")
     ),
@@ -234,7 +233,7 @@ export const saveResearchResults = mutation({
         categoriesCompleted: Object.keys(results),
         status: "completed",
       },
-      currentStage: "selecting",
+      currentStage: "tech-stack",
       updatedAt: Date.now(),
     });
 
