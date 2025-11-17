@@ -12,7 +12,7 @@ import { getDefaultTechStack, generateMockResearchResults } from '@/lib/techStac
 import { TECH_STACK_SUGGESTION_PROMPT } from '@/lib/prompts/techStack'
 import type { Id } from "@/convex/_generated/dataModel";
 import { withAuth } from "@/lib/middleware/withAuth";
-import type { ExtractedContext, Question, SimpleTechStack, ValidationResult } from "@/types";
+import type { ExtractedContext, SimpleTechStack, ValidationResult } from "@/types";
 
 const DEFAULT_STACK: SimpleTechStack = {
   frontend: "Next.js",
@@ -54,7 +54,7 @@ export const POST = withAuth(async (request, { userId, token }) => {
     const extractedContext = conversation.extractedContext
     const clarifyingQuestions = conversation.clarifyingQuestions
 
-    // Convert questions to answers Record for tech stack functions
+    // Convert questions array to UserAnswers format (Record<string, string>)
     const userAnswers: Record<string, string> | null = clarifyingQuestions
       ? clarifyingQuestions.reduce((acc: Record<string, string>, q: { id: string; answer?: string }) => {
           if (q.answer) {
@@ -122,7 +122,7 @@ export const POST = withAuth(async (request, { userId, token }) => {
   }
 });
 
-async function getAISuggestedStack(extractedContext: ExtractedContext, answers: Question[] | null) {
+async function getAISuggestedStack(extractedContext: ExtractedContext, answers: Record<string, string> | null) {
   const response = await anthropic.messages.create({
     model: AI_MODELS.CLAUDE_SONNET,
     max_tokens: TOKEN_LIMITS.TECH_STACK,

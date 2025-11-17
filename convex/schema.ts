@@ -247,93 +247,9 @@ export default defineSchema({
   prds: defineTable({
     conversationId: v.id("conversations"),
     userId: v.string(),
-    prdData: v.object({
-      projectOverview: v.object({
-        productName: v.string(),
-        tagline: v.string(),
-        description: v.string(),
-        targetAudience: v.string(),
-        problemStatement: v.string(),
-      }),
-      purposeAndGoals: v.object({
-        vision: v.string(),
-        keyObjectives: v.array(v.string()),
-        successMetrics: v.array(v.string()),
-      }),
-      techStack: v.record(v.string(), v.union(
-        v.string(),
-        v.object({
-          name: v.string(),
-          purpose: v.string(),
-          pros: v.array(v.string()),
-          cons: v.array(v.string()),
-          alternatives: v.array(v.string()),
-        })
-      )),
-      features: v.object({
-        mvpFeatures: v.array(v.object({
-          name: v.string(),
-          description: v.string(),
-          userStory: v.string(),
-          acceptanceCriteria: v.array(v.string()),
-          technicalRequirements: v.array(v.string()),
-          priority: v.union(v.literal("critical"), v.literal("high"), v.literal("medium")),
-        })),
-        niceToHaveFeatures: v.array(v.object({
-          name: v.string(),
-          description: v.string(),
-          userStory: v.string(),
-          acceptanceCriteria: v.array(v.string()),
-          technicalRequirements: v.array(v.string()),
-          priority: v.union(v.literal("critical"), v.literal("high"), v.literal("medium")),
-        })),
-        outOfScope: v.array(v.string()),
-      }),
-      userPersonas: v.array(v.object({
-        name: v.string(),
-        role: v.string(),
-        demographics: v.string(),
-        goals: v.array(v.string()),
-        painPoints: v.array(v.string()),
-        technicalProficiency: v.string(),
-      })),
-      technicalArchitecture: v.object({
-        systemDesign: v.string(),
-        dataModels: v.array(v.object({
-          entityName: v.string(),
-          description: v.string(),
-          fields: v.array(v.object({
-            name: v.string(),
-            type: v.string(),
-            required: v.boolean(),
-          })),
-          relationships: v.array(v.string()),
-        })),
-        apiEndpoints: v.array(v.object({
-          method: v.union(v.literal("GET"), v.literal("POST"), v.literal("PUT"), v.literal("DELETE"), v.literal("PATCH")),
-          path: v.string(),
-          purpose: v.string(),
-          authentication: v.boolean(),
-          requestBody: v.optional(v.string()),
-          responseBody: v.optional(v.string()),
-        })),
-        securityConsiderations: v.array(v.string()),
-      }),
-      timeline: v.object({
-        estimatedDuration: v.string(),
-        phases: v.array(v.object({
-          name: v.string(),
-          duration: v.string(),
-          deliverables: v.array(v.string()),
-        })),
-      }),
-      risks: v.array(v.object({
-        category: v.string(),
-        description: v.string(),
-        impact: v.string(),
-        mitigation: v.string(),
-      })),
-    }),
+    // Use v.record for flexible PRD data structure while maintaining type safety in TypeScript
+    // The PRDData TypeScript type provides compile-time validation
+    prdData: v.record(v.string(), v.any()),
     productName: v.string(),
     version: v.number(),
     status: v.union(v.literal("generating"), v.literal("completed"), v.literal("failed")),

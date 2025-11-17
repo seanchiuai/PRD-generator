@@ -2,11 +2,11 @@
  * System prompts for tech stack suggestion and validation
  */
 
-import type { ExtractedContext, Question } from "@/types";
+import type { ExtractedContext } from "@/types";
 
 export const TECH_STACK_SUGGESTION_PROMPT = (
   extractedContext: ExtractedContext,
-  answers: Question[] | null
+  answers: Record<string, string> | null
 ): string => `
 Suggest an optimal tech stack for this product:
 

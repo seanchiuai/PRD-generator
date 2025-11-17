@@ -297,9 +297,16 @@ export default function TechStackPage() {
 
       if (success) {
         // Track analytics
+        // Convert questions to UserAnswers format
+        const userAnswers = conversation?.clarifyingQuestions?.reduce((acc: Record<string, string>, q: { id: string; answer?: string }) => {
+          if (q.answer) {
+            acc[q.id] = q.answer;
+          }
+          return acc;
+        }, {}) || null;
         const productType = detectProductType(
           conversation?.extractedContext,
-          conversation?.clarifyingQuestions
+          userAnswers
         );
         trackTechStackSkip({
           conversationId,
