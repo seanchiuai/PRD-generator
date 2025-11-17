@@ -38,6 +38,7 @@ export interface ProductContext {
   description?: string;
   targetAudience?: string;
   coreFeatures?: string[];
+  answers?: Record<string, string>;
 }
 
 export interface ExtractedContext {
@@ -75,6 +76,32 @@ export interface QuestionGenerationResponse {
 // ============================================================================
 // TECH STACK RESEARCH TYPES
 // ============================================================================
+
+export interface ResearchQuery {
+  category: string;
+  query: string;
+  reasoning: string;
+}
+
+export interface ResearchResultItem {
+  category: string;
+  options: TechOption[];
+  reasoning: string;
+}
+
+export interface SimpleTechStack {
+  frontend?: string;
+  backend?: string;
+  database?: string;
+  auth?: string;
+  hosting?: string;
+}
+
+export interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+}
 
 export interface TechOption {
   name: string;
@@ -173,14 +200,14 @@ export interface TechStackItem {
   alternatives: string[];
 }
 
-export interface PRDTechStack {
+export type PRDTechStack = {
   frontend: TechStackItem;
   backend: TechStackItem;
   database: TechStackItem;
   authentication: TechStackItem;
   hosting: TechStackItem;
   reasoning: string;
-}
+} & Record<string, TechStackItem | string>;
 
 export type FeaturePriority = "critical" | "high" | "medium";
 

@@ -11,6 +11,7 @@ import { api } from '@/convex/_generated/api'
 import { getDefaultTechStack, generateMockResearchResults } from '@/lib/techStack/defaults'
 import { Id } from "@/convex/_generated/dataModel";
 import { withAuth } from "@/lib/middleware/withAuth";
+import type { ExtractedContext, Question, SimpleTechStack, ValidationResult } from "@/types";
 
 export const POST = withAuth(async (request, { userId, token }) => {
   try {
@@ -54,9 +55,6 @@ export const POST = withAuth(async (request, { userId, token }) => {
       techStack = getDefaultTechStack(extractedContext, clarifyingQuestions)
     }
 
-    // Generate mock research results
-    const researchResults = generateMockResearchResults(techStack)
-
     // Validate the stack before saving
     const validation = validateDefaultStack(techStack)
 
@@ -73,6 +71,9 @@ export const POST = withAuth(async (request, { userId, token }) => {
       auth: techStack.auth || "Clerk",
       hosting: techStack.hosting || "Vercel",
     }
+
+    // Generate mock research results (using completeStack with all required fields)
+    const researchResults = generateMockResearchResults(completeStack)
 
     // Save research results to Convex
     await convexClient.mutation(api.conversations.saveResearchResults, {
@@ -98,7 +99,7 @@ export const POST = withAuth(async (request, { userId, token }) => {
   }
 });
 
-async function getAISuggestedStack(extractedContext: any, answers: any) {
+async function getAISuggestedStack(extractedContext: ExtractedContext, answers: Question[] | null) {
   const prompt = `
 Suggest an optimal tech stack for this product:
 
@@ -140,37 +141,15 @@ Return ONLY a JSON object:
     messages: [{ role: 'user', content: prompt }],
   })
 
-  const textContent = response.content.find((block) => block.type === 'text')
-  if (!textContent || textContent.type !== 'text') {
+  const textContent = response.content.find((block): block is { type: 'text'; text: string } => block.type === 'text')
+  if (!textContent) {
     throw new Error('Unexpected response type from Claude')
   }
 
-  interface TechStack {
-    frontend: string;
-    backend: string;
-    database: string;
-    auth: string;
-    hosting: string;
-  }
-
-  return safeParseAIResponse<TechStack>(textContent.text) || getDefaultTechStack(extractedContext, answers)
+  return safeParseAIResponse<SimpleTechStack>(textContent.text) || getDefaultTechStack(extractedContext, answers)
 }
 
-interface TechStack {
-  frontend?: string;
-  backend?: string;
-  database?: string;
-  auth?: string;
-  hosting?: string;
-}
-
-interface ValidationResult {
-  isValid: boolean;
-  errors: string[];
-  warnings: string[];
-}
-
-function validateDefaultStack(stack: TechStack): ValidationResult {
+function validateDefaultStack(stack: SimpleTechStack): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -226,9 +205,9 @@ function validateDefaultStack(stack: TechStack): ValidationResult {
 }
 
 async function fixStackErrors(
-  stack: TechStack,
+  stack: SimpleTechStack,
   errors: string[]
-): Promise<TechStack> {
+): Promise<SimpleTechStack> {
   // Create a copy to fix
   const fixedStack = { ...stack };
 

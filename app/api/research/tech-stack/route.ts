@@ -3,20 +3,7 @@ import { perplexity, anthropic, AI_MODELS } from "@/lib/ai-clients";
 import { handleAPIError, handleValidationError } from "@/lib/api-error-handler";
 import { logger } from "@/lib/logger";
 import { withAuth } from "@/lib/middleware/withAuth";
-
-interface ProductContext {
-  productName: string;
-  description: string;
-  targetAudience: string;
-  coreFeatures: string[];
-  answers: Record<string, string>;
-}
-
-interface ResearchQuery {
-  category: string;
-  query: string;
-  reasoning: string;
-}
+import type { ProductContext, ResearchQuery, TechOption, ResearchResultItem } from "@/types";
 
 // Use Claude to intelligently generate research queries based on product context
 async function generateResearchQueries(context: ProductContext): Promise<ResearchQuery[]> {
@@ -28,8 +15,8 @@ Product Context:
 - Name: ${productName}
 - Description: ${description}
 - Target Audience: ${targetAudience}
-- Core Features: ${coreFeatures.join(", ")}
-- Additional Context: ${JSON.stringify(answers, null, 2)}
+- Core Features: ${coreFeatures?.join(", ") || "Not specified"}
+- Additional Context: ${JSON.stringify(answers || {}, null, 2)}
 
 Your task is to generate targeted research queries for technology stack recommendations.
 
@@ -166,16 +153,16 @@ Be smart about what's actually needed. For example:
 }
 
 // Parse Perplexity response into structured format
-function parseResponse(content: string, _category: string): any[] {
+function parseResponse(content: string, _category: string): TechOption[] {
   try {
     // Try to extract JSON if present
     const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/) || content.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      return JSON.parse(jsonMatch[1] || jsonMatch[0]);
+      return JSON.parse(jsonMatch[1] || jsonMatch[0]) as TechOption[];
     }
 
     // Fallback: parse structured text
-    const options: any[] = [];
+    const options: TechOption[] = [];
 
     // Try multiple splitting patterns to handle different response formats
     let sections: string[] = [];
@@ -308,7 +295,7 @@ function parseResponse(content: string, _category: string): any[] {
 async function executeResearchQuery(
   researchQuery: ResearchQuery,
   retryCount = 0
-): Promise<{ category: string; options: any[]; reasoning: string }> {
+): Promise<ResearchResultItem> {
   const MAX_RETRIES = 2;
   const RETRY_DELAY = 2000; // 2 seconds between retries
 
@@ -333,7 +320,7 @@ async function executeResearchQuery(
       // NOTE: Perplexity SDK does not officially support AbortController per-request.
       // This is a workaround to enable request cancellation. Monitor SDK updates for official support.
       signal: abortController.signal,
-    } as any);
+    } as { signal: AbortSignal });
 
     clearTimeout(timeoutId);
 
@@ -433,7 +420,7 @@ export const POST = withAuth(async (request) => {
     // Step 2: Execute research queries sequentially to avoid rate limits
     // Add a small delay between requests to prevent API overload
     const DELAY_BETWEEN_REQUESTS = 1000; // 1 second delay
-    const results: Array<{ category: string; options: any[]; reasoning: string }> = [];
+    const results: ResearchResultItem[] = [];
 
     logger.debug("POST /api/research/tech-stack", `Processing research queries sequentially`, { queryCount: researchQueries.length });
 
@@ -465,7 +452,7 @@ export const POST = withAuth(async (request) => {
     // Step 3: Build structured results object
     const researchResults: Record<
       string,
-      { options: any[]; reasoning: string }
+      { options: TechOption[]; reasoning: string }
     > = {};
     const queriesGenerated: Array<{ category: string; reasoning: string }> = [];
 
