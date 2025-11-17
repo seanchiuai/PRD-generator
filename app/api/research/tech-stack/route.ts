@@ -190,13 +190,45 @@ function parseResponse(content: string, _category: string): any[] {
       sections = content.split(/^#{2,3}\s+/m).filter(Boolean);
     }
 
-    // Pattern 3: Bold text without numbers: "**React**"
+    // Pattern 3: Comma-separated inline bold: "**React**, **Vue**, **Angular**"
+    if (sections.length <= 1 && content.match(/\*\*[^*]+\*\*,?\s+(and\s+)?\*\*/)) {
+      // Extract all bold text segments
+      const boldMatches = content.match(/\*\*([^*]+)\*\*/g);
+      if (boldMatches && boldMatches.length > 1) {
+        sections = boldMatches.map(m => m.replace(/\*\*/g, ''));
+      }
+    }
+
+    // Pattern 4: Bold text without numbers: "**React**"
     if (sections.length <= 1 && content.match(/\*\*[A-Z]/)) {
       // Split by standalone bold text at start of line or after newline
       sections = content.split(/(?:^|\n\n)\*\*/).filter(Boolean);
     }
 
     sections.forEach((section, idx) => {
+      // Handle case where sections are just tech names (from inline bold extraction)
+      // In this case, section is already the clean name
+      const isSimpleName = !section.includes('\n') && !section.includes('**') && section.length < 50;
+
+      if (isSimpleName) {
+        let name = section.trim();
+
+        // Skip common non-tech phrases
+        const skipPhrases = ["and", "or", "the", "these", "those"];
+        if (skipPhrases.some(phrase => name.toLowerCase() === phrase)) {
+          return;
+        }
+
+        options.push({
+          name,
+          description: "",
+          pros: [],
+          cons: [],
+          popularity: undefined,
+        });
+        return;
+      }
+
       // Skip first section if it looks like preamble (no tech name extracted yet)
       if (idx === 0 && sections.length > 1) {
         const hasPreamblePhrase = /(?:top three|top 3|the following|here are|these are)/i.test(section.substring(0, 100));
