@@ -8,7 +8,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed - 2025-01-17
 
-#### Code Review Group-12 Issues (Latest commit)
+#### Code Review Group-9 Issues (Latest commit)
+
+**Component Architecture:**
+- section-cards.tsx: Refactored to data-driven design with props (cards, className) and DEFAULT_CARDS constant, added proper interfaces
+- WorkflowLayout.tsx: Extracted SkipButton props into single object, eliminated duplication between desktop/mobile renders
+
+**Type Safety & Validation:**
+- workflow.ts: Added v.union validation for step parameter in completeStep/skipStep mutations (literal types: discovery/questions/tech-stack/generate)
+- PageTransition.tsx: Made pageKey prop required (removed optional modifier)
+
+**Code Quality:**
+- button.tsx: Refactored 400+ char className string into logical array with .join(' ') for better readability
+- TechStackPage.tsx: Added formatKey helper function for consistent key formatting (handles camelCase to Title Case)
+- ProfileMenu.tsx: Simplified initials calculation (removed unnecessary filter/map chain)
+- techStackEvents.ts: Removed unused originalStack/modifiedStack parameters from trackDefaultStackModified
+
+**React Best Practices:**
+- ResearchResults.tsx: Replaced array index keys with stable content-based keys (option.name)
+- extract-context/route.ts: Optimized ensureArray helper (removed redundant .map(String), used type predicate)
+- questions/generate/route.ts: Added null-safe array access for extractedContext.keyFeatures/technicalPreferences
+
+**Accessibility:**
+- QuestionCard.tsx: Added proper keyboard support (onKeyDown), ARIA roles, and htmlFor/id associations to multiselect checkboxes
+
+**Data Consistency:**
+- conversations.ts: Fixed contradictory workflow state in saveExtractedContext (removed "discovery" from skippedSteps while in completedSteps)
+
+**Impact:** All 15 code review issues from docs/errors/group-9.md resolved
+
+#### Code Review Group-12 Issues
 
 **Code Quality & Readability:**
 - toggle.tsx: Refactored 400+ char className string into logical array with .join(' ') for better maintainability
