@@ -6,7 +6,7 @@
 - **Question Generation**: AI response flattening logic added to handle nested category structure. Questions now save to Convex without schema validation errors.
 - **React Key Warning**: Changed QuestionCard option keys from array index to option value.
 - **Multiselect Support**: Added "multiselect" question type to schema, types, and UI. Multiselect questions render as checkboxes allowing multiple selections.
-- **Research Parsing**: Filter out preamble/reasoning text from Perplexity responses. Only valid tech stack options (short names, no preamble phrases) are shown in selection.
+- **Research Parsing**: Improved parser to handle multiple Perplexity response formats (numbered lists, markdown headers, standalone bold). Intelligent preamble detection prevents valid tech options from being filtered. Increased name length limit and added prefix cleanup.
 
 ## 2025-11-16
 
