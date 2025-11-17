@@ -200,14 +200,14 @@ export interface TechStackItem {
   alternatives: string[];
 }
 
-export interface PRDTechStack {
+export type PRDTechStack = {
   frontend: TechStackItem;
   backend: TechStackItem;
   database: TechStackItem;
   authentication: TechStackItem;
   hosting: TechStackItem;
   reasoning: string;
-}
+} & Record<string, TechStackItem | string>;
 
 export type FeaturePriority = "critical" | "high" | "medium";
 

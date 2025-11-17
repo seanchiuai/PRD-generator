@@ -24,11 +24,11 @@ export function ArchitecturePage({ prd, pageNumber = 4 }: ArchitecturePageProps)
       <View style={pdfStyles.section}>
         <Text style={pdfStyles.sectionTitle}>Data Models</Text>
         {prd.technicalArchitecture.dataModels.map((model) => (
-          <View key={model.entityName} style={{ marginBottom: 10 }}>
+          <View key={model.entityName} style={pdfStyles.dataModel}>
             <Text style={pdfStyles.subsectionTitle}>{model.entityName}</Text>
             <Text style={pdfStyles.text}>{model.description}</Text>
             {model.fields.map((field) => (
-              <Text key={field.name} style={{ fontSize: 9, marginLeft: 10 }}>
+              <Text key={field.name} style={pdfStyles.fieldItem}>
                 - {field.name}: {field.type} {field.required ? "*" : ""}
               </Text>
             ))}

@@ -55,4 +55,11 @@ export const pdfStyles = StyleSheet.create({
     fontSize: 9,
     color: "#999",
   },
+  dataModel: {
+    marginBottom: 10,
+  },
+  fieldItem: {
+    fontSize: 9,
+    marginLeft: 10,
+  },
 });

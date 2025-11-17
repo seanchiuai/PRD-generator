@@ -14,7 +14,7 @@ export function TechStackPage({ prd, pageNumber = 2 }: TechStackPageProps) {
     <Page size="A4" style={pdfStyles.page}>
       <PDFHeader title="Technical Stack" />
 
-      {(Object.entries(prd.techStack) as [string, TechStackItem | string][])
+      {Object.entries(prd.techStack)
         .filter(([key]) => key !== "reasoning")
         .map(([key, value]) => {
           if (typeof value === "string") return null;

@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-interface WorkflowConnectorProps {
+export interface WorkflowConnectorProps {
   isCompleted: boolean;
   variant?: "desktop" | "mobile";
 }

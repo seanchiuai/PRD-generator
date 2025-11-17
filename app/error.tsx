@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
+import { logger } from "@/lib/logger";
 
 function AppError({
   error,
@@ -12,7 +13,8 @@ function AppError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Application error:", error);
+    logger.error("App error boundary", error);
+    console.error("Application error:", error); // Fallback for client-side
   }, [error]);
 
   return (
