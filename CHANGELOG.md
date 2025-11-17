@@ -5,6 +5,7 @@
 ### Fixed
 - **Question Generation**: AI response flattening logic added to handle nested category structure. Questions now save to Convex without schema validation errors.
 - **React Key Warning**: Changed QuestionCard option keys from array index to option value.
+- **Multiselect Support**: Added "multiselect" question type to schema, types, and UI. Multiselect questions render as checkboxes allowing multiple selections.
 
 ## 2025-11-16
 
