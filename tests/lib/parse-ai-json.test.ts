@@ -80,6 +80,39 @@ describe('parseAIResponse', () => {
     })
   })
 
+  describe('Conversational preambles', () => {
+    it('should extract JSON from text with conversational preamble', () => {
+      const input = 'I\'ll create a comprehensive PRD for you. {"name": "test", "value": 123}'
+      const result = parseAIResponse(input)
+
+      expect(result).toEqual({ name: 'test', value: 123 })
+    })
+
+    it('should extract JSON with non-greedy match (stops at first closing brace)', () => {
+      const input = 'Response: {"valid":"json"} some text {something}'
+      const result = parseAIResponse(input)
+
+      expect(result).toEqual({ valid: 'json' })
+    })
+
+    it('should handle preamble with nested JSON object', () => {
+      const input = 'Here is the data: {"user": {"name": "John", "age": 30}} Additional context {}'
+      const result = parseAIResponse(input)
+
+      expect(result).toEqual({ user: { name: 'John', age: 30 } })
+    })
+
+    it('should extract complex JSON from conversational response', () => {
+      const input = 'I\'ll prepare the PRD now. {"projectOverview": {"productName": "Test App", "description": "A test"}, "features": []}'
+      const result = parseAIResponse(input)
+
+      expect(result).toEqual({
+        projectOverview: { productName: 'Test App', description: 'A test' },
+        features: []
+      })
+    })
+  })
+
   describe('Edge cases', () => {
     it('should handle empty object', () => {
       const input = '```json\n{}\n```'
