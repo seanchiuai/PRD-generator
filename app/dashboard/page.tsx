@@ -87,8 +87,8 @@ export default function DashboardPage() {
   if (prds === undefined) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="text-center animate-fade-in-up">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-3xl bg-gradient-to-br from-macaron-lavender to-macaron-mint animate-pulse"></div>
+        <div className="text-center animate-fade-in">
+          <div className="w-12 h-12 mx-auto mb-4 rounded-lg bg-primary/10 animate-pulse"></div>
           <p className="text-muted-foreground font-medium">Loading your PRDs...</p>
         </div>
       </div>
@@ -108,16 +108,17 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="flex justify-between items-center animate-fade-in-up">
           <div>
-            <h1 className="text-4xl font-display font-bold text-gradient-primary">
+            <h1 className="text-4xl font-display font-bold text-foreground">
               My PRDs
             </h1>
             {stats && (
-              <p className="text-muted-foreground mt-2 text-lg">
-                <span className="inline-flex items-center gap-2">
-                  <span className="px-3 py-1 rounded-full bg-macaron-lavender/20 text-secondary-foreground font-medium">
+              <p className="text-muted-foreground mt-3 text-base">
+                <span className="inline-flex items-center gap-3">
+                  <span className="font-medium">
                     {stats.total} total
                   </span>
-                  <span className="px-3 py-1 rounded-full bg-macaron-mint/20 text-primary-foreground font-medium">
+                  <span className="text-border">•</span>
+                  <span className="font-medium text-primary">
                     {stats.completed} completed
                   </span>
                 </span>
@@ -126,7 +127,7 @@ export default function DashboardPage() {
           </div>
           <Button
             onClick={() => router.push("/chat/new")}
-            className="bg-gradient-to-r from-macaron-lavender to-macaron-mint text-secondary-foreground hover:shadow-xl hover:scale-105 transition-all duration-300 font-display font-semibold px-6 py-6 text-base rounded-2xl"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all font-semibold px-6 py-3 text-base rounded-lg"
           >
             <Plus className="h-5 w-5 mr-2" />
             New PRD

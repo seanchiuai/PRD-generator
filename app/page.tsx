@@ -5,7 +5,7 @@ import { SignUpButton } from "@clerk/nextjs";
 import { SignInButton } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Sparkles, FileText, ArrowRight, Box, Layers, Wand2 } from "lucide-react";
+import { Sparkles, MessageSquare, Search, FileText } from "lucide-react";
 
 export default function Home() {
   return (
@@ -29,11 +29,10 @@ function RedirectToDashboard() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="text-center animate-fade-in-up">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-macaron-lavender to-macaron-mint flex items-center justify-center">
-          <Sparkles className="w-8 h-8 text-secondary-foreground" />
+      <div className="text-center animate-fade-in">
+        <div className="w-12 h-12 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+          <Sparkles className="w-6 h-6 text-primary" />
         </div>
-        <h1 className="text-2xl font-display font-semibold mb-2">VIBED</h1>
         <p className="text-muted-foreground">Redirecting to dashboard...</p>
       </div>
     </div>
@@ -42,231 +41,227 @@ function RedirectToDashboard() {
 
 function LandingPage() {
   return (
-    <div className="min-h-screen relative overflow-hidden bg-background">
-      {/* Geometric background patterns */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-60" aria-hidden="true" />
-      <div className="absolute inset-0 bg-dots-pattern opacity-40" aria-hidden="true" />
+    <div className="min-h-screen bg-background">
+      {/* Subtle background texture */}
+      <div className="absolute inset-0 bg-grid-subtle opacity-40" aria-hidden="true" />
 
-      {/* Decorative geometric shapes */}
-      <div
-        className="absolute top-20 right-[10%] w-64 h-64 border-8 border-macaron-lavender/40 rounded-full animate-rotate-slow"
-        aria-hidden="true"
-      />
-      <div
-        className="absolute bottom-32 left-[5%] w-48 h-48 bg-macaron-mint/20 rotate-45"
-        aria-hidden="true"
-      />
-      <div
-        className="absolute top-1/3 right-[15%] w-32 h-32 bg-macaron-rose/30 rounded-2xl animate-float"
-        aria-hidden="true"
-      />
-      <div
-        className="absolute bottom-1/4 right-[25%] w-24 h-24 border-4 border-macaron-peach/50"
-        aria-hidden="true"
-      />
-
-      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 pt-20 pb-24">
-        {/* Header with logo */}
-        <div className="mb-16 animate-fade-in-up">
-          <div className="inline-flex items-center gap-3 px-4 py-2 bg-foreground/5 border-2 border-foreground/10 rounded-full">
-            <FileText className="w-5 h-5 text-secondary-foreground" />
-            <span className="font-jetbrains text-sm font-bold tracking-tight">VIBED</span>
-          </div>
-        </div>
-
-        {/* Main content - Asymmetric layout */}
-        <div className="grid lg:grid-cols-2 gap-16 items-start">
-          {/* Left column - Hero content */}
-          <div className="space-y-12">
-            {/* Hero headline */}
-            <div className="space-y-6 animate-slide-in-left">
-              <h1 className="font-syne text-7xl lg:text-8xl font-extrabold leading-[0.9] tracking-tight">
-                <span className="block text-foreground">Build</span>
-                <span className="block text-foreground">PRDs</span>
-                <span className="block relative inline-block">
-                  <span className="relative z-10">Faster</span>
-                  <span className="absolute bottom-2 left-0 w-full h-6 bg-macaron-lavender/50 -rotate-1" aria-hidden="true" />
-                </span>
-              </h1>
-
-              <p className="font-manrope text-xl lg:text-2xl text-muted-foreground max-w-xl leading-relaxed [animation-delay:0.2s] animate-slide-in-left">
-                Stop writing Product Requirements Documents from scratch.
-                <span className="text-foreground font-semibold"> Let AI do the heavy lifting.</span>
-              </p>
-            </div>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 [animation-delay:0.4s] animate-slide-in-left">
-              <SignUpButton mode="modal">
-                <button className="group px-8 py-5 bg-foreground text-background rounded-none font-syne font-bold text-lg border-4 border-foreground transition-all duration-200 hover:translate-x-1 hover:translate-y-1 hover:shadow-[-8px_8px_0px_0px_rgba(212,189,252,1)] active:translate-x-0 active:translate-y-0 active:shadow-none">
-                  <span className="flex items-center justify-center gap-2">
-                    Start Creating
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </span>
-                </button>
-              </SignUpButton>
-
+      <div className="relative">
+        {/* Header */}
+        <header className="border-b border-border/50">
+          <div className="max-w-7xl mx-auto px-6 lg:px-12 py-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center">
+                  <FileText className="w-4 h-4 text-primary" />
+                </div>
+                <span className="font-display text-xl font-semibold">VIBED</span>
+              </div>
               <SignInButton mode="modal">
-                <button className="px-8 py-5 bg-transparent text-foreground rounded-none font-syne font-bold text-lg border-4 border-foreground transition-all duration-200 hover:bg-foreground hover:text-background">
+                <button type="button" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                   Sign In
                 </button>
               </SignInButton>
             </div>
+          </div>
+        </header>
+
+        {/* Hero Section */}
+        <section className="max-w-7xl mx-auto px-6 lg:px-12 pt-24 pb-32 lg:pt-32 lg:pb-40">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 border border-border animate-fade-in">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-muted-foreground">AI-Powered PRD Generation</span>
+            </div>
+
+            {/* Headline */}
+            <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight tracking-tight text-foreground [animation-delay:100ms] animate-fade-in-up">
+              Build Product Requirements Documents in Minutes
+            </h1>
+
+            {/* Subheadline */}
+            <p className="text-xl lg:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed [animation-delay:200ms] animate-fade-in-up">
+              Stop spending hours writing PRDs from scratch. Let AI interview you, research tech stacks, and generate professional documentation.
+            </p>
+
+            {/* CTA */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 [animation-delay:300ms] animate-fade-in-up">
+              <SignUpButton mode="modal">
+                <button type="button" className="px-8 py-4 bg-primary text-primary-foreground rounded-lg font-semibold text-base hover:bg-primary/90 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm">
+                  Start Building Free
+                </button>
+              </SignUpButton>
+              <a
+                href="#how-it-works"
+                className="px-8 py-4 border border-border rounded-lg font-semibold text-base hover:bg-muted/50 transition-all"
+              >
+                See How It Works
+              </a>
+            </div>
 
             {/* Stats */}
-            <div className="flex items-center gap-8 pt-8 border-t-4 border-foreground/10 [animation-delay:0.6s] animate-slide-in-left">
-              <div>
-                <div className="font-syne text-4xl font-bold text-foreground">15min</div>
-                <div className="font-manrope text-sm text-muted-foreground mt-1">Average time to PRD</div>
+            <div className="flex items-center justify-center gap-12 pt-12 [animation-delay:400ms] animate-fade-in">
+              <div className="text-center">
+                <div className="font-display text-3xl font-bold text-foreground">15min</div>
+                <div className="text-sm text-muted-foreground mt-1">Average Time</div>
               </div>
-              <div className="w-px h-12 bg-foreground/20" aria-hidden="true" />
-              <div>
-                <div className="font-syne text-4xl font-bold text-foreground">AI</div>
-                <div className="font-manrope text-sm text-muted-foreground mt-1">Powered by Claude</div>
+              <div className="w-px h-12 bg-border" aria-hidden="true" />
+              <div className="text-center">
+                <div className="font-display text-3xl font-bold text-foreground">Claude AI</div>
+                <div className="text-sm text-muted-foreground mt-1">Powered By</div>
               </div>
-              <div className="w-px h-12 bg-foreground/20" aria-hidden="true" />
-              <div>
-                <div className="font-syne text-4xl font-bold text-foreground">Pro</div>
-                <div className="font-manrope text-sm text-muted-foreground mt-1">Export ready</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right column - Feature cards */}
-          <div className="space-y-6 [animation-delay:0.3s] animate-slide-in-right lg:mt-24">
-            {/* Feature card 1 */}
-            <div className="relative group">
-              <div className="absolute inset-0 bg-macaron-mint translate-x-2 translate-y-2 transition-transform group-hover:translate-x-3 group-hover:translate-y-3" aria-hidden="true" />
-              <div className="relative bg-background border-4 border-foreground p-8">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-macaron-mint">
-                    <Wand2 className="w-7 h-7 text-foreground" />
-                  </div>
-                  <div>
-                    <h3 className="font-syne text-2xl font-bold text-foreground mb-2">AI Interview</h3>
-                    <p className="font-manrope text-muted-foreground leading-relaxed">
-                      Chat with Claude about your product idea. It asks the right questions and extracts key details.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Feature card 2 */}
-            <div className="relative group [animation-delay:0.5s] animate-slide-in-right">
-              <div className="absolute inset-0 bg-macaron-lavender translate-x-2 translate-y-2 transition-transform group-hover:translate-x-3 group-hover:translate-y-3" aria-hidden="true" />
-              <div className="relative bg-background border-4 border-foreground p-8">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-macaron-lavender">
-                    <Layers className="w-7 h-7 text-foreground" />
-                  </div>
-                  <div>
-                    <h3 className="font-syne text-2xl font-bold text-foreground mb-2">Tech Stack Research</h3>
-                    <p className="font-manrope text-muted-foreground leading-relaxed">
-                      AI-powered research finds the best technologies for your product with validation.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Feature card 3 */}
-            <div className="relative group [animation-delay:0.7s] animate-slide-in-right">
-              <div className="absolute inset-0 bg-macaron-peach translate-x-2 translate-y-2 transition-transform group-hover:translate-x-3 group-hover:translate-y-3" aria-hidden="true" />
-              <div className="relative bg-background border-4 border-foreground p-8">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-macaron-peach">
-                    <Box className="w-7 h-7 text-foreground" />
-                  </div>
-                  <div>
-                    <h3 className="font-syne text-2xl font-bold text-foreground mb-2">Complete PRD</h3>
-                    <p className="font-manrope text-muted-foreground leading-relaxed">
-                      Export professional, comprehensive PRDs as JSON or PDF. Ready for your team.
-                    </p>
-                  </div>
-                </div>
+              <div className="w-px h-12 bg-border" aria-hidden="true" />
+              <div className="text-center">
+                <div className="font-display text-3xl font-bold text-foreground">PDF Export</div>
+                <div className="text-sm text-muted-foreground mt-1">Ready to Use</div>
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Process flow - Bottom section */}
-        <div className="mt-32 [animation-delay:0.8s] animate-fade-in-up">
-          <div className="text-center mb-12">
-            <h2 className="font-syne text-5xl font-bold text-foreground mb-4">
+        {/* Features Section */}
+        <section className="max-w-7xl mx-auto px-6 lg:px-12 py-24 border-t border-border/50">
+          <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
+            {/* Feature 1 */}
+            <div className="space-y-4 [animation-delay:100ms] animate-fade-in-up">
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                <MessageSquare className="w-6 h-6 text-primary" />
+              </div>
+              <h3 className="font-display text-2xl font-semibold text-foreground">
+                AI Interview
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Conversational AI asks the right questions to extract every detail about your product vision, features, and requirements.
+              </p>
+            </div>
+
+            {/* Feature 2 */}
+            <div className="space-y-4 [animation-delay:200ms] animate-fade-in-up">
+              <div className="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center">
+                <Search className="w-6 h-6 text-secondary" />
+              </div>
+              <h3 className="font-display text-2xl font-semibold text-foreground">
+                Tech Research
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                AI-powered research identifies and validates the best technologies, frameworks, and tools for your specific product needs.
+              </p>
+            </div>
+
+            {/* Feature 3 */}
+            <div className="space-y-4 [animation-delay:300ms] animate-fade-in-up">
+              <div className="w-12 h-12 rounded-lg bg-warm-terracotta/10 flex items-center justify-center">
+                <FileText className="w-6 h-6 text-warm-terracotta" />
+              </div>
+              <h3 className="font-display text-2xl font-semibold text-foreground">
+                Export PRD
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Generate comprehensive, professional PRD documents in seconds. Export as JSON or PDF, ready for your team.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* How It Works Section */}
+        <section id="how-it-works" className="max-w-7xl mx-auto px-6 lg:px-12 py-24 border-t border-border/50">
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="font-display text-4xl lg:text-5xl font-bold text-foreground">
               How It Works
             </h2>
-            <p className="font-manrope text-xl text-muted-foreground">
-              From idea to PRD in 4 simple steps
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              From idea to professional PRD in four simple steps
             </p>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Step 1 */}
-            <div className="relative group">
-              <div className="absolute inset-0 bg-macaron-mint translate-y-2 transition-transform group-hover:translate-y-3" aria-hidden="true" />
-              <div className="relative bg-background border-4 border-foreground p-6 h-full">
-                <div className="font-jetbrains text-6xl font-bold text-macaron-mint mb-4">
-                  01
-                </div>
-                <h3 className="font-syne text-xl font-bold text-foreground mb-2">
-                  Chat
-                </h3>
-                <p className="font-manrope text-muted-foreground text-sm">
-                  Describe your product idea
-                </p>
+            <div className="space-y-4 [animation-delay:100ms] animate-fade-in-up">
+              <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
+                <span className="font-mono text-2xl font-semibold text-foreground">01</span>
               </div>
+              <h3 className="font-display text-xl font-semibold text-foreground">
+                Describe Your Idea
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Share your product vision in a natural conversation with Claude AI.
+              </p>
             </div>
 
             {/* Step 2 */}
-            <div className="relative group">
-              <div className="absolute inset-0 bg-macaron-lavender translate-y-2 transition-transform group-hover:translate-y-3" aria-hidden="true" />
-              <div className="relative bg-background border-4 border-foreground p-6 h-full">
-                <div className="font-jetbrains text-6xl font-bold text-macaron-lavender mb-4">
-                  02
-                </div>
-                <h3 className="font-syne text-xl font-bold text-foreground mb-2">
-                  Answer
-                </h3>
-                <p className="font-manrope text-muted-foreground text-sm">
-                  Clarify with AI questions
-                </p>
+            <div className="space-y-4 [animation-delay:200ms] animate-fade-in-up">
+              <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
+                <span className="font-mono text-2xl font-semibold text-foreground">02</span>
               </div>
+              <h3 className="font-display text-xl font-semibold text-foreground">
+                Answer Questions
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                AI asks clarifying questions to capture all the essential details.
+              </p>
             </div>
 
             {/* Step 3 */}
-            <div className="relative group">
-              <div className="absolute inset-0 bg-macaron-rose translate-y-2 transition-transform group-hover:translate-y-3" aria-hidden="true" />
-              <div className="relative bg-background border-4 border-foreground p-6 h-full">
-                <div className="font-jetbrains text-6xl font-bold text-macaron-rose mb-4">
-                  03
-                </div>
-                <h3 className="font-syne text-xl font-bold text-foreground mb-2">
-                  Research
-                </h3>
-                <p className="font-manrope text-muted-foreground text-sm">
-                  Select tech stack
-                </p>
+            <div className="space-y-4 [animation-delay:300ms] animate-fade-in-up">
+              <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
+                <span className="font-mono text-2xl font-semibold text-foreground">03</span>
               </div>
+              <h3 className="font-display text-xl font-semibold text-foreground">
+                Select Tech Stack
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Review AI-researched technologies and choose what fits best.
+              </p>
             </div>
 
             {/* Step 4 */}
-            <div className="relative group">
-              <div className="absolute inset-0 bg-macaron-peach translate-y-2 transition-transform group-hover:translate-y-3" aria-hidden="true" />
-              <div className="relative bg-background border-4 border-foreground p-6 h-full">
-                <div className="font-jetbrains text-6xl font-bold text-macaron-peach mb-4">
-                  04
-                </div>
-                <h3 className="font-syne text-xl font-bold text-foreground mb-2">
-                  Export
-                </h3>
-                <p className="font-manrope text-muted-foreground text-sm">
-                  Get your PRD
-                </p>
+            <div className="space-y-4 [animation-delay:400ms] animate-fade-in-up">
+              <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
+                <span className="font-mono text-2xl font-semibold text-foreground">04</span>
               </div>
+              <h3 className="font-display text-xl font-semibold text-foreground">
+                Export Your PRD
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Download a complete, professional PRD ready for your team.
+              </p>
             </div>
           </div>
-        </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="max-w-7xl mx-auto px-6 lg:px-12 py-24 border-t border-border/50">
+          <div className="max-w-3xl mx-auto text-center space-y-8 py-12">
+            <h2 className="font-display text-4xl lg:text-5xl font-bold text-foreground">
+              Ready to Build Your PRD?
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Join product teams using VIBED to ship faster with better documentation.
+            </p>
+            <SignUpButton mode="modal">
+              <button type="button" className="px-10 py-5 bg-primary text-primary-foreground rounded-lg font-semibold text-lg hover:bg-primary/90 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm">
+                Get Started Free
+              </button>
+            </SignUpButton>
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="border-t border-border/50">
+          <div className="max-w-7xl mx-auto px-6 lg:px-12 py-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded bg-primary/10 flex items-center justify-center">
+                  <FileText className="w-3 h-3 text-primary" />
+                </div>
+                <span className="font-display text-sm font-semibold text-muted-foreground">VIBED</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                © 2024 VIBED. AI-Powered PRD Generation.
+              </p>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );
