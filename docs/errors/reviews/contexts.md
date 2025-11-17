@@ -1,6 +1,6 @@
 # Code Review: Contexts
 
-This file contains 3 review issues for contexts files (ALL RESOLVED).
+This file contains 3 review issues for contexts files (2 RESOLVED, 1 PENDING).
 
 ============================================================================
 

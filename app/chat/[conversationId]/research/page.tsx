@@ -169,6 +169,11 @@ export default function ResearchPage() {
     }
   };
 
+  // Reset ref when conversationId changes
+  useEffect(() => {
+    hasStartedResearchRef.current = false;
+  }, [conversationId]);
+
   // Auto-start research if no existing results
   useEffect(() => {
     logger.debug("ResearchPage.useEffect", "Research useEffect triggered", {

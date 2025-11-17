@@ -12,17 +12,27 @@ export default function NewChatPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let mounted = true;
+
     const initConversation = async () => {
       try {
         const conversationId = await createConversation();
-        router.push(`/chat/${conversationId}`);
+        if (mounted) {
+          router.push(`/chat/${conversationId}`);
+        }
       } catch (error) {
         console.error("Failed to create conversation:", error);
-        setError(error instanceof Error ? error.message : "Failed to create conversation");
+        if (mounted) {
+          setError(error instanceof Error ? error.message : "Failed to create conversation");
+        }
       }
     };
 
     initConversation();
+
+    return () => {
+      mounted = false;
+    };
   }, [createConversation, router]);
 
   if (error) {
