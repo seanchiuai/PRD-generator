@@ -8,7 +8,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed - 2025-01-17
 
-#### Code Review Group-9 Issues (Latest commit)
+#### Code Review Group-10 Issues (Latest commit)
+
+**Security:**
+- chart.tsx: Strengthened color validation regex to prevent XSS (full string match with ^ and $, explicit parentheses matching)
+- generate/route.ts: Added null-safe fallbacks for messages/clarifyingQuestions arrays
+
+**Race Conditions & State Management:**
+- WorkflowContext.tsx: Fixed race condition in goToStep - update local state only after successful remote update
+- questions/page.tsx: Clear auto-save timeout in handleSkip to prevent race conditions
+- questions/page.tsx: Fixed useEffect dependency (excluded generateQuestions with ESLint disable + explanation)
+
+**Type Safety:**
+- prds.ts: Added pagination support (paginationOptsValidator, returns PaginationResult)
+- prds.ts: Clear orphaned conversation.prdId reference in deletePRD mutation
+- dashboard/page.tsx: Updated to handle paginated results (prds.page)
+- tech-stack/page.tsx: Convert Question[] to UserAnswers format for detectProductType
+
+**Data Validation & Filtering:**
+- TechStackPage.tsx: Use explicit .filter() chain instead of inline null return
+- progress.ts: Use precise segment matching in getStepFromPath (split by '/' and check segments)
+- conversations.ts: Improved mergeCompletedSteps sorting (handle unknown steps gracefully)
+
+**Defensive Programming:**
+- nav-user.tsx: Defensive initials calculation (trim, split by whitespace, filter empty parts, fallback to email/U)
+- progress.tsx: Clamp value to 0-100 range to prevent visual glitches
+
+**Component Fixes:**
+- chat/new/page.tsx: Removed unused isLoading state variable
+- suggest-defaults/route.ts: Added missing TECH_STACK_SUGGESTION_PROMPT import
+
+#### Code Review Group-9 Issues
 
 **Component Architecture:**
 - section-cards.tsx: Refactored to data-driven design with props (cards, className) and DEFAULT_CARDS constant, added proper interfaces
