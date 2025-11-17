@@ -8,6 +8,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed - 2025-01-17
 
+#### Code Review Group-1 Issues (bba3083)
+
+**Environment & Configuration:**
+- Pinned Node.js version to 20.10.0 in .tool-versions for reproducible dev environments
+- Removed duplicate .claude/commands/push.md file (kept push-all.md)
+- Added trailing newline to .claude/commands/pull.md for POSIX compliance
+
+**Database & Migrations:**
+- Added migrations table to Convex schema for tracking migration execution
+- Implemented pagination (100 items/batch) in migrations to handle large datasets
+- Added error handling, type guards, and idempotency checks to migration logic
+- Migration now logs progress and prevents duplicate execution
+
+**TypeScript & Type Safety:**
+- Added TypeScript interfaces (AuthProvider, AuthConfig) to convex/auth.config.ts
+- Fixed unused imports and variables across API routes
+- Replaced type-only imports with `import type` for better tree-shaking
+- Fixed parse-ai-json.ts unused variable errors
+
+**React & UI:**
+- Fixed SSR hydration mismatch in use-mobile hook (initialize with undefined, not window check)
+- Fixed infinite re-render in use-store-user hook (removed storeUser from dependency array)
+- Added ARIA attributes (role="status", aria-live, aria-busy) to loading.tsx for accessibility
+- Fixed responsive col-span-2 class in DefaultStackPreview (now md:col-span-2)
+
+**Code Quality:**
+- Extracted repeated tech stack item structure in DefaultStackPreview (reduced duplication)
+- Replaced String.replaceAll with regex (/_/g) for broader browser compatibility
+- Removed redundant console.error in app/error.tsx (logger utility handles it)
+
+**Impact:** All 14 code review issues from docs/errors/group-1.md resolved
+
+### Fixed - 2025-01-17
+
 #### Group-8 Code Review Issues (827b116)
 
 Resolved 14 code quality and performance issues:
