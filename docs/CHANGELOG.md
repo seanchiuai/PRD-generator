@@ -44,32 +44,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 #### Fix: PRD Generation Validation Error (5e2645b)
 
-**Bug Fix**
+##### Bug Fix
 - Fixed 400 Bad Request error when generating PRDs from Generate page
 - Generate page was sending `conversationData` but API expects `conversationId`
 - API now correctly fetches conversation data server-side using conversationId
 
-**Type Safety**
+##### Type Safety
 - Fixed TypeScript errors in tech-stack route and toggle-group component
 - Improved nullable array access and const declarations
 
-**Impact**: PRD generation now works correctly through full workflow (Discovery → Questions → Research → Selection → Generate)
+##### Impact
+PRD generation now works correctly through full workflow (Discovery → Questions → Research → Selection → Generate)
 
 ### Changed - 2025-01-16
 
 #### Refactor: Type Safety & Code Organization (8562799)
 
-**Type Safety Improvements**
+##### Type Safety Improvements
 - Replaced `v.any()` with proper TechOption validator in Convex schema
 - Added full type definition for tech stack research results with validation
 - Improved database schema type safety while maintaining flexibility for dynamic content
 
-**Code Organization**
+##### Code Organization
 - Created barrel exports for `lib/analytics`, `lib/prompts`, and `lib/workflow` modules
 - Simplified imports across codebase with index.ts re-exports
 - Improved code organization and module structure
 
-**Dependencies**
+##### Dependencies
 - Updated 10 dependencies to latest minor/patch versions:
   - @anthropic-ai/sdk: 0.68.0 → 0.69.0
   - @clerk/nextjs: patch update
@@ -84,19 +85,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 #### Refactor: Logging Standardization (eeec14b)
 
-**Logging Infrastructure**
+##### Logging Infrastructure
 - Replaced 70+ `console.log/error/warn` statements with centralized `logger` utility
 - Implemented structured logging with context metadata throughout application
 - Added proper log levels (debug, info, warn, error) for better log filtering
 - Enhanced production observability with JSON-formatted logs
 
-**Files Modified**
+##### Files Modified
 - 6 chat workflow pages (discovery, questions, research, selection, generate)
 - 3 API routes (tech stack research, dashboard operations, PRD generation)
 - 3 library utilities (analytics tracking, workflow persistence)
 - 2 shared contexts and hooks (WorkflowContext, useStoreUser)
 
-**Benefits**
+##### Benefits
 - Production-ready logging with structured metadata
 - Better debugging with contextual information (conversationId, component names)
 - Consistent error tracking across the entire application
