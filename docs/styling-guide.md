@@ -6,48 +6,46 @@
 
 This project uses Tailwind 4's CSS variables approach defined in `app/globals.css`.
 
-### Theme Colors (Macaron Palette)
+### Theme Colors (Minimalist Warm Palette)
 
 ```css
-/* Soft cream background */
---background: #FFFBF5
---foreground: #2D1B3D (deep purple-brown)
+/* Warm neutral base */
+--background: #FAFAF8 (warm off-white)
+--foreground: #1A1816 (warm near-black)
 
-/* Primary: Pistachio macaron */
---primary: #B8E6D5
---primary-foreground: #1A4D3E
+/* Primary: Burnt sienna/terracotta */
+--primary: #C7522A
+--primary-foreground: #FAFAF8
 
-/* Secondary: Lavender macaron */
---secondary: #D4BDFC
---secondary-foreground: #3D2066
+/* Secondary: Deep teal */
+--secondary: #2C5F5D
+--secondary-foreground: #FAFAF8
 
-/* Accent: Rose macaron */
---accent: #FFD4E5
---accent-foreground: #8B2952
+/* Accent: Same as primary (minimalist approach) */
+--accent: #C7522A
+--accent-foreground: #FAFAF8
 
 /* Muted */
---muted: #F5F0EB
---muted-foreground: #6B5B73
+--muted: #E8E6E1 (warm gray)
+--muted-foreground: #706B63
 
 /* Destructive */
---destructive: #FF6B9D
+--destructive: #D93F3F
 --destructive-foreground: #FFFFFF
 
 /* Borders & Inputs */
---border: #E8DDD4
---input: #F9F5F1
---ring: #D4BDFC
+--border: #D6D3CC
+--input: #F2F1EE
+--ring: #C7522A
 ```
 
-### Macaron Accent Colors
+### Accent Colors (Minimal Palette)
 
 ```css
---macaron-lemon: #FFF4A3
---macaron-peach: #FFD1B3
---macaron-berry: #FF9EB7
---macaron-mint: #B8E6D5
---macaron-lavender: #D4BDFC
---macaron-rose: #FFD4E5
+--warm-terracotta: #C7522A
+--deep-teal: #2C5F5D
+--soft-sage: #A4B4A5
+--warm-sand: #D6C8B5
 ```
 
 ### Usage in Components
@@ -74,9 +72,9 @@ This project uses Tailwind 4's CSS variables approach defined in `app/globals.cs
 ### Font Families
 
 ```css
---font-sans: 'Onest' (body text)
---font-display: 'Bricolage Grotesque' (headings)
---font-mono: ui-monospace, 'Cascadia Code', ...
+--font-sans: 'DM Sans' (body text - clean, slightly quirky)
+--font-display: 'Fraunces' (headings - distinctive variable serif)
+--font-mono: 'IBM Plex Mono' (code/numbers)
 ```
 
 ### Font Usage
@@ -86,41 +84,39 @@ This project uses Tailwind 4's CSS variables approach defined in `app/globals.cs
 <p className="font-sans">Regular text</p>
 
 // Headings (automatically applied via globals.css)
-<h1>Heading</h1>  // Uses 'Bricolage Grotesque'
+<h1>Heading</h1>  // Uses 'Fraunces'
 
 // Display text (manual application)
 <div className="font-display">Special heading</div>
 
-// Alternative display fonts
-<div className="font-syne">Syne font</div>
-<div className="font-manrope">Manrope font</div>
-<div className="font-jetbrains">JetBrains Mono</div>
+// Monospace
+<div className="font-mono">Code or numbers</div>
 ```
 
 ### Heading Defaults
 
-All h1-h6 tags automatically use `Bricolage Grotesque` with `font-weight: 600` (defined in globals.css).
+All h1-h6 tags automatically use `Fraunces` with `font-weight: 600` and optical sizing enabled (defined in globals.css).
 
 ## Border Radius
 
 ### Standard Radius
 
 ```css
---radius: 1.25rem (20px) - macaron aesthetic
+--radius: 0.375rem (6px) - subtle, minimalist aesthetic
 
 /* Derived radii */
---radius-sm: calc(var(--radius) - 6px)   // 14px
---radius-md: calc(var(--radius) - 4px)   // 16px
---radius-lg: var(--radius)               // 20px
---radius-xl: calc(var(--radius) + 8px)   // 28px
+--radius-sm: calc(var(--radius) - 2px)   // 4px
+--radius-md: var(--radius)               // 6px
+--radius-lg: calc(var(--radius) + 2px)   // 8px
+--radius-xl: calc(var(--radius) + 4px)   // 10px
 ```
 
 ### Usage
 
 ```typescript
-<Card className="rounded-lg">        // Uses --radius-lg (20px)
-<Button className="rounded-md">      // Uses --radius-md (16px)
-<Input className="rounded-sm">       // Uses --radius-sm (14px)
+<Card className="rounded-lg">        // Uses --radius-lg (8px)
+<Button className="rounded-md">      // Uses --radius-md (6px)
+<Input className="rounded-sm">       // Uses --radius-sm (4px)
 ```
 
 ## Spacing Patterns
@@ -345,45 +341,31 @@ border-gray-200 dark:border-gray-800
 
 ## Custom Utility Classes
 
-### Gradient Backgrounds
-
-```typescript
-// Macaron gradient
-<div className="bg-macaron-gradient">
-
-// Macaron mesh (radial gradients)
-<div className="bg-macaron-mesh">
-```
-
 ### Glass Effect
 
 ```typescript
 <div className="glass-effect">
-  // Blurred background with transparency
+  // Subtle blurred background with transparency
 </div>
 ```
 
 ### Text Gradients
 
 ```typescript
-<h1 className="text-gradient-primary">
-  Gradient heading
-</h1>
-
-<h1 className="text-gradient-accent">
-  Accent gradient
+<h1 className="text-gradient">
+  Terracotta to teal gradient text
 </h1>
 ```
 
 ### Pattern Backgrounds
 
 ```typescript
-<div className="bg-grid-pattern">
-  // Grid pattern overlay
+<div className="bg-grid-subtle">
+  // Subtle grid pattern overlay
 </div>
 
-<div className="bg-dots-pattern">
-  // Dots pattern overlay
+<div className="bg-texture">
+  // Diagonal line texture
 </div>
 ```
 
@@ -396,27 +378,19 @@ border-gray-200 dark:border-gray-800
 animate-accordion-down
 animate-accordion-up
 
-// Floating animation
-animate-float
-
 // Shimmer effect (loading)
 animate-shimmer
 
-// Fade in from bottom
+// Fade animations
+animate-fade-in
 animate-fade-in-up
 
 // Scale in
 animate-scale-in
 
-// Glow pulse
-animate-glow-pulse
-
 // Slide animations
 animate-slide-in-right
 animate-slide-in-left
-
-// Slow rotation
-animate-rotate-slow
 ```
 
 ### Usage Examples
