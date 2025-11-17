@@ -40,6 +40,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Improved maintainability and testability
 - Type-safe error handling throughout
 
+### Fixed - 2025-01-17
+
+#### Fix: PRD Generation Validation Error (5e2645b)
+
+**Bug Fix**
+- Fixed 400 Bad Request error when generating PRDs from Generate page
+- Generate page was sending `conversationData` but API expects `conversationId`
+- API now correctly fetches conversation data server-side using conversationId
+
+**Type Safety**
+- Fixed TypeScript errors in tech-stack route and toggle-group component
+- Improved nullable array access and const declarations
+
+**Impact**: PRD generation now works correctly through full workflow (Discovery → Questions → Research → Selection → Generate)
+
 ### Changed - 2025-01-16
 
 #### Refactor: Type Safety & Code Organization (8562799)
