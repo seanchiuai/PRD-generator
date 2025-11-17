@@ -2,6 +2,9 @@
 
 ## 2025-11-17
 
+### Pulled (5ed9060)
+- **PRD JSON Parsing**: Balanced brace matching implementation merged. Improved extraction of JSON from conversational responses.
+
 ### Added
 - **Skip Button Protection**: Skip button now disabled during message processing to prevent race conditions.
 - **Merge Plan**: Created plan to merge research/selection phases for streamlined workflow.
