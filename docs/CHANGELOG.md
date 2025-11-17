@@ -8,6 +8,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed - 2025-01-17
 
+#### Code Review Group-2 Issues (827b116 - included in group-8 commit)
+
+**Documentation Improvements:**
+- frontend-architecture.md: Added language specifiers (text) to code blocks for proper syntax highlighting
+- SETUP.md: Added language specifier (text) to project structure code block
+- SETUP.md: Added blank lines after headings and around code blocks for markdownlint compliance
+- SETUP.md: Converted emphasized footer text to proper heading (## Happy coding!)
+- refactor.md: Added trailing newline for POSIX compliance
+- convex-patterns.md: Fixed variable name error (users → idToUsername) in Record example
+- context-extraction.md: Added top-level heading and trailing newline
+
+**Code Quality & Maintainability:**
+- constants.ts: Extracted sanitizeForFilename() helper to deduplicate filename sanitization logic
+- TechStackCard.tsx: Replaced array index keys with content keys (key={pro} and key={con})
+- PDFHeader.tsx: Added explicit locale (en-US) to toLocaleDateString for consistent date formatting across environments
+- app-sidebar.tsx: Implemented real navigation URLs for Settings (/settings) and Help (/help) pages
+
+**Type Safety & Validation:**
+- tech-stack/page.tsx: Added runtime type guard (isValidTechOption) before type assertion to prevent runtime errors
+- tech-stack/page.tsx: Documented MIN_SELECTIONS_FOR_VALIDATION constant (requires 2+ selections for compatibility validation)
+
+**API Security & Monitoring:**
+- conversation/message/route.ts: Added token usage monitoring with warnings when approaching 80% of TOKEN_LIMITS.CONVERSATION
+- initial-message/route.ts: Added token usage monitoring with warnings when approaching 80% of TOKEN_LIMITS.CONVERSATION
+
+**Impact:** All 15 code review issues from docs/errors/group-2.md resolved. Note: Full rate limiting requires infrastructure (Redis/Upstash) - implemented token monitoring as immediate improvement.
+
 #### Code Review Group-5 Issues (Latest commit)
 
 **UI/UX Fixes:**
