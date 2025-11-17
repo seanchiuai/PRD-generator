@@ -38,21 +38,30 @@ export default function TechStackPage() {
   const [showCountdown, setShowCountdown] = useState(false);
   const [validationAbortController, setValidationAbortController] = useState<AbortController | null>(null);
   const hasStartedResearchRef = useRef(false);
+  const hasInitializedSelectionsRef = useRef(false);
 
   // Detect if the stack was auto-selected
   const isAutoSelected = conversation?.selection?.autoSelected || false;
 
   // Dynamically build categories from queriesGenerated or researchResults
   const categories = useMemo(() => {
-    return conversation?.queriesGenerated?.map(q => ({
-      key: q.category,
-      name: q.category.charAt(0).toUpperCase() + q.category.slice(1).replace(/-/g, ' '),
-      reasoning: q.reasoning,
-    })) || Object.keys(conversation?.researchResults || {}).map(key => ({
-      key,
-      name: key.charAt(0).toUpperCase() + key.slice(1).replace(/-/g, ' '),
-      reasoning: undefined,
-    })) || [];
+    if (conversation?.queriesGenerated && conversation.queriesGenerated.length > 0) {
+      return conversation.queriesGenerated.map(q => ({
+        key: q.category,
+        name: q.category.charAt(0).toUpperCase() + q.category.slice(1).replace(/-/g, ' '),
+        reasoning: q.reasoning,
+      }));
+    }
+
+    if (conversation?.researchResults) {
+      return Object.keys(conversation.researchResults).map(key => ({
+        key,
+        name: key.charAt(0).toUpperCase() + key.slice(1).replace(/-/g, ' '),
+        reasoning: undefined,
+      }));
+    }
+
+    return [];
   }, [conversation?.queriesGenerated, conversation?.researchResults]);
 
   // Check if research results actually have data
@@ -61,7 +70,7 @@ export default function TechStackPage() {
 
   // Load existing selections - only once per conversation
   useEffect(() => {
-    if (!conversation) return;
+    if (!conversation || hasInitializedSelectionsRef.current) return;
 
     if (conversation?.selectedTechStack) {
       const loaded: Record<string, string> = {};
@@ -76,8 +85,9 @@ export default function TechStackPage() {
     if (conversation?.validationWarnings) {
       setValidationWarnings(conversation.validationWarnings as ValidationWarning[]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversationId]);
+
+    hasInitializedSelectionsRef.current = true;
+  }, [conversation, conversationId]);
 
   // Auto-advance countdown for auto-selected stacks
   useEffect(() => {
@@ -202,28 +212,45 @@ export default function TechStackPage() {
   }, [conversation, conversationId, saveResults, toast]);
 
   const handleSelection = async (category: string, optionName: string) => {
-    // Update local state
+    // Update local state optimistically
     const newSelections = {
       ...selections,
       [category]: optionName,
     };
     setSelections(newSelections);
 
-    // Save to Convex
-    const categoryData = conversation?.researchResults?.[category as keyof typeof conversation.researchResults];
-    const options = (Array.isArray(categoryData) ? categoryData : (categoryData?.options || [])) as TechOption[];
-    await saveSelection({
-      conversationId,
-      category,
-      selection: {
-        name: optionName,
-        reasoning: `Selected from ${options.length} options`,
-        selectedFrom: options.map((o) => o.name),
-      },
-    });
+    try {
+      // Save to Convex
+      const categoryData = conversation?.researchResults?.[category as keyof typeof conversation.researchResults];
+      const options = (Array.isArray(categoryData) ? categoryData : (categoryData?.options || [])) as TechOption[];
+      await saveSelection({
+        conversationId,
+        category,
+        selection: {
+          name: optionName,
+          reasoning: `Selected from ${options.length} options`,
+          selectedFrom: options.map((o) => o.name),
+        },
+      });
 
-    // Trigger validation with updated selections
-    validateSelections(newSelections);
+      // Trigger validation with updated selections
+      validateSelections(newSelections);
+    } catch (error) {
+      logger.error("TechStackPage.handleSelection", error, {
+        conversationId,
+        category,
+        optionName,
+      });
+
+      // Revert optimistic update
+      setSelections(selections);
+
+      toast({
+        title: "Selection Failed",
+        description: "Failed to save your selection. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSkip = async () => {
@@ -309,9 +336,10 @@ export default function TechStackPage() {
     router.push(`/chat/${conversationId}/generate`);
   };
 
-  // Reset ref when conversationId changes
+  // Reset refs when conversationId changes
   useEffect(() => {
     hasStartedResearchRef.current = false;
+    hasInitializedSelectionsRef.current = false;
   }, [conversationId]);
 
   // Auto-start research if no existing results

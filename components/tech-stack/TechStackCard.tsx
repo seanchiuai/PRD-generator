@@ -4,15 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Check, X, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface TechOption {
-  name: string;
-  description: string;
-  pros: string[];
-  cons: string[];
-  popularity?: string;
-  learnMore?: string;
-}
+import type { TechOption } from "@/types";
 
 interface TechStackCardProps {
   option: TechOption;

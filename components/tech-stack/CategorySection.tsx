@@ -5,15 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
-
-interface TechOption {
-  name: string;
-  description: string;
-  pros: string[];
-  cons: string[];
-  popularity?: string;
-  learnMore?: string;
-}
+import type { TechOption } from "@/types";
 
 interface CategorySectionProps {
   category: string;

@@ -3,13 +3,7 @@
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CheckCircle2, AlertTriangle, XCircle, Loader2 } from "lucide-react";
-
-interface ValidationWarning {
-  level: "warning" | "error";
-  message: string;
-  affectedTechnologies: string[];
-  suggestion?: string;
-}
+import type { ValidationWarning } from "@/types";
 
 interface SelectionStatusProps {
   total: number;
