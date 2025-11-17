@@ -148,9 +148,9 @@ export function QuestionCard({ question, onAnswerChange }: QuestionCardProps) {
 
       {/* Suggested Options */}
       <div className="flex flex-col sm:flex-row gap-2">
-        {question.suggestedOptions.map((option, idx) => (
+        {question.suggestedOptions.map((option) => (
           <Button
-            key={idx}
+            key={option}
             variant={selectedOption === option ? "default" : "outline"}
             onClick={() => handleOptionClick(option)}
             className="flex-1 h-auto py-3 px-4 text-left justify-start whitespace-normal"

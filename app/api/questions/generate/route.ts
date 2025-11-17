@@ -73,9 +73,32 @@ Use this context to generate highly relevant questions.
     }
 
     // Parse AI response using centralized utility
-    const questions = parseAIResponse<QuestionGenerationResponse>(content.text);
+    const parsedResponse = parseAIResponse<any>(content.text);
 
-    return NextResponse.json(questions);
+    // Normalize response structure
+    // AI may return nested structure (grouped by category) or flat structure
+    let questions: QuestionGenerationResponse["questions"];
+    if (parsedResponse.questions && Array.isArray(parsedResponse.questions)) {
+      const firstItem = parsedResponse.questions[0];
+
+      // Check if nested structure (has 'questions' array inside category groups)
+      if (firstItem && "questions" in firstItem && Array.isArray(firstItem.questions)) {
+        // Flatten nested structure: extract questions from each category group
+        questions = parsedResponse.questions.flatMap((categoryGroup: any) =>
+          categoryGroup.questions.map((q: any) => ({
+            ...q,
+            category: categoryGroup.category, // Add category field from parent
+          }))
+        );
+      } else {
+        // Already flat structure
+        questions = parsedResponse.questions;
+      }
+    } else {
+      throw new Error("Invalid AI response structure: missing questions array");
+    }
+
+    return NextResponse.json({ questions });
   } catch (error) {
     return handleAPIError(error, "generate questions");
   }

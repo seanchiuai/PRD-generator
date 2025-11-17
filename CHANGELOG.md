@@ -1,5 +1,11 @@
 # Changelog
 
+## 2025-11-17
+
+### Fixed
+- **Question Generation**: AI response flattening logic added to handle nested category structure. Questions now save to Convex without schema validation errors.
+- **React Key Warning**: Changed QuestionCard option keys from array index to option value.
+
 ## 2025-11-16
 
 ### Fixed
