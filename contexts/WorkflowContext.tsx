@@ -8,10 +8,10 @@ import { saveWorkflowSnapshot, loadWorkflowSnapshot } from '@/lib/workflow/persi
 import { logger } from '@/lib/logger'
 
 // Note: 'discovery' kept for backwards compatibility with existing data
-export type WorkflowStep = 'discovery' | 'questions' | 'tech-stack' | 'generate'
+export type WorkflowStep = 'discovery' | 'setup' | 'questions' | 'tech-stack' | 'generate'
 
 // Active workflow steps (discovery removed from flow)
-const WORKFLOW_STEPS: WorkflowStep[] = ['questions', 'tech-stack', 'generate']
+const WORKFLOW_STEPS: WorkflowStep[] = ['setup', 'questions', 'tech-stack', 'generate']
 
 function arraysEqual<T>(a: T[], b: T[]): boolean {
   return a.length === b.length && a.every((val, idx) => val === b[idx])

@@ -60,9 +60,9 @@ export default defineSchema({
         productName: v.string(),
         description: v.string(),
         targetAudience: v.string(),
-        keyFeatures: v.array(v.string()),
+        keyFeatures: v.optional(v.array(v.string())),
         problemStatement: v.string(),
-        technicalPreferences: v.array(v.string()),
+        technicalPreferences: v.optional(v.array(v.string())),
         extractedAt: v.number(),
       })
     ),
@@ -179,6 +179,7 @@ export default defineSchema({
       v.object({
         currentStep: v.union(
           v.literal("discovery"), // kept for backwards compatibility
+          v.literal("setup"),
           v.literal("questions"),
           v.literal("tech-stack"),
           v.literal("generate")

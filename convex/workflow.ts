@@ -42,6 +42,7 @@ export const updateProgress = mutation({
     conversationId: v.id("conversations"),
     currentStep: v.union(
       v.literal("discovery"), // kept for backwards compatibility
+      v.literal("setup"),
       v.literal("questions"),
       v.literal("tech-stack"),
       v.literal("generate")
@@ -91,6 +92,7 @@ export const completeStep = mutation({
     conversationId: v.id("conversations"),
     step: v.union(
       v.literal("discovery"), // kept for backwards compatibility
+      v.literal("setup"),
       v.literal("questions"),
       v.literal("tech-stack"),
       v.literal("generate")
@@ -127,6 +129,7 @@ export const skipStep = mutation({
     conversationId: v.id("conversations"),
     step: v.union(
       v.literal("discovery"), // kept for backwards compatibility
+      v.literal("setup"),
       v.literal("questions"),
       v.literal("tech-stack"),
       v.literal("generate")

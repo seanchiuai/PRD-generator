@@ -47,9 +47,9 @@ export interface ExtractedContext {
   productName: string;
   description: string;
   targetAudience: string;
-  keyFeatures: string[];
+  keyFeatures?: string[];
   problemStatement: string;
-  technicalPreferences: string[];
+  technicalPreferences?: string[];
   extractedAt?: number;
 }
 

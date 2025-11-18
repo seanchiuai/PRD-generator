@@ -1,5 +1,5 @@
 // Note: 'discovery' kept for backwards compatibility with existing data
-export type WorkflowStep = 'discovery' | 'questions' | 'tech-stack' | 'generate'
+export type WorkflowStep = 'discovery' | 'setup' | 'questions' | 'tech-stack' | 'generate'
 
 export interface WorkflowProgress {
   currentStep: WorkflowStep
@@ -13,9 +13,9 @@ export interface WorkflowProgress {
 export function getCompletedSteps(stage: string): WorkflowStep[] {
   const stageMap: Record<string, WorkflowStep[]> = {
     'setup': [],
-    'questions': [],
-    'tech-stack': ['questions'],
-    'generate': ['questions', 'tech-stack'],
+    'questions': ['setup'],
+    'tech-stack': ['setup', 'questions'],
+    'generate': ['setup', 'questions', 'tech-stack'],
   }
   return stageMap[stage] || []
 }
@@ -57,8 +57,8 @@ export function canNavigateToStep(
 
   // Can navigate to the next step after the last completed step
   if (completedSteps.length === 0) {
-    // If no steps completed, can only access questions
-    return targetStep === 'questions'
+    // If no steps completed, can only access setup
+    return targetStep === 'setup'
   }
 
   const lastCompletedIndex = Math.max(
@@ -90,6 +90,7 @@ export function getStepFromPath(pathname: string): WorkflowStep {
 export function getStepPath(step: WorkflowStep, conversationId: string): string {
   const pathMap: Record<WorkflowStep, string> = {
     discovery: `/chat/${conversationId}/questions`, // redirect to questions
+    setup: `/chat/${conversationId}/setup`,
     questions: `/chat/${conversationId}/questions`,
     'tech-stack': `/chat/${conversationId}/tech-stack`,
     generate: `/chat/${conversationId}/generate`,
@@ -120,5 +121,5 @@ export function isStepSkipped(
  * Get all workflow steps
  */
 export function getAllSteps(): WorkflowStep[] {
-  return ['questions', 'tech-stack', 'generate']
+  return ['setup', 'questions', 'tech-stack', 'generate']
 }

@@ -490,10 +490,10 @@ export const saveProjectSetup = mutation({
     const extractedContext = {
       productName: args.projectName,
       description: args.projectDescription,
-      targetAudience: "To be determined based on project requirements",
-      keyFeatures: [],
+      targetAudience: "",
+      keyFeatures: undefined,
       problemStatement: args.projectDescription,
-      technicalPreferences: [],
+      technicalPreferences: undefined,
       extractedAt: Date.now(),
     };
 
