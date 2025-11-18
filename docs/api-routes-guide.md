@@ -577,7 +577,57 @@ await convex.mutation(api.conversations.update, {
 });
 ```
 
-## Rate Limiting Considerations
+## Rate Limiting
+
+### Application Rate Limits
+
+Located in `lib/rate-limiter.ts`:
+
+```typescript
+import { rateLimitRequest, recordTokenUsage, RATE_LIMIT_CONFIGS } from "@/lib/rate-limiter";
+
+export const RATE_LIMIT_CONFIGS = {
+  API_STANDARD: {
+    maxRequests: 60,
+    windowMs: 60 * 1000,  // 60 requests per minute
+  },
+  API_AI: {
+    maxRequests: 20,
+    windowMs: 60 * 1000,   // 20 requests per minute
+    maxTokens: 100000,     // 100k tokens per minute
+  },
+  API_ANONYMOUS: {
+    maxRequests: 10,
+    windowMs: 60 * 1000,   // 10 requests per minute
+  },
+};
+```
+
+### Rate Limiting Middleware
+
+```typescript
+export async function POST(req: Request) {
+  const { userId } = await auth();
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Apply rate limiting
+  const rateLimitResult = rateLimitRequest(req, userId, RATE_LIMIT_CONFIGS.API_AI);
+  if ("error" in rateLimitResult) {
+    return rateLimitResult.error; // Returns 429 with Retry-After header
+  }
+  const { identifier } = rateLimitResult;
+
+  // ... perform API call ...
+
+  // Track token usage for AI endpoints
+  const totalTokens = response.usage?.total_tokens ?? 0;
+  recordTokenUsage(identifier, totalTokens);
+
+  return NextResponse.json({ data: result });
+}
+```
 
 ### Claude API Limits
 

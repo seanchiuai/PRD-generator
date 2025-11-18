@@ -199,6 +199,44 @@ setItems(items.map(i =>
 )); // Update
 ```
 
+### useReducer for Complex State
+
+For components with multiple interdependent state fields (5+), use `useReducer`:
+
+```typescript
+type Action =
+  | { type: "TOGGLE_MULTISELECT"; option: string }
+  | { type: "SELECT_OPTION"; option: string }
+  | { type: "TOGGLE_OTHER" }
+  | { type: "INITIALIZE"; payload: State };
+
+interface State {
+  selectedOptions: string[];
+  otherEnabled: boolean;
+  otherText: string;
+}
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "TOGGLE_MULTISELECT":
+      return {
+        ...state,
+        selectedOptions: state.selectedOptions.includes(action.option)
+          ? state.selectedOptions.filter(o => o !== action.option)
+          : [...state.selectedOptions, action.option]
+      };
+    case "SELECT_OPTION":
+      return { ...state, selectedOptions: [action.option] };
+    default:
+      return state;
+  }
+}
+
+// Usage
+const [state, dispatch] = useReducer(reducer, initialState);
+dispatch({ type: "SELECT_OPTION", option: "React" });
+```
+
 ### Derived State
 
 ```typescript
@@ -620,6 +658,60 @@ const firstItem = items?.[0];
 
 // Call optional callback
 onItemClick?.(itemId);
+```
+
+## Accessibility Patterns
+
+### ARIA Labels for Interactive Elements
+
+```typescript
+// Chat messages with full context
+<div
+  aria-label={`Message from ${role} at ${timestamp}: ${content.slice(0, 100)}`}
+>
+  <span aria-hidden="true">{icon}</span>
+  <span>{content}</span>
+</div>
+
+// Icon-only buttons
+<button aria-label="Delete item">
+  <Trash2 className="h-4 w-4" />
+</button>
+```
+
+### Form Element Associations
+
+```typescript
+// Checkbox with proper label association
+<div className="flex items-center gap-2">
+  <input
+    type="checkbox"
+    id={`option-${question.id}-${index}`}
+    checked={isSelected}
+    onChange={() => handleToggle(option)}
+  />
+  <label htmlFor={`option-${question.id}-${index}`}>
+    {option}
+  </label>
+</div>
+```
+
+### Keyboard Navigation
+
+```typescript
+<div
+  role="button"
+  tabIndex={0}
+  onClick={handleClick}
+  onKeyDown={(e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleClick();
+    }
+  }}
+>
+  Interactive content
+</div>
 ```
 
 ## Common Anti-Patterns to Avoid
