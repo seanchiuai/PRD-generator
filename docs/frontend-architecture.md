@@ -23,9 +23,9 @@
       /tech-stack
         page.tsx                    # Tech stack research & selection
       /research
-        page.tsx                    # Redirect to tech-stack (deprecated)
+        page.tsx                    # 🗑️ Deprecated - redirects to tech-stack
       /select
-        page.tsx                    # Redirect to tech-stack (deprecated)
+        page.tsx                    # 🗑️ Deprecated - redirects to tech-stack
       /generate
         page.tsx                    # PRD generation & display
 
@@ -62,11 +62,18 @@
 - `[conversationId]`: Conversation-specific pages
 - `[prdId]`: PRD-specific pages
 
-**Workflow Progression:**
+**Workflow Progression (4 steps):**
 ```text
-/ → /dashboard → /chat/new → /chat/[id] → /chat/[id]/questions
-  → /chat/[id]/tech-stack → /chat/[id]/generate → /prd/[prdId]
+/ → /dashboard → /chat/new → /chat/[id] (Discovery)
+  → /chat/[id]/questions → /chat/[id]/tech-stack → /chat/[id]/generate
+  → /prd/[prdId]
+
+Steps: Discovery → Questions → Tech Stack → Generate
 ```
+
+**Deprecated Routes:**
+- `/chat/[id]/research` → Redirects to `/chat/[id]/tech-stack`
+- `/chat/[id]/select` → Redirects to `/chat/[id]/tech-stack`
 
 ## Component Organization
 
@@ -212,7 +219,7 @@ export async function POST(req: Request) {
 
 ### API Categories
 
-**Conversation APIs:**
+**Conversation APIs:** (Rate limited: 20 req/min, 100k tokens/min)
 - `/api/conversation/message` - Handle chat messages (Claude AI)
 - `/api/conversation/extract-context` - Extract product context
 - `/api/conversation/initial-message` - Generate first message

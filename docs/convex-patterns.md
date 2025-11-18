@@ -997,6 +997,71 @@ const conversation = useQuery(
 );
 ```
 
+## Helper Function Patterns
+
+### validateConversationAccess Helper
+
+Extract auth validation to reduce duplication:
+
+```typescript
+async function validateConversationAccess(
+  ctx: MutationCtx,
+  conversationId: Id<"conversations">
+) {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
+    throw new Error("Not authenticated");
+  }
+
+  const conversation = await ctx.db.get(conversationId);
+  if (!conversation || conversation.userId !== identity.subject) {
+    throw new Error("Unauthorized");
+  }
+
+  return { identity, conversation };
+}
+
+// Usage in mutations
+export const updateStage = mutation({
+  args: { conversationId: v.id("conversations"), stage: v.string() },
+  handler: async (ctx, args) => {
+    const { conversation } = await validateConversationAccess(ctx, args.conversationId);
+    // ... mutation logic
+  },
+});
+```
+
+### getDefaultProgress Helper
+
+Return consistent default workflow state:
+
+```typescript
+function getDefaultProgress() {
+  return {
+    currentStep: "discovery",
+    completedSteps: [],
+    skippedSteps: [],
+    lastUpdated: Date.now(),
+  };
+}
+```
+
+### Constants
+
+```typescript
+// Number of tech stack categories for progress tracking
+const TECH_STACK_CATEGORIES_COUNT = 5;
+// Categories: frontend, backend, database, authentication, hosting
+```
+
+## Deprecated Stages
+
+The following stages are deprecated (kept for backwards compatibility):
+- `"researching"` → Use `"tech-stack"`
+- `"selecting"` → Use `"tech-stack"`
+
+Current workflow stages: `setup` → `discovery` → `questions` → `tech-stack` → `generating` → `completed`
+
 ## Security Checklist
 
 ### For Every Mutation

@@ -621,3 +621,27 @@ Use semantic color variables which maintain proper contrast:
   </div>
 </div>
 ```
+
+## Known Issues & Missing Utilities
+
+### ⚠️ Undefined Utilities
+
+| Utility | Used In | Fix |
+|---------|---------|-----|
+| `animate-float` | EmptyState.tsx | Define keyframe or use `animate-pulse` |
+| `text-gradient-primary` | EmptyState, app-sidebar | Use `.text-gradient` instead |
+| `macaron-*` colors | EmptyState, PRDCard | Use warm-terracotta, deep-teal, soft-sage |
+
+### ⚠️ Hardcoded Dark Mode Colors
+
+Replace hardcoded colors with CSS variables:
+
+```typescript
+// ❌ Wrong
+<div className="dark:bg-gray-900 dark:text-red-400">
+
+// ✅ Correct
+<div className="dark:bg-card dark:text-destructive">
+```
+
+**Best Practice:** Always use CSS variable-based colors for dark mode variants.

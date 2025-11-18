@@ -4,6 +4,48 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 2025-11-18
+
+### Documentation Updates
+
+Parallel analysis of codebase with agent-status-reporter. Updated all docs/* files.
+
+**component-patterns.md:**
+- Added useReducer pattern for complex state (QuestionCard example)
+- Added accessibility patterns (ARIA labels, form associations, keyboard nav)
+
+**frontend-architecture.md:**
+- Updated workflow to 4 steps (Discovery → Questions → Tech Stack → Generate)
+- Marked /research and /select as deprecated (redirect to /tech-stack)
+- Added rate limiting annotation to API categories (20 req/min, 100k tokens/min)
+
+**convex-patterns.md:**
+- Added helper functions: validateConversationAccess(), getDefaultProgress()
+- Documented TECH_STACK_CATEGORIES_COUNT constant (5 categories)
+- Added deprecated stages section ("researching", "selecting" → "tech-stack")
+
+**api-routes-guide.md:**
+- Added complete rate limiting configuration section
+- Documented RATE_LIMIT_CONFIGS (API_STANDARD, API_AI, API_ANONYMOUS)
+- Added rate limiting middleware pattern with token tracking
+
+**styling-guide.md:**
+- Added "Known Issues & Missing Utilities" section
+- Documented undefined utilities: animate-float, text-gradient-primary, macaron-*
+- Added warning about hardcoded dark mode colors
+
+**type-definitions.md:**
+- Added PaginationResult type pattern
+- Added ReactElement for icon rendering functions
+- Added defensive type assertions pattern (filter before assert)
+
+**Status Summary:**
+- ✅ Components: All folders working, selection/ deprecated
+- ✅ Routes: All working, rate limiting added
+- ✅ Convex: Schema updated, helpers extracted
+- ⚠️ Styles: Some undefined utilities need fixing
+- ✅ Config: Rate limiting, logger, error handling complete
+
 ## 2025-11-17
 
 ### Fixed

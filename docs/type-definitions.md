@@ -212,6 +212,42 @@ await createPRD({
 });
 ```
 
+### Pagination Types
+
+```typescript
+import { PaginationResult } from "convex/server";
+
+// Query returns paginated result
+const prds = useQuery(api.prds.list, { paginationOpts: { numItems: 50 } });
+// Type: PaginationResult<PRD> | undefined
+
+// Access paginated data
+if (prds) {
+  const items = prds.page;        // PRD[]
+  const hasMore = !prds.isDone;   // boolean
+  const cursor = prds.continueCursor; // string
+}
+```
+
+### ReactElement for Icon Functions
+
+Use `ReactElement` instead of `JSX.Element` for explicit typing:
+
+```typescript
+import { ReactElement } from "react";
+
+function renderStatusIcon(status: string): ReactElement {
+  switch (status) {
+    case "completed":
+      return <CheckCircle2 className="h-5 w-5 text-green-600" />;
+    case "in_progress":
+      return <Loader2 className="h-5 w-5 animate-spin" />;
+    default:
+      return <Circle className="h-5 w-5 text-gray-400" />;
+  }
+}
+```
+
 ## Data Model Types
 
 ### Conversation
@@ -698,4 +734,29 @@ const items = []; // inferred as never[] (should add type!)
 // ✅ Explicit when needed
 const items: Item[] = [];
 const user: User | null = null;
+```
+
+### 6. Defensive Type Assertions
+
+Always filter before asserting types:
+
+```typescript
+// ✅ Correct - filter then assert
+{Object.entries(prd.techStack)
+  .filter(([key, value]) => {
+    if (key === "reasoning") return false;
+    if (!value || typeof value !== "object") return false;
+    if (!("name" in value)) return false;
+    return true;
+  })
+  .map(([key, value]) => {
+    const techItem = value as TechStackItem;
+    return <div key={key}>{techItem.name}</div>;
+  })}
+
+// ❌ Wrong - assert without validation
+{Object.entries(prd.techStack).map(([key, value]) => {
+  const techItem = value as TechStackItem; // Unsafe!
+  return <div key={key}>{techItem.name}</div>;
+})}
 ```
