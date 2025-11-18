@@ -29,6 +29,7 @@ export default function QuestionsPage() {
   const [isSkipping, setIsSkipping] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hasGeneratedRef = useRef(false);
+  const hasLoadedQuestionsRef = useRef(false);
 
   const generateQuestions = useCallback(async () => {
     if (!conversation) return;
@@ -72,7 +73,7 @@ export default function QuestionsPage() {
   useEffect(() => {
     if (!conversation) return;
 
-    if (conversation.clarifyingQuestions) {
+    if (conversation.clarifyingQuestions && !hasLoadedQuestionsRef.current) {
       // Validate questions structure before setting
       const rawQuestions = conversation.clarifyingQuestions;
       if (
@@ -87,6 +88,7 @@ export default function QuestionsPage() {
             typeof q.question === "string"
         )
       ) {
+        hasLoadedQuestionsRef.current = true;
         setQuestions(rawQuestions as Question[]);
       } else {
         logger.error(
@@ -101,7 +103,7 @@ export default function QuestionsPage() {
         });
         setQuestions([]);
       }
-    } else if (!hasGeneratedRef.current) {
+    } else if (!hasGeneratedRef.current && !conversation.clarifyingQuestions) {
       hasGeneratedRef.current = true;
       generateQuestions();
     }
@@ -270,7 +272,7 @@ export default function QuestionsPage() {
   return (
     <WorkflowLayout
       currentStep="questions"
-      completedSteps={["discovery"]}
+      completedSteps={["setup"]}
       conversationId={conversationId}
       showSkipButton={true}
       onSkip={handleSkip}
@@ -279,7 +281,7 @@ export default function QuestionsPage() {
       skipConfirmMessage={`You've answered ${answeredRequired} out of ${requiredQuestions.length} questions. We'll automatically fill the remaining ${unansweredCount} questions with recommended or default answers. You can always come back to review and edit these answers.`}
       skipConfirmTitle="Skip Questions?"
       showFooter={true}
-      onBack={() => router.back()}
+      onBack={() => router.push(`/chat/${conversationId}`)}
       onNext={handleContinue}
       nextButtonText={isSaving ? "Saving..." : "Continue to Research"}
       nextButtonDisabled={isSaving}

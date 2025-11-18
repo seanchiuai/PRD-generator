@@ -1,6 +1,5 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  MessageSquare,
   HelpCircle,
   Layers,
   FileText,
@@ -15,8 +14,7 @@ export interface WorkflowStep {
 }
 
 export const WORKFLOW_STEPS: WorkflowStep[] = [
-  { id: "setup", label: "Setup", path: "/chat/[id]/setup", icon: Settings },
-  { id: "discovery", label: "Discovery", path: "/chat/[id]", icon: MessageSquare },
+  { id: "setup", label: "Setup", path: "/chat/[id]", icon: Settings },
   { id: "questions", label: "Questions", path: "/chat/[id]/questions", icon: HelpCircle },
   { id: "tech-stack", label: "Tech Stack", path: "/chat/[id]/tech-stack", icon: Layers },
   { id: "generate", label: "Generate", path: "/chat/[id]/generate", icon: FileText },

@@ -1,10 +1,12 @@
 import { WorkflowStep } from '@/contexts/WorkflowContext'
 import { redirect } from 'next/navigation'
 
-const WORKFLOW_STEPS: WorkflowStep[] = ['discovery', 'questions', 'tech-stack', 'generate']
+// Active workflow steps (discovery removed from flow)
+const WORKFLOW_STEPS: WorkflowStep[] = ['questions', 'tech-stack', 'generate']
 
+// Note: discovery route kept for backwards compatibility
 const STEP_ROUTES: Record<WorkflowStep, (conversationId: string) => string> = {
-  discovery: (conversationId) => `/chat/${conversationId}`,
+  discovery: (conversationId) => `/chat/${conversationId}/questions`, // redirect to questions
   questions: (conversationId) => `/chat/${conversationId}/questions`,
   'tech-stack': (conversationId) => `/chat/${conversationId}/tech-stack`,
   generate: (conversationId) => `/chat/${conversationId}/generate`,

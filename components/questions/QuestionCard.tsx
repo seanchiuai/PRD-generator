@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducer, useEffect } from "react";
+import { useReducer, useEffect, useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -115,16 +115,20 @@ export function QuestionCard({ question, onAnswerChange }: QuestionCardProps) {
 
   const [state, dispatch] = useReducer(questionReducer, null, getInitialState);
 
+  // Use ref to avoid infinite loops when onAnswerChange changes
+  const onAnswerChangeRef = useRef(onAnswerChange);
+  onAnswerChangeRef.current = onAnswerChange;
+
   // Emit answer changes
   useEffect(() => {
     if (question.type === "multiselect") {
-      onAnswerChange(state.selectedOptions.join(", "));
+      onAnswerChangeRef.current(state.selectedOptions.join(", "));
     } else if (state.isOtherSelected && state.otherText.trim()) {
-      onAnswerChange(state.otherText);
+      onAnswerChangeRef.current(state.otherText);
     } else if (state.selectedOption) {
-      onAnswerChange(state.selectedOption);
+      onAnswerChangeRef.current(state.selectedOption);
     } else if (!state.isOtherSelected) {
-      onAnswerChange("");
+      onAnswerChangeRef.current("");
     }
   }, [
     state.selectedOptions,
@@ -132,7 +136,6 @@ export function QuestionCard({ question, onAnswerChange }: QuestionCardProps) {
     state.isOtherSelected,
     state.otherText,
     question.type,
-    onAnswerChange,
   ]);
 
   // Handle multiselect option toggle

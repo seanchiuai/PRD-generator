@@ -229,7 +229,7 @@ export default defineSchema({
     workflowProgress: v.optional(
       v.object({
         currentStep: v.union(
-          v.literal("discovery"),
+          v.literal("discovery"), // kept for backwards compatibility
           v.literal("questions"),
           v.literal("tech-stack"),
           v.literal("generate")
@@ -248,8 +248,8 @@ export default defineSchema({
     conversationId: v.id("conversations"),
     userId: v.string(),
     // Structured PRDData validator matching types/index.ts PRDData interface
-    // Optional since it's null during initial creation with "generating" status
-    prdData: v.optional(v.object({
+    // Optional/nullable since it's null during initial creation with "generating" status
+    prdData: v.optional(v.union(v.null(), v.object({
       projectOverview: v.object({
         productName: v.string(),
         tagline: v.string(),
@@ -385,7 +385,7 @@ export default defineSchema({
           mitigation: v.string(),
         })
       ),
-    })),
+    }))),
     productName: v.string(),
     version: v.number(),
     status: v.union(v.literal("generating"), v.literal("completed"), v.literal("failed")),

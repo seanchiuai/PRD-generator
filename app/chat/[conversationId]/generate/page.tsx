@@ -128,7 +128,7 @@ export default function GeneratePage() {
   return (
     <WorkflowLayout
       currentStep="generate"
-      completedSteps={["discovery", "questions", "tech-stack"]}
+      completedSteps={["setup", "questions", "tech-stack"]}
       conversationId={conversationId}
       showSkipButton={false}
       showFooter={true}

@@ -119,9 +119,9 @@ export function CategorySection({
       {/* Options Grid */}
       {!isLoading && !error && options.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {options.map((option) => (
+          {options.map((option, index) => (
             <TechStackCard
-              key={option.name}
+              key={`${option.name}-${index}`}
               option={option}
               isSelected={selectedOption === option.name}
               onSelect={() => onSelect(option.name)}

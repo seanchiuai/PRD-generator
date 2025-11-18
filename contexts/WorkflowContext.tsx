@@ -7,9 +7,11 @@ import { Id } from '@/convex/_generated/dataModel'
 import { saveWorkflowSnapshot, loadWorkflowSnapshot } from '@/lib/workflow/persistence'
 import { logger } from '@/lib/logger'
 
+// Note: 'discovery' kept for backwards compatibility with existing data
 export type WorkflowStep = 'discovery' | 'questions' | 'tech-stack' | 'generate'
 
-const WORKFLOW_STEPS: WorkflowStep[] = ['discovery', 'questions', 'tech-stack', 'generate']
+// Active workflow steps (discovery removed from flow)
+const WORKFLOW_STEPS: WorkflowStep[] = ['questions', 'tech-stack', 'generate']
 
 function arraysEqual<T>(a: T[], b: T[]): boolean {
   return a.length === b.length && a.every((val, idx) => val === b[idx])
@@ -51,7 +53,7 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
   const updateProgress = useMutation(api.workflow.updateProgress)
 
   const [state, setState] = useState<WorkflowState>({
-    currentStep: 'discovery',
+    currentStep: 'questions',
     completedSteps: [],
     skippedSteps: [],
     isTransitioning: false,

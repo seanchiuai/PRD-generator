@@ -1,4 +1,5 @@
-export type WorkflowStep = 'discovery' | 'questions' | 'research' | 'selection' | 'generate'
+// Note: 'discovery' kept for backwards compatibility with existing data
+export type WorkflowStep = 'discovery' | 'questions' | 'tech-stack' | 'generate'
 
 export interface WorkflowProgress {
   currentStep: WorkflowStep
@@ -11,12 +12,10 @@ export interface WorkflowProgress {
  */
 export function getCompletedSteps(stage: string): WorkflowStep[] {
   const stageMap: Record<string, WorkflowStep[]> = {
-    'chat': [],
-    'questions': ['discovery'],
-    'research': ['discovery', 'questions'],
-    'selection': ['discovery', 'questions', 'research'],
-    'generation': ['discovery', 'questions', 'research', 'selection'],
-    'generate': ['discovery', 'questions', 'research', 'selection'],
+    'setup': [],
+    'questions': [],
+    'tech-stack': ['questions'],
+    'generate': ['questions', 'tech-stack'],
   }
   return stageMap[stage] || []
 }
@@ -58,8 +57,8 @@ export function canNavigateToStep(
 
   // Can navigate to the next step after the last completed step
   if (completedSteps.length === 0) {
-    // If no steps completed, can only access discovery
-    return targetStep === 'discovery'
+    // If no steps completed, can only access questions
+    return targetStep === 'questions'
   }
 
   const lastCompletedIndex = Math.max(
@@ -80,10 +79,9 @@ export function getStepFromPath(pathname: string): WorkflowStep {
 
   // Check for exact segment matches to avoid false positives
   if (segments.includes('generate')) return 'generate'
-  if (segments.includes('select')) return 'selection'
-  if (segments.includes('research')) return 'research'
+  if (segments.includes('tech-stack')) return 'tech-stack'
   if (segments.includes('questions')) return 'questions'
-  return 'discovery'
+  return 'questions'
 }
 
 /**
@@ -91,10 +89,9 @@ export function getStepFromPath(pathname: string): WorkflowStep {
  */
 export function getStepPath(step: WorkflowStep, conversationId: string): string {
   const pathMap: Record<WorkflowStep, string> = {
-    discovery: `/chat/${conversationId}`,
+    discovery: `/chat/${conversationId}/questions`, // redirect to questions
     questions: `/chat/${conversationId}/questions`,
-    research: `/chat/${conversationId}/research`,
-    selection: `/chat/${conversationId}/select`,
+    'tech-stack': `/chat/${conversationId}/tech-stack`,
     generate: `/chat/${conversationId}/generate`,
   }
   return pathMap[step]
@@ -123,5 +120,5 @@ export function isStepSkipped(
  * Get all workflow steps
  */
 export function getAllSteps(): WorkflowStep[] {
-  return ['discovery', 'questions', 'research', 'selection', 'generate']
+  return ['questions', 'tech-stack', 'generate']
 }

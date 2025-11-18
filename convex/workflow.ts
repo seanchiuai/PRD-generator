@@ -8,7 +8,7 @@ import type { Id } from "./_generated/dataModel"
  */
 function getDefaultProgress() {
   return {
-    currentStep: "discovery" as const,
+    currentStep: "questions" as const,
     completedSteps: [],
     skippedSteps: [],
     lastUpdated: Date.now(),
@@ -41,7 +41,7 @@ export const updateProgress = mutation({
   args: {
     conversationId: v.id("conversations"),
     currentStep: v.union(
-      v.literal("discovery"),
+      v.literal("discovery"), // kept for backwards compatibility
       v.literal("questions"),
       v.literal("tech-stack"),
       v.literal("generate")
@@ -90,7 +90,7 @@ export const completeStep = mutation({
   args: {
     conversationId: v.id("conversations"),
     step: v.union(
-      v.literal("discovery"),
+      v.literal("discovery"), // kept for backwards compatibility
       v.literal("questions"),
       v.literal("tech-stack"),
       v.literal("generate")
@@ -126,7 +126,7 @@ export const skipStep = mutation({
   args: {
     conversationId: v.id("conversations"),
     step: v.union(
-      v.literal("discovery"),
+      v.literal("discovery"), // kept for backwards compatibility
       v.literal("questions"),
       v.literal("tech-stack"),
       v.literal("generate")
