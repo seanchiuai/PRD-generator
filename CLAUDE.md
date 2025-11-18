@@ -51,6 +51,6 @@ Auth: `ConvexProviderWithClerk` | Schema: `convex/schema.ts` | Protection: `midd
 ## Important Notes
 - Never add backwards compatibility
 - Always sacrifice grammar for the sake of conciseness in your responses
-- Always constantly commit changes after finishing the smallest fix.
+- **MANDATORY:** Git commit after every change (small, medium, or big). No exceptions. Commit immediately after completing any change, fix, or update.
 - Always constantly update /docs/CHANGELOG.md after pulling in new commits or making new commits. Keep logs concise. Only log information critical information my engineers need to know.
 - When a plan finishes executing, update the plan folder itself (`.claude/plans/`) in addition to /docs/CHANGELOG.md
