@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 
 interface QuestionCardProps {
   question: {
+    id: string;
     question: string;
     placeholder?: string;
     answer?: string;

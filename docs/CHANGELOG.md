@@ -8,7 +8,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed - 2025-01-17
 
-#### Code Review Group-3 Issues (Latest commit)
+#### Code Review Group-7 Issues (Latest commit)
+
+**Type Safety & Validation:**
+- extract-context/route.ts: Added string type validation before conversationId type assertion with error handling for invalid IDs
+- QuestionCard.tsx: Refactored complex state management from multiple useState calls to useReducer pattern for better maintainability
+- questions/page.tsx: Added runtime validation for clarifyingQuestions array structure before type assertion
+- ConvexClientProvider.tsx: Moved env variable check and client initialization inside component body
+- schema.ts: Replaced v.any() with v.record(v.string(), v.any()) for prdData to enforce object structure while maintaining flexibility
+
+**Code Organization:**
+- workflowEvents.ts: Fixed skip rate calculation to use total steps instead of completed steps as denominator
+- workflow.ts: Extracted default progress object to getDefaultProgress() helper function
+- workflow.ts: Created validateConversationAccess() helper to eliminate auth validation duplication across mutations
+
+**Accessibility:**
+- ChatMessage.tsx: Added aria-label with sender, timestamp, and truncated message content for screen readers
+- ChatMessage.tsx: Added aria-hidden to visual elements to prevent duplicate announcements
+
+**UI/UX Improvements:**
+- badge.tsx: Reformatted long className string into array with .join() for better readability
+- PRDCard.tsx: Made techStack filtering defensive with proper type validation before rendering
+
+**Code Quality:**
+- export-utils.ts: Removed unnecessary async modifier from exportJSON function
+- research/page.tsx: Added conversationId validation in research redirect page with error handling
+- CHANGELOG.md: Fixed markdown formatting (added blank line after heading)
+
+#### Code Review Group-3 Issues
 
 **Component Refactoring:**
 - ProfileMenu.tsx: Extracted duplicate Avatar logic into reusable UserAvatar component (reduced duplication)
