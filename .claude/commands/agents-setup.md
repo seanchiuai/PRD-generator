@@ -1,18 +1,14 @@
 ---
-description: Creates feature-specific agents and implementation plans based on a PRD or feature document
-allowed-tools: Bash, Edit
+description: Creates agents for your tech stack
 argument-hint: [PRD.json or doc describing what agent is in charge of]
 ---
 
-# Command: /agents-setup
+# Command: Agents Setup
 
-If not already existing, create agents and plans under .claude/agents/ and .claude/plans/ for each core feature described in the mentioned document.
+If not already existing, create agents and plans under .claude/agents/ for each tool in the tech stack describes in the mentioned document.
 
-Rules:
-- Keep in mind the default agents are not feature-specific agents. Default agents exist under the .claude/agents/default folder.
+Notes:
 - Agents are created with kebab-case naming: `agent-feature-name.md`
-- Plans follow the same convention: `plan-feature-name.md`
-- Each agent should be focused on a single feature or capability
+- Agents should be specific to technologies used like APIs or frameworks rather than features.
 - Use skill `agent-creating` to create agents
-- Use skill `researching-features` to create plans
-- Always use context7 for the latest information and best practices
+- Always use context7 for the latest information, documentation, and best practices. If context7 MCP is not available. STOP and ask the user to install it. Do not proceed without using the MCP.

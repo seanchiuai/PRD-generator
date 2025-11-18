@@ -1,9 +1,6 @@
 ---
 name: "Vercel Deploying"
 description: "Automatically deploys to Vercel production, uses Vercel MCP to fetch build logs, analyzes errors, fixes them, and retries until successful deployment. Use when deploying to production or fixing deployment issues."
-version: "1.0.0"
-dependencies: ["vercel-cli", "mcp-vercel"]
-allowed-tools: ["bash", "mcp__vercel__*", "read", "edit", "write", "grep", "glob"]
 ---
 
 # Vercel Production Deploy Loop
