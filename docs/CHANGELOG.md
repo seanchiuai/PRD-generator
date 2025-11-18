@@ -32,6 +32,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Old Pages**: `/research` and `/select` now redirect to `/tech-stack` with notification toast.
 
 ### Fixed
+- **Schema Dynamic Categories (0e3b1cc)**: Changed `selectedTechStack` from fixed object to `v.record()` to support AI-generated category names like "mobile-app-framework".
+- **React setState Warning (aaea158)**: Moved `router.push` to useEffect in ChatPage to avoid "Cannot update component while rendering" error.
 - **Tech Stack Pros/Cons Display (b98d1be)**: Fixed empty pros/cons lists in tech stack cards. Improved `parseResponse` regex patterns to correctly extract arrays. Updated research queries to request JSON format. Added "Re-run research" button to refresh corrupted data.
 - **PRD Generation**: Fixed API payload structure - removed incorrect `researchData` wrapper causing generation failures.
 - **PRD JSON Parsing**: Strengthened prompt with explicit JSON-only instructions. Implemented balanced brace matching to extract JSON from conversational responses while preserving nested objects/arrays.
