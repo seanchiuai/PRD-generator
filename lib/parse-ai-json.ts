@@ -126,10 +126,14 @@ function extractJSON(text: string): string | null {
 export function parseAIResponse<T>(text: string): T {
   try {
     // Try to extract JSON from markdown code block first
-    const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/);
+    // Handle various formats: ```json, ```, with/without newlines
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
 
     if (jsonMatch && jsonMatch[1]) {
-      return JSON.parse(jsonMatch[1]);
+      const extracted = jsonMatch[1].trim();
+      if (extracted) {
+        return JSON.parse(extracted);
+      }
     }
 
     // Fallback to parsing the raw text (trim whitespace)
