@@ -408,7 +408,7 @@ export default function TechStackPage() {
   return (
     <WorkflowLayout
       currentStep="tech-stack"
-      completedSteps={["discovery", "questions"]}
+      completedSteps={["setup", "questions"]}
       conversationId={conversationId}
       showSkipButton={true}
       onSkip={handleSkip}
@@ -512,12 +512,24 @@ export default function TechStackPage() {
 
         {/* Selection Status */}
         {!isResearching && hasExistingResults && (
-          <SelectionStatus
-            total={categories.length}
-            selected={selectedCount}
-            warnings={validationWarnings}
-            isValidating={isValidating}
-          />
+          <div className="flex items-center justify-between">
+            <SelectionStatus
+              total={categories.length}
+              selected={selectedCount}
+              warnings={validationWarnings}
+              isValidating={isValidating}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                hasStartedResearchRef.current = false;
+                startResearch();
+              }}
+              className="text-sm text-muted-foreground hover:text-foreground underline"
+            >
+              Re-run research
+            </button>
+          </div>
         )}
 
         {/* Category Sections */}

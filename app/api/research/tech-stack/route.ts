@@ -32,7 +32,8 @@ Consider these common categories, but ONLY include them if they're relevant to t
 For each relevant category, generate a specific research query that:
 1. Asks for the top 3 options for that category in 2025
 2. Includes product-specific context and requirements
-3. Requests structured data with: name, description, 3-4 pros, 3-4 cons, and popularity/adoption rate
+3. Requests the response as a JSON array with this exact structure:
+   [{"name": "Tech Name", "description": "Brief description", "pros": ["pro1", "pro2", "pro3"], "cons": ["con1", "con2", "con3"], "popularity": "~X% market share"}]
 
 Generate a JSON array of research queries. Each query should have:
 - category: The tech stack category (e.g., "frontend", "database", "external-apis")
@@ -156,9 +157,12 @@ Be smart about what's actually needed. For example:
 function parseResponse(content: string, _category: string): TechOption[] {
   try {
     // Try to extract JSON if present
-    const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/) || content.match(/\{[\s\S]*\}/);
+    const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/) || content.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
-      return JSON.parse(jsonMatch[1] || jsonMatch[0]) as TechOption[];
+      const parsed = JSON.parse(jsonMatch[1] || jsonMatch[0]);
+      if (Array.isArray(parsed)) {
+        return parsed as TechOption[];
+      }
     }
 
     // Fallback: parse structured text
@@ -167,9 +171,9 @@ function parseResponse(content: string, _category: string): TechOption[] {
     // Try multiple splitting patterns to handle different response formats
     let sections: string[] = [];
 
-    // Pattern 1: Numbered lists with bold: "1. **React**"
+    // Pattern 1: Numbered lists with bold: "1. **React**" or "### 1. **React**"
     if (content.includes('**')) {
-      sections = content.split(/\d+\.\s+\*\*/).filter(Boolean);
+      sections = content.split(/(?:^|\n)(?:#{1,3}\s+)?\d+\.\s+\*\*/).filter(Boolean);
     }
 
     // Pattern 2: Markdown headers: "## React" or "### React"
@@ -177,112 +181,134 @@ function parseResponse(content: string, _category: string): TechOption[] {
       sections = content.split(/^#{2,3}\s+/m).filter(Boolean);
     }
 
-    // Pattern 3: Comma-separated inline bold: "**React**, **Vue**, **Angular**"
-    if (sections.length <= 1 && content.match(/\*\*[^*]+\*\*,?\s+(and\s+)?\*\*/)) {
-      // Extract all bold text segments
-      const boldMatches = content.match(/\*\*([^*]+)\*\*/g);
-      if (boldMatches && boldMatches.length > 1) {
-        sections = boldMatches.map(m => {
-          // Remove ** and extract only the tech name (before /, :, or other delimiters)
-          const cleaned = m.replace(/\*\*/g, '');
-          // Extract name before common delimiters
-          const nameMatch = cleaned.match(/^([^/:(\n]+)/);
-          return nameMatch?.[1]?.trim() ?? cleaned.trim();
-        });
-      }
-    }
-
-    // Pattern 4: Bold text without numbers: "**React**"
+    // Pattern 3: Bold text without numbers: "**React**"
     if (sections.length <= 1 && content.match(/\*\*[A-Z]/)) {
       // Split by standalone bold text at start of line or after newline
       sections = content.split(/(?:^|\n\n)\*\*/).filter(Boolean);
     }
 
+    logger.debug("parseResponse", `Split into ${sections.length} sections`, { sectionCount: sections.length });
+
     sections.forEach((section, idx) => {
-      // Handle case where sections are just tech names (from inline bold extraction)
-      // In this case, section is already the clean name
-      const isSimpleName = !section.includes('\n') && !section.includes('**') && section.length < 50;
-
-      if (isSimpleName) {
-        const name = section.trim();
-
-        // Skip common non-tech phrases
-        const skipPhrases = ["and", "or", "the", "these", "those"];
-        if (skipPhrases.some(phrase => name.toLowerCase() === phrase)) {
-          return;
-        }
-
-        options.push({
-          name,
-          description: "",
-          pros: [],
-          cons: [],
-          popularity: undefined,
-        });
-        return;
-      }
-
-      // Skip first section if it looks like preamble (no tech name extracted yet)
+      // Skip first section if it looks like preamble
       if (idx === 0 && sections.length > 1) {
-        const hasPreamblePhrase = /(?:top three|top 3|the following|here are|these are)/i.test(section.substring(0, 100));
-        if (hasPreamblePhrase && !section.match(/^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\*\*/)) {
+        const hasPreamblePhrase = /(?:top three|top 3|the following|here are|these are|based on)/i.test(section.substring(0, 150));
+        if (hasPreamblePhrase) {
           logger.debug("parseResponse", `Skipping first section (preamble detected)`, {});
           return;
         }
       }
 
-      const nameMatch = section.match(/^([^*\n:]+?)(?:\*\*|:|\n)/);
-      const descMatch = section.match(/(?:\*\*|:)\s*[-:]?\s*([\s\S]+?)(?=\n\n|Pros:|$)/);
-      const prosMatch = section.match(/Pros:?\s*\n([\s\S]*?)(?=Cons:|$)/);
-      const consMatch = section.match(/Cons:?\s*\n([\s\S]*?)(?=Popularity:|$|Learn More:|###|##)/);
-      const popularityMatch = section.match(/Popularity:?\s*(.+?)(?=\n|$)/);
-
-      if (nameMatch && nameMatch[1]) {
-        let name = nameMatch[1].trim();
-
-        // Clean up common prefixes that might slip through
-        name = name.replace(/^(?:The\s+)?(?:top\s+)?(?:three|3)\s+/i, '');
-        name = name.replace(/^\d+\.\s*/, ''); // Remove leading numbers
-
-        // Skip if name is still too long (likely preamble)
-        if (name.length > 80) {
-          logger.debug("parseResponse", `Skipping invalid option name (too long): ${name.substring(0, 50)}...`, {});
-          return;
-        }
-
-        // Skip if name contains common preamble phrases
-        const preamblePhrases = [
-          "following are",
-          "here are the",
-          "these are the",
-          "based on your",
-          "for your",
-          "best options",
-        ];
-        if (preamblePhrases.some(phrase => name.toLowerCase().includes(phrase))) {
-          logger.debug("parseResponse", `Skipping preamble text: ${name.substring(0, 50)}...`, {});
-          return;
-        }
-
-        // Extract description, clean it up
-        let description = descMatch?.[1]?.trim() || "";
-        // Remove markdown formatting from description
-        description = description.replace(/\*\*/g, '').replace(/#{1,6}\s+/g, '');
-
-        options.push({
-          name,
-          description,
-          pros: prosMatch?.[1]
-            ?.split(/\n/)
-            .map((p) => p.replace(/^[-*•]\s*/, "").trim())
-            .filter(Boolean) || [],
-          cons: consMatch?.[1]
-            ?.split(/\n/)
-            .map((c) => c.replace(/^[-*•]\s*/, "").trim())
-            .filter(Boolean) || [],
-          popularity: popularityMatch?.[1]?.trim() || undefined,
-        });
+      // Extract name - handle formats like "React**" or "React Native (by Meta)**"
+      const nameMatch = section.match(/^([^*\n]+?)(?:\*\*|$)/);
+      if (!nameMatch || !nameMatch[1]) {
+        return;
       }
+
+      let name = nameMatch[1].trim();
+
+      // Clean up common patterns
+      name = name.replace(/^(?:The\s+)?(?:top\s+)?(?:three|3)\s+/i, '');
+      name = name.replace(/^\d+\.\s*/, ''); // Remove leading numbers
+      name = name.replace(/\s*[-–]\s*$/, ''); // Remove trailing dashes
+
+      // Skip if name is too long or contains preamble phrases
+      if (name.length > 80) {
+        return;
+      }
+
+      const preamblePhrases = ["following are", "here are the", "these are the", "based on your", "for your", "best options"];
+      if (preamblePhrases.some(phrase => name.toLowerCase().includes(phrase))) {
+        return;
+      }
+
+      // Extract description - look for text after the name/metadata block
+      // Handle format: **Name**/Adoption:** ~50%\n\nDescription: ...
+      let description = "";
+      const descPatterns = [
+        /Description:\s*([^\n]+(?:\n(?!(?:\*\*)?(?:Pros|Cons|Adoption|Popularity):)[^\n]+)*)/i,
+        /\*\*\s*\n\n([^*\n][^\n]+(?:\n(?!(?:\*\*)?(?:Pros|Cons|Adoption|Popularity):)[^\n]+)*)/,
+        /(?:^|\n\n)([A-Z][^*\n][^\n]+(?:\n(?!(?:\*\*)?(?:Pros|Cons|Adoption|Popularity):)[^\n]+)*)/
+      ];
+
+      for (const pattern of descPatterns) {
+        const match = section.match(pattern);
+        if (match && match[1]) {
+          description = match[1].trim();
+          // Remove markdown formatting
+          description = description.replace(/\*\*/g, '').replace(/#{1,6}\s+/g, '').replace(/\[\d+\]/g, '');
+          if (description.length > 20) break;
+        }
+      }
+
+      // Extract popularity/adoption - handle various formats
+      let popularity: string | undefined;
+      const popularityPatterns = [
+        /(?:Adoption|Popularity|Market Share)[:\s]*\*?\*?\s*([~\d%\w\s-]+?)(?:\n|\*\*|$)/i,
+        /\*\*[^*]+\*\*\s*[/\-–]\s*(?:Adoption|Popularity)[:\s]*\*?\*?\s*([~\d%\w\s-]+?)(?:\n|$)/i
+      ];
+
+      for (const pattern of popularityPatterns) {
+        const match = section.match(pattern);
+        if (match && match[1]) {
+          popularity = match[1].trim().replace(/\*\*/g, '');
+          if (popularity) break;
+        }
+      }
+
+      // Extract pros - handle various formats including **Pros:** and - Pros:
+      const prosPatterns = [
+        /\*\*Pros:?\*\*\s*\n([\s\S]*?)(?=\*\*Cons|\n\n\*\*|$)/i,
+        /(?:^|\n)Pros:?\s*\n([\s\S]*?)(?=(?:^|\n)Cons:|$)/im,
+        /-\s*\*\*Pros:?\*\*\s*([\s\S]*?)(?=-\s*\*\*Cons|$)/i
+      ];
+
+      let pros: string[] = [];
+      for (const pattern of prosPatterns) {
+        const match = section.match(pattern);
+        if (match && match[1]) {
+          pros = match[1]
+            .split(/\n/)
+            .map(line => line.replace(/^[\s-*•]+/, '').replace(/\*\*/g, '').trim())
+            .filter(line => line.length > 0 && !line.match(/^(cons|pros):/i));
+          if (pros.length > 0) break;
+        }
+      }
+
+      // Extract cons - handle various formats
+      const consPatterns = [
+        /\*\*Cons:?\*\*\s*\n([\s\S]*?)(?=\*\*(?:Popularity|Learn|Sources)|#{2,3}|\[\d+\]|$)/i,
+        /(?:^|\n)Cons:?\s*\n([\s\S]*?)(?=(?:^|\n)(?:Popularity|Learn More|Sources):|#{2,3}|$)/im,
+        /-\s*\*\*Cons:?\*\*\s*([\s\S]*?)(?=\n\n|$)/i
+      ];
+
+      let cons: string[] = [];
+      for (const pattern of consPatterns) {
+        const match = section.match(pattern);
+        if (match && match[1]) {
+          cons = match[1]
+            .split(/\n/)
+            .map(line => line.replace(/^[\s-*•]+/, '').replace(/\*\*/g, '').trim())
+            .filter(line => line.length > 0 && !line.match(/^(cons|pros|popularity|learn|sources):/i));
+          if (cons.length > 0) break;
+        }
+      }
+
+      logger.debug("parseResponse", `Parsed option: ${name}`, {
+        name,
+        descLength: description.length,
+        prosCount: pros.length,
+        consCount: cons.length,
+        popularity
+      });
+
+      options.push({
+        name,
+        description,
+        pros,
+        cons,
+        popularity,
+      });
     });
 
     return options.length > 0 ? options : [];
