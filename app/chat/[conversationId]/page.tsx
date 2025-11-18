@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -70,6 +70,13 @@ export default function ChatPage() {
     }
   };
 
+  // Redirect if not in setup stage
+  useEffect(() => {
+    if (conversation && conversation.currentStage !== "setup") {
+      router.push(`/chat/${conversationId}/questions`);
+    }
+  }, [conversation, conversationId, router]);
+
   if (!conversation) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -78,9 +85,8 @@ export default function ChatPage() {
     );
   }
 
-  // If not in setup stage, redirect to questions
+  // If not in setup stage, show redirecting while useEffect handles navigation
   if (conversation.currentStage !== "setup") {
-    router.push(`/chat/${conversationId}/questions`);
     return (
       <div className="flex items-center justify-center h-screen">
         <p className="text-muted-foreground">Redirecting...</p>
