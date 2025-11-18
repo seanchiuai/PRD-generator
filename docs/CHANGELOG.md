@@ -8,7 +8,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed - 2025-01-17
 
-#### Code Review Group-10 Issues (Latest commit)
+#### Code Review Group-3 Issues (Latest commit)
+
+**Component Refactoring:**
+- ProfileMenu.tsx: Extracted duplicate Avatar logic into reusable UserAvatar component (reduced duplication)
+- PRDCard.tsx: Renamed "Export" button to "View & Export" for clearer navigation intent
+
+**Validation & Type Safety:**
+- select/page.tsx: Added runtime validation for conversationId param before type assertion
+- conversation/message/route.ts: Added comprehensive message structure validation (role, content, length limits)
+- generate/page.tsx: Replaced `any` type with strict `PRDData` type for PRD state
+- SortControls.tsx: Exported SortOption type for reuse across components
+- FeaturesPage.tsx: Used stable composite keys (feature.name + index) instead of array indices
+
+**Error Handling & Logging:**
+- logger.ts: Refactored error method to delegate to internal log method (eliminated duplication)
+- SkipButton.tsx: Replaced console.error with centralized logger utility
+
+**UX Improvements:**
+- nav-main.tsx: Added onClick handler to "Add Task" button (navigation to dashboard or custom callback)
+- CategorySection.tsx: Added expectedOptionsCount prop for accurate loading skeleton count
+- TechStackCard.tsx: Made min-height responsive (300px on small screens, 400px on sm breakpoints)
+
+**Documentation:**
+- README.md: Fixed markdown formatting (added blank lines around code blocks, language specifiers, rephrased repeated words)
+
+**Critical Bug Fixes:**
+- parse-ai-json.ts: Fixed logic error where startChar was never assigned in fallback branch (replaced type assertions with actual assignments)
+
+#### Code Review Group-10 Issues
 
 **Security:**
 - chart.tsx: Strengthened color validation regex to prevent XSS (full string match with ^ and $, explicit parentheses matching)

@@ -46,7 +46,7 @@ export default function PRDViewPage({ params }: { params: Promise<{ prdId: strin
 
     try {
       const filename = sanitizeFilename(prd.productName);
-      const document = <PRDDocument prd={prd.prdData} />;
+      const document = <PRDDocument prd={prd.prdData as import("@/types").PRDData} />;
       await exportPDF(document, `${filename}-prd`);
 
       toast({
@@ -102,15 +102,13 @@ export default function PRDViewPage({ params }: { params: Promise<{ prdId: strin
         </div>
 
         <ExportButtons
-          prd={prd.prdData}
-          productName={prd.productName}
           onExportJSON={handleExportJSON}
           onExportPDF={handleExportPDF}
         />
       </div>
 
       {/* PRD Display */}
-      <PRDDisplay prd={prd.prdData} />
+      <PRDDisplay prd={prd.prdData as import("@/types").PRDData} />
 
       {/* Navigation */}
       <div className="flex justify-between pt-6 border-t">

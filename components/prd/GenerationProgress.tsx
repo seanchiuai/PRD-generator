@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactElement } from "react";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -13,7 +14,7 @@ interface GenerationProgressProps {
   steps: GenerationStep[];
 }
 
-function renderStatusIcon(status: GenerationStep['status']): JSX.Element {
+function renderStatusIcon(status: GenerationStep['status']): ReactElement {
   switch (status) {
     case 'completed':
       return <CheckCircle2 className="h-5 w-5 text-green-600" />;

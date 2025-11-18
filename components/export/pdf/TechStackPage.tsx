@@ -22,21 +22,22 @@ export function TechStackPage({ prd, pageNumber = 2 }: TechStackPageProps) {
       <PDFHeader title="Technical Stack" />
 
       {Object.entries(prd.techStack)
-        .filter(([key]) => key !== "reasoning")
-        .filter(([, value]) => typeof value !== "string")
+        .filter(([key, value]) => key !== "reasoning" && typeof value !== "string")
         .map(([key, value]) => {
+          // Type assertion safe after filtering out strings
+          const techItem = value as import("@/types").TechStackItem;
           return (
             <View key={key} style={pdfStyles.section}>
               <Text style={pdfStyles.sectionTitle}>
                 {formatKey(key)}
               </Text>
-              <Text style={pdfStyles.subsectionTitle}>{value.name}</Text>
-              <Text style={pdfStyles.text}>{value.purpose}</Text>
+              <Text style={pdfStyles.subsectionTitle}>{techItem.name}</Text>
+              <Text style={pdfStyles.text}>{techItem.purpose}</Text>
 
               <Text style={{ ...pdfStyles.subsectionTitle, color: "#059669" }}>
                 Pros
               </Text>
-              {value.pros.map((pro, i) => (
+              {techItem.pros.map((pro, i) => (
                 <Text key={i} style={pdfStyles.bulletPoint}>
                   • {pro}
                 </Text>
@@ -45,7 +46,7 @@ export function TechStackPage({ prd, pageNumber = 2 }: TechStackPageProps) {
               <Text style={{ ...pdfStyles.subsectionTitle, color: "#DC2626" }}>
                 Cons
               </Text>
-              {value.cons.map((con, i) => (
+              {techItem.cons.map((con, i) => (
                 <Text key={i} style={pdfStyles.bulletPoint}>
                   • {con}
                 </Text>
