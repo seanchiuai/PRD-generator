@@ -154,67 +154,16 @@ export default defineSchema({
         autoSelected: v.optional(v.boolean()),
       })
     ),
+    // Dynamic tech stack selections - supports any category names from AI research
     selectedTechStack: v.optional(
-      v.object({
-        frontend: v.optional(
-          v.object({
-            name: v.string(),
-            reasoning: v.string(),
-            selectedFrom: v.array(v.string()),
-          })
-        ),
-        backend: v.optional(
-          v.object({
-            name: v.string(),
-            reasoning: v.string(),
-            selectedFrom: v.array(v.string()),
-          })
-        ),
-        database: v.optional(
-          v.object({
-            name: v.string(),
-            reasoning: v.string(),
-            selectedFrom: v.array(v.string()),
-          })
-        ),
-        authentication: v.optional(
-          v.object({
-            name: v.string(),
-            reasoning: v.string(),
-            selectedFrom: v.array(v.string()),
-          })
-        ),
-        hosting: v.optional(
-          v.object({
-            name: v.string(),
-            reasoning: v.string(),
-            selectedFrom: v.array(v.string()),
-          })
-        ),
-        real_time_communication: v.optional(
-          v.object({
-            name: v.string(),
-            reasoning: v.string(),
-            selectedFrom: v.array(v.string()),
-          })
-        ),
-        file_storage: v.optional(
-          v.object({
-            name: v.string(),
-            reasoning: v.string(),
-            selectedFrom: v.array(v.string()),
-          })
-        ),
-        additionalTools: v.optional(
-          v.array(
-            v.object({
-              category: v.string(),
-              name: v.string(),
-              reasoning: v.string(),
-            })
-          )
-        ),
-      })
+      v.record(
+        v.string(), // category key (e.g., "mobile-app-framework", "backend-api")
+        v.object({
+          name: v.string(),
+          reasoning: v.string(),
+          selectedFrom: v.array(v.string()),
+        })
+      )
     ),
     validationWarnings: v.optional(
       v.array(
