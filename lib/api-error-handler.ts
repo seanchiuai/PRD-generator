@@ -22,7 +22,7 @@ export function handleAPIError(
   statusCode: number = 500
 ): NextResponse<APIError> {
   // Log the full error for debugging
-  logger.error(`${context} Error`, context, error);
+  logger.error(`${context} Error`, error, { context });
 
   // Extract error message
   const errorMessage = error instanceof Error ? error.message : "Unknown error";
@@ -58,7 +58,7 @@ export function handleValidationError(
     code: "VALIDATION_ERROR",
   };
 
-  logger.error("Validation Error", "validation", apiError);
+  logger.error("Validation Error", new Error(message), { details, code: "VALIDATION_ERROR" });
   return NextResponse.json(apiError, { status: 400 });
 }
 

@@ -4,6 +4,7 @@ import { handleAPIError, handleValidationError } from "@/lib/api-error-handler";
 import { logger } from "@/lib/logger";
 import { withAuth } from "@/lib/middleware/withAuth";
 import { CONVERSATION_SYSTEM_PROMPT } from "@/lib/prompts/conversation";
+import { rateLimitRequest, recordTokenUsage, RATE_LIMIT_CONFIGS } from "@/lib/rate-limiter";
 
 /**
  * Generate the initial discovery message based on project name and description.
@@ -11,6 +12,13 @@ import { CONVERSATION_SYSTEM_PROMPT } from "@/lib/prompts/conversation";
  * that kicks off the discovery conversation.
  */
 export const POST = withAuth(async (request, { userId }) => {
+  // Apply rate limiting before processing
+  const rateLimitResult = rateLimitRequest(request, userId, RATE_LIMIT_CONFIGS.API_AI);
+  if ("error" in rateLimitResult) {
+    return rateLimitResult.error;
+  }
+  const { identifier } = rateLimitResult;
+
   try {
     const body = await request.json();
     const { projectName, projectDescription } = body;
@@ -74,6 +82,10 @@ export const POST = withAuth(async (request, { userId }) => {
         percentage: tokenUsagePercentage.toFixed(1),
       });
     }
+
+    // Record token usage for rate limiting
+    const totalTokens = response.usage.input_tokens + response.usage.output_tokens;
+    recordTokenUsage(identifier, totalTokens);
 
     logger.info("Initial Message Generated", "Generated discovery greeting", {
       userId,

@@ -1,5 +1,6 @@
 import { v } from "convex/values";
-import { mutation, query, paginationOptsValidator } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
+import { paginationOptsValidator } from "convex/server";
 import { Id } from "./_generated/dataModel";
 
 export const list = query({

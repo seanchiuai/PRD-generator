@@ -1,6 +1,9 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
+// Number of tech stack categories (frontend, backend, database, authentication, hosting)
+const TECH_STACK_CATEGORIES_COUNT = 5;
+
 // Helper function to merge workflow steps without duplicates
 function mergeCompletedSteps(
   existingSteps: string[] | undefined,
@@ -277,10 +280,9 @@ export const updateResearchProgress = mutation({
         ? [...currentCompleted, args.category]
         : currentCompleted;
 
-    // Determine overall status
-    const allCategories = conversation.researchMetadata?.totalCategories || 0;
+    // Determine overall status based on expected categories
     const overallStatus =
-      newCompleted.length === allCategories ? "completed" :
+      newCompleted.length === TECH_STACK_CATEGORIES_COUNT ? "completed" :
       newCompleted.length > 0 ? "in_progress" :
       "pending";
 
@@ -472,11 +474,11 @@ export const saveProjectSetup = mutation({
     }
 
     // Create PRD record with status "generating"
+    // prdData is omitted since it's optional and will be populated later
     const prdId = await ctx.db.insert("prds", {
       conversationId: args.conversationId,
       userId: identity.subject,
       productName: args.projectName,
-      prdData: null, // Will be populated later during generation
       version: 1,
       status: "generating",
       createdAt: Date.now(),

@@ -83,7 +83,7 @@ export function WorkflowLayout({
 
       {/* Main content */}
       <main className="flex-1 w-full">
-        <PageTransition>
+        <PageTransition pageKey={currentStep}>
           <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8">
             {children}
           </div>

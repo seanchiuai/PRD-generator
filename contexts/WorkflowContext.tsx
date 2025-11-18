@@ -7,9 +7,9 @@ import { Id } from '@/convex/_generated/dataModel'
 import { saveWorkflowSnapshot, loadWorkflowSnapshot } from '@/lib/workflow/persistence'
 import { logger } from '@/lib/logger'
 
-export type WorkflowStep = 'discovery' | 'questions' | 'research' | 'selection' | 'generate'
+export type WorkflowStep = 'discovery' | 'questions' | 'tech-stack' | 'generate'
 
-const WORKFLOW_STEPS: WorkflowStep[] = ['discovery', 'questions', 'research', 'selection', 'generate']
+const WORKFLOW_STEPS: WorkflowStep[] = ['discovery', 'questions', 'tech-stack', 'generate']
 
 function arraysEqual<T>(a: T[], b: T[]): boolean {
   return a.length === b.length && a.every((val, idx) => val === b[idx])

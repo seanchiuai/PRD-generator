@@ -1,4 +1,5 @@
 import { pdf } from "@react-pdf/renderer";
+import type { DocumentProps } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { PRDData } from "@/types";
 
@@ -17,7 +18,7 @@ export function exportJSON(data: PRDData, filename: string) {
   URL.revokeObjectURL(url);
 }
 
-export async function exportPDF(documentComponent: ReactElement, filename: string) {
+export async function exportPDF(documentComponent: ReactElement<DocumentProps>, filename: string) {
   // Generate PDF blob from React component
   const blob = await pdf(documentComponent).toBlob();
 

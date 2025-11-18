@@ -11,9 +11,8 @@ afterEach(() => {
 })
 
 // Mock environment variables for tests
-if (process.env.NODE_ENV !== 'test') {
-  process.env.NODE_ENV = 'test'
-}
+// NODE_ENV is read-only, use Object.defineProperty if needed
+// In vitest, NODE_ENV should already be 'test'
 process.env.ANTHROPIC_API_KEY = 'test-anthropic-key'
 process.env.PERPLEXITY_API_KEY = 'test-perplexity-key'
 process.env.NEXT_PUBLIC_CONVEX_URL = 'https://test.convex.cloud'

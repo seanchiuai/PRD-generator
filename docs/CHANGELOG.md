@@ -6,7 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added - 2025-01-17
+
+#### Rate Limiting for API Routes
+- Created lib/rate-limiter.ts with in-memory rate limiting (20 req/min for AI routes)
+- Added rate limiting to /api/conversation/message and /api/conversation/initial-message
+- Includes token usage tracking and 429 responses with Retry-After headers
+
 ### Fixed - 2025-01-17
+
+#### Pre-existing Type Errors & Build Fixes
+- WorkflowContext.tsx: Updated WorkflowStep type from old steps ('research', 'selection') to new ('tech-stack')
+- lib/workflow/guards.ts: Updated workflow steps and routes to match new schema
+- convex/conversations.ts: Fixed totalCategories reference with TECH_STACK_CATEGORIES_COUNT constant
+- convex/schema.ts: Made prdData optional for PRD records (allows null during generation)
+- convex/prds.ts: Fixed paginationOptsValidator import from "convex/server"
+- lib/analytics/workflowEvents.ts: Fixed Window.analytics type to use Record<string, unknown>
+- lib/api-error-handler.ts: Fixed logger.error call signature
+- lib/export-utils.ts: Fixed exportPDF type to use ReactElement<DocumentProps>
+- tests/setup.ts: Removed attempt to assign read-only NODE_ENV
+- components/workflow/WorkflowLayout.tsx: Added required pageKey prop to PageTransition
 
 #### Code Review Group-7 Issues (Latest commit)
 

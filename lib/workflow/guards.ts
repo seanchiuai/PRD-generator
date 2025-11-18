@@ -1,13 +1,12 @@
 import { WorkflowStep } from '@/contexts/WorkflowContext'
 import { redirect } from 'next/navigation'
 
-const WORKFLOW_STEPS: WorkflowStep[] = ['discovery', 'questions', 'research', 'selection', 'generate']
+const WORKFLOW_STEPS: WorkflowStep[] = ['discovery', 'questions', 'tech-stack', 'generate']
 
 const STEP_ROUTES: Record<WorkflowStep, (conversationId: string) => string> = {
   discovery: (conversationId) => `/chat/${conversationId}`,
   questions: (conversationId) => `/chat/${conversationId}/questions`,
-  research: (conversationId) => `/chat/${conversationId}/research`,
-  selection: (conversationId) => `/chat/${conversationId}/select`,
+  'tech-stack': (conversationId) => `/chat/${conversationId}/tech-stack`,
   generate: (conversationId) => `/chat/${conversationId}/generate`,
 }
 

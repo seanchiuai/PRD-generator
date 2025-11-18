@@ -8,6 +8,7 @@ import { CONVERSATION_SYSTEM_PROMPT } from "@/lib/prompts/conversation";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import { rateLimitRequest, recordTokenUsage, RATE_LIMIT_CONFIGS } from "@/lib/rate-limiter";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
@@ -21,6 +22,13 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
  * On error, returns a JSON error response with status `400` (bad request) or `500` (internal server error).
  */
 export const POST = withAuth(async (request, { userId }) => {
+  // Apply rate limiting before processing
+  const rateLimitResult = rateLimitRequest(request, userId, RATE_LIMIT_CONFIGS.API_AI);
+  if ("error" in rateLimitResult) {
+    return rateLimitResult.error;
+  }
+  const { identifier } = rateLimitResult;
+
   try {
     const body = await request.json();
     const { conversationId } = body;
@@ -98,6 +106,10 @@ export const POST = withAuth(async (request, { userId }) => {
         percentage: tokenUsagePercentage.toFixed(1),
       });
     }
+
+    // Record token usage for rate limiting
+    const totalTokens = response.usage.input_tokens + response.usage.output_tokens;
+    recordTokenUsage(identifier, totalTokens);
 
     logger.info("Conversation Message", "Message processed successfully", {
       userId,
