@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## 2025-11-17
 
+### Removed
+- **Product Discovery Phase**: Removed entire discovery conversation flow. Users now go directly from Setup → Questions.
+  - Deleted API routes: `/api/conversation/initial-message`, `/api/conversation/message`, `/api/conversation/extract-context`
+  - Updated `saveProjectSetup` to generate `extractedContext` directly from project name/description
+  - Workflow now has 4 steps: Setup → Questions → Tech Stack → Generate
+  - Chat page now only shows setup form, redirects to questions after submission
+  - Kept "discovery" in schema/types for backwards compatibility with existing data
+
 ### Pushed (301061d)
 - **Schema Fix**: Fixed workflow.ts currentStep type from string to proper union. Added deprecated stages for backwards compatibility. Created migration utility. Dev server now starts without validation errors.
 
@@ -24,6 +32,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Old Pages**: `/research` and `/select` now redirect to `/tech-stack` with notification toast.
 
 ### Fixed
+- **Tech Stack Pros/Cons Display (b98d1be)**: Fixed empty pros/cons lists in tech stack cards. Improved `parseResponse` regex patterns to correctly extract arrays. Updated research queries to request JSON format. Added "Re-run research" button to refresh corrupted data.
 - **PRD Generation**: Fixed API payload structure - removed incorrect `researchData` wrapper causing generation failures.
 - **PRD JSON Parsing**: Strengthened prompt with explicit JSON-only instructions. Implemented balanced brace matching to extract JSON from conversational responses while preserving nested objects/arrays.
 - **Test Setup**: Fixed NODE_ENV collision in test setup causing test failures.
