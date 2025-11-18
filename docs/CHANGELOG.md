@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## 2025-11-17
 
+### Fixed
+- **AI JSON Parsing (b1db37f)**: Fixed regex pattern in `parseAIResponse` to handle flexible code fence formats. Now correctly parses responses with `\`\`\`json` that have varying whitespace/newline patterns.
+- **WorkflowStep Type**: Added 'setup' to WorkflowStep union type in WorkflowContext.tsx and progress.ts
+- **WORKFLOW_STEPS Arrays**: Updated workflow step arrays to include 'setup' as first step in WorkflowContext.tsx and guards.ts
+- **Progress Functions**: Updated getAllSteps(), getCompletedSteps(), canNavigateToStep(), and getStepPath() to include 'setup' step
+- **ExtractedContext Placeholders**: Changed targetAudience to empty string and keyFeatures/technicalPreferences to null in saveProjectSetup
+
 ### Removed
 - **Product Discovery Phase**: Removed entire discovery conversation flow. Users now go directly from Setup → Questions.
   - Deleted API routes: `/api/conversation/initial-message`, `/api/conversation/message`, `/api/conversation/extract-context`
